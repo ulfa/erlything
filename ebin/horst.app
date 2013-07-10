@@ -1,9 +1,0 @@
-{application,horst,
-             [{description,[]},
-              {vsn,"0.1.0"},
-              {registered,[]},
-              {applications,[kernel,stdlib]},
-              {mod,{horst_app,[]}},
-              {env,[]},
-              {modules,[dht22_sensor,horst,horst_app,horst_sup,pir_sensor,
-                        sensor_sup]}]}.

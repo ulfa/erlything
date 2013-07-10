@@ -27,7 +27,6 @@
 
 %% Supervisor callbacks
 -export([init/1]).
--export([start_sups/0, stop_sups/0]).
 
 %% Helper macro for declaring children of supervisor
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
@@ -38,12 +37,5 @@
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-start_sups() ->
-    PI_SENSOR = 
-ok.
-
-stop_sups() ->
-    ok.
-
 init([]) ->
-    {ok, {{one_for_one, 1, 10000},[?CHILD(pir_sensor, worker), ?CHILD(dht22_sensor, worker)]}}.
+    {ok, {{one_for_one, 1, 10000},[?CHILD(hc_sr501_sensor, worker), ?CHILD(dht22_sensor, worker)]}}.

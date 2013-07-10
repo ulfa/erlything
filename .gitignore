@@ -1,0 +1,8 @@
+erl_crash.dump
+log/*
+apps/horst/ebin/*
+.eunit/
+rel/horst/*
+deps
+src/*~
+include/*~
