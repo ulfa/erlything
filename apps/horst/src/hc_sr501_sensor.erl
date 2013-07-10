@@ -31,7 +31,6 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0]).
 -export([start/0]).
-
 %% ====================================================================
 %% External functions
 %% ====================================================================
@@ -95,7 +94,15 @@ handle_cast(Msg, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_info(timeout, State) ->
+
+    gpio:set_interrupt(7, both),
     {noreply, State};
+
+handle_info({gpio_interrupt, 0, 7, 0}, State) ->
+    io:format("1...");
+handle_info({gpio_interrupt, 0, 7, 1}, State) ->
+    io:format("2...");
+
 
 handle_info(Info, State) ->
     {noreply, State}.
