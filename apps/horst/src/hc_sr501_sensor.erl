@@ -38,7 +38,7 @@
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {}).
+-record(state, {activ=false, last_changed}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -60,7 +60,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{}, 0}.
+    {ok, #state{activ=false, last_changed=[]}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -94,19 +94,21 @@ handle_cast(Msg, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_info(timeout, State) ->
-
     gpio:set_interrupt(7, both),
     {noreply, State};
-
 handle_info({gpio_interrupt, 0, 7, 0}, State) ->
-    io:format("1...");
+    Msg = create_msg(node(), ?MODULE, get_seconds(), "FALLING"),
+    %%send_message(Msg),
+    lager:debug("gpio_interrupt FALLING ~p",[Msg]),
+    {noreply, State#state{activ=true}};
 handle_info({gpio_interrupt, 0, 7, 1}, State) ->
-    io:format("2...");
-
+    Msg = create_msg(node(), ?MODULE, get_seconds(), "RISING"),
+    send_message(Msg),
+    lager:debug("gpio_interrupt RISING ~p",[Msg]),
+    {noreply, State#state{activ=false}};
 
 handle_info(Info, State) ->
     {noreply, State}.
-
 %% --------------------------------------------------------------------
 %% Function: terminate/2
 %% Description: Shutdown the server
@@ -126,12 +128,25 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-%% --------------------------------------------------------------------
-%%% Test functions
-%% --------------------------------------------------------------------
+send_message(Message) ->
+    lager:debug("sending message to these nodes : ", [nodes()]),
+    rpc:abcast(nodes(), 'actor_group', Message).
+
+create_msg(Node, Sensor, Time, Body) ->
+    [atom_to_binary(Node, utf8), atom_to_binary(Sensor, utf8), list_to_binary(integer_to_list(Time)), erlang:list_to_binary(Body)].
+
+get_seconds() ->
+    calendar:datetime_to_gregorian_seconds(calendar:local_time()).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
+
+handle_info_test() ->
+    ?assertEqual({noreply, #state{activ=true}}, ?MODULE:handle_info({gpio_interrupt, 0, 7, 0}, #state{activ=false})).
+
+
+create_msg_test() ->
+    ?assertEqual([<<"horst@notebook">>,<<"hc_sr501_sensor">>,<<"63540684780">>,<<"FALLING">>], create_msg('horst@notebook', 'hc_sr501_sensor', 63540684780, "FALLING")).
 -endif.

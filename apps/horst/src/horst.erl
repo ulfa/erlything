@@ -24,10 +24,18 @@
 
 %% Application callbacks
 -export([start/0, stop/0]).
+-export([set_debug/0, set_info/0]).
 
 start() ->
-	application:start(gpio), 
+ 	application:start(gpio), 
     application:start(horst).
 
 stop() ->
+    application:start(gpio), 
     application:stop(horst).
+
+set_debug() ->
+	lager:set_loglevel(lager_console_backend, debug).
+
+set_info() ->
+	lager:set_loglevel(lager_console_backend, info).
