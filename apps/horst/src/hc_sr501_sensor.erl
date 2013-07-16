@@ -31,14 +31,16 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0]).
 -export([start/0]).
+-export([get_description/0]).
 %% ====================================================================
 %% External functions
 %% ====================================================================
-
+get_description() ->
+    gen_server:call(?MODULE, {get_description}).
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {activ=false, last_changed}).
+-record(state, {switched=false, last_changed=0, description=[]}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -60,7 +62,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{activ=false, last_changed=[]}, 0}.
+    {ok, #state{switched=false, last_changed=0, description="Sensor, which handles the hr_sr501"}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -72,6 +74,8 @@ init([]) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_call({get_description}, From, State=#state{description = Description}) ->
+    {reply, Description, State};
 handle_call(Request, From, State) ->
     Reply = ok,
     {reply, Reply, State}.
@@ -97,15 +101,14 @@ handle_info(timeout, State) ->
     gpio:set_interrupt(7, both),
     {noreply, State};
 handle_info({gpio_interrupt, 0, 7, 0}, State) ->
-    Msg = create_msg(node(), ?MODULE, get_seconds(), "FALLING"),
-    %%send_message(Msg),
+    Msg = sensor:create_message(node(), ?MODULE, get_seconds(), "FALLING"),
     lager:debug("gpio_interrupt FALLING ~p",[Msg]),
-    {noreply, State#state{activ=true}};
+    {noreply, State#state{switched=true, last_changed=get_seconds()}};
 handle_info({gpio_interrupt, 0, 7, 1}, State) ->
-    Msg = create_msg(node(), ?MODULE, get_seconds(), "RISING"),
-    send_message(Msg),
+    Msg = sensor:create_message(node(), ?MODULE, get_seconds(), "RISING"),
+    sensor:send_message(nodes(),Msg),
     lager:debug("gpio_interrupt RISING ~p",[Msg]),
-    {noreply, State#state{activ=false}};
+    {noreply, State#state{switched=false, last_changed=get_seconds()}};
 
 handle_info(Info, State) ->
     {noreply, State}.
@@ -128,11 +131,11 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-send_message(Message) ->
+asend_message(Message) ->
     lager:debug("sending message to these nodes : ", [nodes()]),
     rpc:abcast(nodes(), 'actor_group', Message).
 
-create_msg(Node, Sensor, Time, Body) ->
+acreate_msg(Node, Sensor, Time, Body) ->
     [atom_to_binary(Node, utf8), atom_to_binary(Sensor, utf8), list_to_binary(integer_to_list(Time)), erlang:list_to_binary(Body)].
 
 get_seconds() ->
@@ -144,9 +147,7 @@ get_seconds() ->
 -ifdef(TEST).
 
 handle_info_test() ->
-    ?assertEqual({noreply, #state{activ=true}}, ?MODULE:handle_info({gpio_interrupt, 0, 7, 0}, #state{activ=false})).
+    {noreply, State} = ?MODULE:handle_info({gpio_interrupt, 0, 7, 0}, #state{switched=false}),
+    ?assertEqual(true, State#state.switched).
 
-
-create_msg_test() ->
-    ?assertEqual([<<"horst@notebook">>,<<"hc_sr501_sensor">>,<<"63540684780">>,<<"FALLING">>], create_msg('horst@notebook', 'hc_sr501_sensor', 63540684780, "FALLING")).
 -endif.

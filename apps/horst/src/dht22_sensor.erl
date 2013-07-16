@@ -31,15 +31,17 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0]).
 -export([start/0]).
-
+-export([get_type/0]).
+-export([get_description/0]).
 %% ====================================================================
 %% External functions
 %% ====================================================================
-
+get_description() ->
+    gen_server:call(?MODULE, {get_description}).
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {}).
+-record(state, {description=[]}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -52,7 +54,7 @@ start_link() ->
 
 start() ->
 	start_link().
-%% --------------------------------------------------------------------
+%% ------------------------------- -------------------------------------
 %% Function: init/1
 %% Description: Initiates the server
 %% Returns: {ok, State}          |
@@ -61,7 +63,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{}}.
+    {ok, #state{description="Sensor, which handles the dht22"}}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -73,6 +75,8 @@ init([]) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_call({get_description}, From, State=#state{description = Description}) ->
+    {reply, Description, State};
 handle_call(Request, From, State) ->
     Reply = ok,
     {reply, Reply, State}.
@@ -116,6 +120,8 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+get_type() ->
+    sensor.
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

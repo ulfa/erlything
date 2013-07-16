@@ -25,6 +25,7 @@
 %% Application callbacks
 -export([start/0, stop/0]).
 -export([set_debug/0, set_info/0]).
+-export([get_sensors/0]).
 
 start() ->
  	application:start(gpio), 
@@ -33,6 +34,14 @@ start() ->
 stop() ->
     application:start(gpio), 
     application:stop(horst).
+
+get_sensors() ->
+    get_sensors(sensor_sup:get_sensors(), []).
+
+get_sensors([], Acc) ->
+	Acc;
+get_sensors([{Modul, Pid, _X, _Y}|Actors], Acc) ->
+	get_sensors(Actors, [{Pid, Modul, Modul:get_description()}|Acc]).
 
 set_debug() ->
 	lager:set_loglevel(lager_console_backend, debug).

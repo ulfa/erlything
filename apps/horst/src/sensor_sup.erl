@@ -27,6 +27,7 @@
 
 %% Supervisor callbacks
 -export([init/1]).
+-export([get_sensors/0]).
 
 %% Helper macro for declaring children of supervisor
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
@@ -42,3 +43,5 @@ init([]) ->
     								?CHILD(hc_sr501_sensor, worker), 
     							   	?CHILD(dht22_sensor, worker)
     							  ]}}.
+get_sensors() ->
+	supervisor:which_children(?MODULE).
