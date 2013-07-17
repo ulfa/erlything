@@ -26,13 +26,13 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([create_message/4, send_message/2]).
+-export([create_message/5, send_message/2]).
 -export([get_description/0, get_type/0]).
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
-create_message(Node, Sensor, Time, Body) ->
-    [atom_to_binary(Node, utf8), atom_to_binary(Sensor, utf8), list_to_binary(integer_to_list(Time)), erlang:list_to_binary(Body)].
+create_message(Node, Sensor, Id, Time, Body) ->
+    [atom_to_binary(Node, utf8), atom_to_binary(Sensor, utf8), list_to_binary(Id), list_to_binary(integer_to_list(Time)), erlang:list_to_binary(Body)].
 
 send_message(Nodes, Message) ->
 	send_message(Nodes, 'actor_group', Message).    
@@ -53,6 +53,6 @@ get_type() ->
 -ifdef(TEST).
 
 create_message_test() ->
-    ?assertEqual([<<"horst@notebook">>,<<"hc_sr501_sensor">>,<<"63540684780">>,<<"FALLING">>], create_message('horst@notebook', 'hc_sr501_sensor', 63540684780, "FALLING")).
+    ?assertEqual([<<"horst@notebook">>,<<"hc_sr501_sensor">>,<<"1">>, <<"63540684780">>,<<"FALLING">>], create_message('horst@notebook', 'hc_sr501_sensor', "1", 63540684780, "FALLING")).
 
 -endif.

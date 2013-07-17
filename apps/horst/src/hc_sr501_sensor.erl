@@ -40,7 +40,7 @@ get_description() ->
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {switched=false, last_changed=0, description=[]}).
+-record(state, {id=[], switched=false, last_changed=0, description=[]}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -62,7 +62,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{switched=false, last_changed=0, description="Sensor, which handles the hr_sr501"}, 0}.
+    {ok, #state{id="0", switched=false, last_changed=0, description="Sensor, which handles the hr_sr501"}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -100,14 +100,14 @@ handle_cast(Msg, State) ->
 handle_info(timeout, State) ->
     gpio:set_interrupt(7, both),
     {noreply, State};
-handle_info({gpio_interrupt, 0, 7, 0}, State) ->
-    Msg = sensor:create_message(node(), ?MODULE, get_seconds(), "FALLING"),
+handle_info({gpio_interrupt, 0, 7, 0}, State=#state{id = Id}) ->
+    Msg = sensor:create_message(node(), ?MODULE, Id, get_seconds(), "FALLING"),
     lager:debug("gpio_interrupt FALLING ~p",[Msg]),
     {noreply, State#state{switched=true, last_changed=get_seconds()}};
-handle_info({gpio_interrupt, 0, 7, 1}, State) ->
-    Msg = sensor:create_message(node(), ?MODULE, get_seconds(), "RISING"),
-    sensor:send_message(nodes(),Msg),
+handle_info({gpio_interrupt, 0, 7, 1}, State=#state{id = Id}) ->
+    Msg = sensor:create_message(node(), ?MODULE, Id,get_seconds(), "RISING"),
     lager:debug("gpio_interrupt RISING ~p",[Msg]),
+    sensor:send_message(nodes(),Msg),
     {noreply, State#state{switched=false, last_changed=get_seconds()}};
 
 handle_info(Info, State) ->
@@ -147,6 +147,7 @@ get_seconds() ->
 -ifdef(TEST).
 
 handle_info_test() ->
+
     {noreply, State} = ?MODULE:handle_info({gpio_interrupt, 0, 7, 0}, #state{switched=false}),
     ?assertEqual(true, State#state.switched).
 
