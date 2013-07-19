@@ -40,7 +40,7 @@ get_description() ->
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {id=[], switched=false, last_changed=0, description=[]}).
+-record(state, {id=0, switched=false, last_changed=0, description=[]}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -101,16 +101,17 @@ handle_info(timeout, State) ->
     gpio:set_interrupt(7, both),
     {noreply, State};
 handle_info({gpio_interrupt, 0, 7, 0}, State=#state{id = Id}) ->
-    Msg = sensor:create_message(node(), ?MODULE, Id, get_seconds(), "FALLING"),
+    Msg = sensor:create_message(node(), ?MODULE, Id, sensor:get_seconds(), "FALLING"),
     lager:debug("gpio_interrupt FALLING ~p",[Msg]),
-    {noreply, State#state{switched=true, last_changed=get_seconds()}};
+    {noreply, State#state{switched=true, last_changed=sensor:get_seconds()}};
 handle_info({gpio_interrupt, 0, 7, 1}, State=#state{id = Id}) ->
-    Msg = sensor:create_message(node(), ?MODULE, Id,get_seconds(), "RISING"),
+    Msg = sensor:create_message(node(), ?MODULE, Id, sensor:get_seconds(), "RISING"),
     lager:debug("gpio_interrupt RISING ~p",[Msg]),
     sensor:send_message(nodes(),Msg),
-    {noreply, State#state{switched=false, last_changed=get_seconds()}};
+    {noreply, State#state{switched=false, last_changed=sensor:get_seconds()}};
 
 handle_info(Info, State) ->
+    lager:warning("can't understand message ~p", [Info]),
     {noreply, State}.
 %% --------------------------------------------------------------------
 %% Function: terminate/2
@@ -138,8 +139,7 @@ asend_message(Message) ->
 acreate_msg(Node, Sensor, Time, Body) ->
     [atom_to_binary(Node, utf8), atom_to_binary(Sensor, utf8), list_to_binary(integer_to_list(Time)), erlang:list_to_binary(Body)].
 
-get_seconds() ->
-    calendar:datetime_to_gregorian_seconds(calendar:local_time()).
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
@@ -147,8 +147,6 @@ get_seconds() ->
 -ifdef(TEST).
 
 handle_info_test() ->
-
-    {noreply, State} = ?MODULE:handle_info({gpio_interrupt, 0, 7, 0}, #state{switched=false}),
+    {noreply, State} = handle_info({gpio_interrupt, 0, 7, 0}, #state{switched=false, id="1"}),
     ?assertEqual(true, State#state.switched).
-
 -endif.
