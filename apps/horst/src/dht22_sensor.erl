@@ -1,23 +1,12 @@
-%% Copyright 2010 Ulf Angermann
-%%
-%% Licensed under the Apache License, Version 2.0 (the "License");
-%% you may not use this file except in compliance with the License.
-%% You may obtain a copy of the License at
-%% 
-%%     http://www.apache.org/licenses/LICENSE-2.0
-%% 
-%% Unless required by applicable law or agreed to in writing, software
-%% distributed under the License is distributed on an "AS IS" BASIS,
-%% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-%% See the License for the specific language governing permissions and
-%% limitations under the License.
+%% Copyright (c) 2013 Ulf Angermann
+%% See MIT-LICENSE for licensing information.
 
 %%% -------------------------------------------------------------------
 %%% Author  : Ulf Angermann uaforum1@googlemail.com
 %%% Description :
 %%%
 %%% Created : 
-%%% -------------------------------------------------------------------
+
 -module(dht22_sensor).
 
 -behaviour(gen_server).
@@ -103,7 +92,8 @@ handle_info(timeout, State) ->
     {noreply, State};
 
 handle_info({call_sensor}, State=#state{id = Id}) ->
-    Msg = sensor:create_message(node(), ?MODULE, Id, sensor:get_seconds(), [{temp, "10.1"}, {humidity, "10"}]),
+    Value = call_driver(),
+    Msg = sensor:create_message(node(), ?MODULE, Id, sensor:get_seconds(), parse_message_from_dht22(Value)),
     lager:debug("got the temp and the humidity from the DHT22 ~p",[Msg]),
     sensor:send_message(nodes(),Msg),
     lager:debug("send message to the actor_group ~p",[Msg]),
@@ -133,17 +123,23 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+
+call_driver() ->
+    Driver = filename:join(code:priv_dir(horst), "Adafruit_DHT"),
+    os:cmd(Driver ++ " 22 4").
+
 start_timer() ->
-    erlang:send_after(5000, self(), {call_sensor}). 
+    erlang:send_after(30000, self(), {call_sensor}). 
 get_type() ->
     sensor.
 parse_message_from_dht22(Msg) ->
+    lager:info("Msg from DHT : ~p", [Msg]),
     Temp = case re:run(Msg ,"Temp =\s+([0-9.]+)") of 
-       nomatch -> {temp, unknown};
+       nomatch -> {temp, 0.0};
        {match,[{C1,C2},{C3,C4}]} -> {temp, string:substr(Msg, C3 + 1, C4)}
     end,
     Hum = case re:run(Msg ,"Hum =\s+([0-9.]+)") of 
-       nomatch -> {hum, unknown};
+       nomatch -> {hum, 0.0};
        {match,[{C11,C22},{C33,C44}]} -> {hum, string:substr(Msg, C33 + 1, C44)}
     end,
     [Temp, Hum].
