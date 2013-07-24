@@ -28,10 +28,6 @@
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-start_child(Module) ->
-	io:format("Modul : ~p~n", [?CHILD(Module, worker)]),
-    supervisor:start_child(Module, ?CHILD(Module, worker)).
-
 create_child_specs() ->
 	Config = get_config(),
 	[?CHILD(Sensor, worker) || {Sensor} <- Config].
