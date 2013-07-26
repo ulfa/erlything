@@ -125,7 +125,7 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 
 call_driver() ->
-    Driver = filename:join(code:priv_dir(horst), "Adafruit_DHT"),
+    Driver = filename:join([code:priv_dir(horst), "driver", "dht22", "Adafruit_DHT"]),
     os:cmd(Driver ++ " 22 4").
 
 start_timer() ->
