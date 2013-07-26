@@ -18,42 +18,22 @@
 -export([init/1]).
 -export([get_sensors/0]).
 
-%% Helper macro for declaring children of supervisor
--define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
--define(CHILD_1(I, Type, Args), {I, {I, start_link, [Args]}, permanent, 5000, Type, [I]}).
--define(CONFIG_FILE, "sensor.config").
+-include("../include/horst.hrl").
+
 %% ===================================================================
 %% API functions
 %% ===================================================================
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-create_child_specs() ->
-	Config = get_config(),
-	[?CHILD(Sensor, worker) || {Sensor} <- Config].
 
 init([]) ->
-    {ok, {{one_for_one, 1, 10000}, create_child_specs()}}.
+	Config = config_handler:get_config(horst, ?CONFIG_FILE),
+    {ok, {{one_for_one, 1, 10000}, config_handler:create_child_specs(sensor, Config)}}.
 
 get_sensors() ->
 	supervisor:which_children(?MODULE).
 
-get_config() ->
-	{ok, Config} = file:consult(filename:join([code:priv_dir(horst),"config", ?CONFIG_FILE])),
-	Config.
-	
 -include_lib("eunit/include/eunit.hrl").
-
 -ifdef(TEST).
-
-get_config_test() ->
-	application:load(horst),
-	Config = get_config(),
-	%%	?debugFmt("Config File : ~p", [Config]),
-	?assertEqual([{hc_sr501_sensor}, {dht22_sensor}], Config).
-
-
-start_child_test() ->
-	application:load(horst),
-	?assertEqual([?CHILD(hc_sr501_sensor, worker), ?CHILD(dht22_sensor, worker)], create_child_specs()).
 -endif.

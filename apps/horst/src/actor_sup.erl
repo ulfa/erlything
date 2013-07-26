@@ -7,7 +7,7 @@
 %%%
 %%% Created : 
 
--module(horst_sup).
+-module(actor_sup).
 
 -behaviour(supervisor).
 
@@ -17,21 +17,31 @@
 %% Supervisor callbacks
 -export([init/1]).
 
-%% Helper macro for declaring children of supervisor
--define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
+-export([get_actors_pids/0, get_actors/0]).
+
+-include("../include/horst.hrl").
 %% ===================================================================
 %% API functions
 %% ===================================================================
-
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-%% ===================================================================
-%% Supervisor callbacks
-%% ===================================================================
-
 init([]) ->
-    {ok, { {one_for_one, 5, 10}, [?CHILD(sensor_sup, supervisor),
-    							  ?CHILD(actor_sup, supervisor),
-    							  ?CHILD(actor_group, worker)
-    							  ]}}.
+    Config = config_handler:get_config(horst, ?CONFIG_FILE),    
+    {ok, {{one_for_one, 1, 10000},config_handler:create_child_specs(actor, Config)}}.
+
+get_actors_pids() ->
+	List = supervisor:which_children(?MODULE),
+	get_actors_pids(List, []).
+
+get_actors_pids([], Acc) ->
+	Acc;
+get_actors_pids([{_Id, Pid, _Type, _Module}|T], Acc) ->
+	get_actors_pids(T, [Pid|Acc]).
+
+get_actors() ->
+	supervisor:which_children(?MODULE).
+
+-include_lib("eunit/include/eunit.hrl").
+-ifdef(TEST).
+-endif.
