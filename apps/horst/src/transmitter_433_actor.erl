@@ -20,20 +20,31 @@
 -export([start_link/0]).
 -export([start/0]).
 -export([get_description/0]).
--export([switch/1]).
+-export([switch/2, get_switched/1, get_list_of_switches/0]).
+
+-define(ON, "1").
+-define(OFF, "0").
+
 %% ====================================================================
 %% External functions
 %% ====================================================================
 get_description() ->
     gen_server:call(?MODULE, {get_description}).
 
-switch(Plug_no) ->
-    gen_server:call(?MODULE, {switch, Plug_no}).
+switch(Switch, Status) ->
+    gen_server:cast(?MODULE, {switch, Switch, Status}).
+
+get_switched(Switch) ->
+    gen_server:call(?MODULE, {get_switched, Switch}).
+
+get_list_of_switches() ->
+    gen_server:call(?MODULE, {get_list_of_switches}).
+
 
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {id, description}).
+-record(state, {id, switched, description}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -55,7 +66,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{id="0", description="Actor, which can switch on/off plug sockets"}}.
+    {ok, #state{id="0", switched=[{"1", ?OFF},{"2", ?OFF},{"3", ?OFF},{"4", ?OFF}], description="Actor, which can switch on/off plug sockets"}}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -70,10 +81,15 @@ init([]) ->
 handle_call({get_description}, From, State=#state{description = Description}) ->
     {reply, Description, State};
 
-handle_call({switch, Plug_no}, From, State) ->
-    lager:debug("switching plug number : ~p" , [Plug_no]),
-    Reply = ok,
-    {reply, Reply, State};
+handle_call({get_switched, Switch}, From, State=#state{switched = List}) ->
+    R = case lists:keyfind(Switch,1, List) of 
+        false -> {error, "not a valid switch number"};
+        {S, V} -> V 
+    end,
+    {reply, R, State};
+
+handle_call(Request, From, State=#state{switched = List}) ->
+    {reply, {node(),List}, State};
 
 handle_call(Request, From, State) ->
     Reply = ok,
@@ -86,6 +102,11 @@ handle_call(Request, From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_cast({switch, Switch, Status}, State) ->
+    lager:debug("switching plug number : ~p to State ~p" , [Switch, Status]),
+    State_1 = switch(Switch, Status, State),
+    {noreply, State_1};
+
 handle_cast(Msg, State) ->
     {noreply, State}.
 
@@ -118,12 +139,27 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-%% --------------------------------------------------------------------
-%%% Test functions
-%% --------------------------------------------------------------------
+switch(Switch, ?ON, State=#state{switched = List}) ->
+    lager:debug("switch number ~p on", [Switch]),
+    switch_1(Switch, ?ON),
+    State#state{switched=save_state(Switch, ?ON, List)};
+switch(Switch, ?OFF, State=#state{switched = List}) ->
+    lager:debug("switch number ~p off", [Switch]),
+    switch_1(Switch, ?OFF),
+    State#state{switched=save_state(Switch, ?OFF, List)}.
+
+switch_1(Switch, Status) ->
+    Driver = filename:join([code:priv_dir(horst), "driver", "remote", "send"]),
+    os:cmd(Driver ++ " 11111 " ++ Switch ++ " " ++ Status).
+
+save_state(Switch, Status, List) ->
+    lists:keyreplace(Switch,1, List, {Switch, Status}).
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
+
+
 -endif.
