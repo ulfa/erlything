@@ -47,7 +47,7 @@ get_list_of_switches() ->
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {id, switched, description}).
+-record(state, {id, allowed_msgs, switched, description}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -69,7 +69,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{id="0", switched=[{"1", ?OFF},{"2", ?OFF},{"3", ?OFF},{"4", ?OFF}], description="Actor, which can switch on/off plug sockets"}}.
+    {ok, #state{id="0", allowed_msgs=[], switched=[{"1", ?OFF},{"2", ?OFF},{"3", ?OFF},{"4", ?OFF}], description="Actor, which can switch on/off plug sockets"}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -123,6 +123,16 @@ handle_cast(Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_info(timeout, State) ->
+    {noreply, State#state{allowed_msgs = config_handler:get_messages_for_module(?MODULE, "0")}};
+
+handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs}) ->
+    case sets:is_element({Node, Sensor, Id}, Allowed_msgs) of 
+        false ->  lager:debug("got message which i don't understand : ~p", [{Node, Sensor, Id}]);
+        true -> lager:debug("got message ~p", [Body])
+    end,
+    {noreply, State};   
+
 handle_info(Info, State) ->
     {noreply, State}.
 

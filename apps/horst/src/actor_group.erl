@@ -85,7 +85,7 @@ handle_cast(Msg, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_info(Msg, State) ->
-	lager:info("got message: ~p", [Msg]),
+	lager:debug("got message: ~p", [Msg]),
 	send_msg(Msg),
     {noreply, State};
 

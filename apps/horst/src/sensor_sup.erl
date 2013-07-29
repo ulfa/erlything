@@ -28,7 +28,7 @@ start_link() ->
 
 
 init([]) ->
-	Config = config_handler:get_config(horst, ?CONFIG_FILE),
+	Config = config_handler:get_config(horst, ?SUPERVISOR_CONFIG),
     {ok, {{one_for_one, 1, 10000}, config_handler:create_child_specs(sensor, Config)}}.
 
 get_sensors() ->

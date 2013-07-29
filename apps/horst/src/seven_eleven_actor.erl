@@ -33,7 +33,7 @@ get_id() ->
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {id, description=[]}).
+-record(state, {id, allowed_msgs=[], description=[]}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -55,7 +55,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{id="0", description="Actor, which rings the 7-11 bell"}}.
+    {ok, #state{id="0", allowed_msgs=[], description="Actor, which rings the 7-11 bell"}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -94,13 +94,17 @@ handle_cast(Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_info([<<"horst@ronja">>,<<"hc_sr501_sensor">>, Id, Time, "RISING"], State) ->
-	lager:info("got message : ~p", ["RISING"]),
-	play_sound(),
-    {noreply, State};
+handle_info(timeout, State) ->
+    {noreply, State#state{allowed_msgs = config_handler:get_messages_for_module(?MODULE, "0")}};
+
+handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs}) ->
+    case sets:is_element({Node, Sensor, Id}, Allowed_msgs) of 
+        false ->  lager:debug("got message which i don't understand : ~p", [{Node, Sensor, Id}]);
+        true -> play_sound()
+    end,
+    {noreply, State};    
 
 handle_info(Info, State) ->
-	lager:info("got message which i don't understand : ~p", [Info]),
     {noreply, State}.
 
 %% --------------------------------------------------------------------

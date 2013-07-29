@@ -46,7 +46,7 @@ get_id() ->
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {id, data=[], description=[]}).
+-record(state, {id, allowed_msgs=[], data=[], description=[]}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -68,7 +68,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{id="0", data=[], description="Actor, which is responspable for dht22 messages"}}.
+    {ok, #state{id="0", allowed_msgs=[], data=[], description="Actor, which is responspable for dht22 messages"}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -85,7 +85,7 @@ handle_call({get_description}, From, State=#state{description = Description}) ->
 
 handle_call({get_id}, From, State=#state{id = Id}) ->
     {reply, Id, State};
-    
+
 handle_call(Request, From, State) ->
     Reply = ok,
     {reply, Reply, State}.
@@ -107,13 +107,19 @@ handle_cast(Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_info([<<"horst@raspberrypi">>,<<"dht22_sensor">>, Id, Time, Body], State=#state{data = Data}) ->
-    lager:info("got message : ~p", [Body]),
+handle_info(timeout, State) ->
+    {noreply, State#state{allowed_msgs = config_handler:get_messages_for_module(?MODULE, "0")}};
+
+handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs, data = Data}) ->
+    case sets:is_element({Node, Sensor, Id}, Allowed_msgs) of 
+        false ->  lager:debug("got message which i don't understand : ~p", [{Node, Sensor, Id}]);
+        true -> lager:info("got message : ~p : ~p", [Time, Body])
+    end,
     {noreply, State};
 
 handle_info(Info, State) ->
-    lager:debug("got message which i don't understand : ~p", [Info]),
     {noreply, State}.
+
 
 %% --------------------------------------------------------------------
 %% Function: terminate/2

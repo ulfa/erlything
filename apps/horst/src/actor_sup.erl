@@ -27,7 +27,7 @@ start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
-    Config = config_handler:get_config(horst, ?CONFIG_FILE),    
+    Config = config_handler:get_config(horst, ?SUPERVISOR_CONFIG),    
     {ok, {{one_for_one, 1, 10000},config_handler:create_child_specs(actor, Config)}}.
 
 get_actors_pids() ->
