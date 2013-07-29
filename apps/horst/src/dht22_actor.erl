@@ -32,7 +32,7 @@
 -export([start_link/0]).
 -export([start/0]).
 -export([get_description/0, get_id/0]).
-
+-export([get_temp_list/0]).
 -define(MAX_QUEUE_LENGTH, 19).
 
 %% ====================================================================
@@ -43,6 +43,10 @@ get_description() ->
 
 get_id() ->
     gen_server:call(?MODULE, {get_id}).    
+
+get_temp_list() ->
+    gen_server:call(?MODULE, {get_temp_list}).    
+
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
@@ -86,6 +90,9 @@ handle_call({get_description}, From, State=#state{description = Description}) ->
 handle_call({get_id}, From, State=#state{id = Id}) ->
     {reply, Id, State};
 
+handle_call({get_temp_list}, From, State=#state{data = Data}) ->
+    {reply, Data, State};
+
 handle_call(Request, From, State) ->
     Reply = ok,
     {reply, Reply, State}.
@@ -111,11 +118,13 @@ handle_info(timeout, State) ->
     {noreply, State#state{allowed_msgs = config_handler:get_messages_for_module(?MODULE, "0")}};
 
 handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs, data = Data}) ->
-    case sets:is_element({Node, Sensor, Id}, Allowed_msgs) of 
-        false ->  lager:debug("got message which i don't understand : ~p", [{Node, Sensor, Id}]);
-        true -> lager:info("got message : ~p : ~p", [Time, Body])
+    State_1 = case sets:is_element({Node, Sensor, Id}, Allowed_msgs) of 
+        false ->  lager:debug("got message which i don't understand : ~p", [{Node, Sensor, Id}]),
+                 State;
+        true -> lager:info("got message : ~p : ~p", [Time, Body]),
+                State#state{data=add(Data, {Time, Body})}
     end,
-    {noreply, State};
+    {noreply, State_1};
 
 handle_info(Info, State) ->
     {noreply, State}.
