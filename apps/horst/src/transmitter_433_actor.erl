@@ -19,7 +19,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0]).
 -export([start/0]).
--export([get_description/0]).
+-export([get_description/0, get_id/0]).
 -export([switch/2, get_switched/1, get_list_of_switches/0]).
 
 -define(ON, "1").
@@ -30,6 +30,9 @@
 %% ====================================================================
 get_description() ->
     gen_server:call(?MODULE, {get_description}).
+
+get_id() ->
+    gen_server:call(?MODULE, {get_id}).
 
 switch(Switch, Status) ->
     gen_server:cast(?MODULE, {switch, Switch, Status}).
@@ -80,6 +83,9 @@ init([]) ->
 %% --------------------------------------------------------------------
 handle_call({get_description}, From, State=#state{description = Description}) ->
     {reply, Description, State};
+
+handle_call({get_id}, From, State=#state{id = Id}) ->
+    {reply, Id, State};
 
 handle_call({get_switched, Switch}, From, State=#state{switched = List}) ->
     R = case lists:keyfind(Switch,1, List) of 

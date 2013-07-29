@@ -31,7 +31,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0]).
 -export([start/0]).
--export([get_description/0]).
+-export([get_description/0, get_id/0]).
 
 -define(MAX_QUEUE_LENGTH, 19).
 
@@ -40,10 +40,13 @@
 %% ====================================================================
 get_description() ->
     gen_server:call(?MODULE, {get_description}).
+
+get_id() ->
+    gen_server:call(?MODULE, {get_id}).    
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {data=[], description=[]}).
+-record(state, {id, data=[], description=[]}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -65,7 +68,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{data=[], description="Actor, which is responspable for dht22 messages"}}.
+    {ok, #state{id="0", data=[], description="Actor, which is responspable for dht22 messages"}}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -80,6 +83,9 @@ init([]) ->
 handle_call({get_description}, From, State=#state{description = Description}) ->
     {reply, Description, State};
 
+handle_call({get_id}, From, State=#state{id = Id}) ->
+    {reply, Id, State};
+    
 handle_call(Request, From, State) ->
     Reply = ok,
     {reply, Reply, State}.
@@ -102,7 +108,7 @@ handle_cast(Msg, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_info([<<"horst@raspberrypi">>,<<"dht22_sensor">>, Id, Time, Body], State=#state{data = Data}) ->
-    lager:debug("got message : ~p", [Body]),
+    lager:info("got message : ~p", [Body]),
     {noreply, State};
 
 handle_info(Info, State) ->
