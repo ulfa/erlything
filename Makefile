@@ -31,6 +31,7 @@ clean:
 	@$(REBAR) clean
 	rm -f test/*.beam
 	rm -f erl_crash.dump
+	rm -f log/*
 
 tests: clean app eunit ct
 
