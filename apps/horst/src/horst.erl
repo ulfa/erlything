@@ -24,7 +24,7 @@ stop() ->
     application:stop(horst).
 
 get_sensors() ->
-    get_sensors(sensor_sup:get_sensors(), []).
+    {node(), get_sensors(sensor_sup:get_sensors(), [])}.
 
 get_sensors([], Acc) ->
 	Acc;
@@ -32,7 +32,7 @@ get_sensors([{Modul, Pid, _X, _Y}|Actors], Acc) ->
 	get_sensors(Actors, [{Pid, Modul, Modul:get_description()}|Acc]).
 
 get_actors() ->
-	get_actors(actor_sup:get_actors(),[]).
+	{node(), get_actors(actor_sup:get_actors(),[])}.
 
 get_actors([], Acc) ->
 	Acc;
