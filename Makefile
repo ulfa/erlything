@@ -11,7 +11,7 @@ tar: app
 	cd rel; tar cvf $(REPO)/$(PROJECT).$(VERSION).tar $(PROJECT)
 
 tarall: app 
-	cd ..; tar cvf $(REPOSRC)/$(PROJECT).src.$(VERSION).tar $(PROJECT)
+	cd ..; tar cvf $(REPOSRC)/$(PROJECT).src.$(VERSION).tar $(PROJECT) --exclude .git/* --exclude log/*
 
 cpall: tarall
 	cd ..;scp $(REPOSRC)/$(PROJECT).src.$(VERSION).tar $(USR)@$(HOST):~/projects/erlang
