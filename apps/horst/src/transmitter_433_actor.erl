@@ -69,7 +69,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{id="0", allowed_msgs=[], switched=[{"1", ?OFF},{"2", ?OFF},{"3", ?OFF},{"4", ?OFF}], description="Actor, which can switch on/off plug sockets"}, 0}.
+    {ok, #state{id="0", allowed_msgs=[], switched=[{"1", ?OFF},{"2", ?OFF},{"3", ?OFF}], description="Actor, which can switch on/off plug sockets"}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
