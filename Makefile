@@ -1,8 +1,9 @@
 PROJECT = horst
 DIALYZER = dialyzer
 REBAR = rebar
-REPO = ../../../repository
-REPOSRC = ../repository
+REPO = ../../../../repository
+REPOSRC = ../../repository
+
 
 all: app
 
