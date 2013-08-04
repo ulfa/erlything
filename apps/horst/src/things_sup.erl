@@ -7,7 +7,7 @@
 %%%
 %%% Created : 
 
--module(horst_sup).
+-module(things_sup).
 
 -behaviour(supervisor).
 
@@ -16,23 +16,27 @@
 
 %% Supervisor callbacks
 -export([init/1]).
+-export([get_sensors/0]).
 
-%% Helper macro for declaring children of supervisor
--define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
+-include("../include/horst.hrl").
+
 %% ===================================================================
 %% API functions
 %% ===================================================================
-
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-%% ===================================================================
-%% Supervisor callbacks
-%% ===================================================================
 
 init([]) ->
-    {ok, { {one_for_one, 5, 10}, [?CHILD(sensor_sup, supervisor),
-    							  ?CHILD(actor_sup, supervisor),
-    							  ?CHILD(actor_group, worker),
-    							  ?CHILD(things_sup,supervisor)
-    							  ]}}.
+	Config = config_handler:get_config(horst, ?THINGS_CONFIG),
+    {ok, {{one_for_one, 1, 10000}, config_handler:create_thing_spec(Config)}}.
+
+get_sensors() ->
+	[].
+
+get_actors() ->
+	[].
+
+-include_lib("eunit/include/eunit.hrl").
+-ifdef(TEST).
+-endif.

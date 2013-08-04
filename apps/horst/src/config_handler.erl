@@ -15,7 +15,7 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([get_config/2, create_child_specs/2]).
+-export([get_config/2, create_child_specs/2, create_thing_spec/1]).
 -export([get_messages_for_module/2]).
 %% --------------------------------------------------------------------
 %% record definitions
@@ -37,12 +37,18 @@ create_child_specs(Type_in, Config) ->
 is_activ(true) ->
 	true;
 is_activ(false) ->
-	false.
+	false;
+is_activ(List) when is_list(List) ->
+	proplists:get_value(activ, List, false). 
 
 is_type(Type, Type) ->
 	true;
 is_type(Type, Type_1) ->
 	false.
+
+create_thing_spec(Config) ->
+	[?THING(list_to_atom(Name), [{name, Name}|List]) || {thing, Name, List} <- Config, is_activ(List)].
+	
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
@@ -52,6 +58,15 @@ is_type(Type, Type_1) ->
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
+
+create_thing_spec_test() ->
+	Config = [{thing, "Switches office",
+		[{type, actor},
+		{driver, transmitter_433_driver, [{"Ventilator",1},{"Licht",2}]},
+		{activ, true},
+		{description,"Switches in my office"}]}],
+	P = [{name, "Switches office"},{type, actor}, {driver, transmitter_433_driver, [{"Ventilator",1},{"Licht",2}]}, {activ, true},{description,"Switches in my office"}],
+	?assertEqual([{'Switches office', {thing, start_link, P}, permanent, 5000, worker, [thing]}], create_thing_spec(Config)).
 
 get_config_test() ->
 	application:load(horst),
