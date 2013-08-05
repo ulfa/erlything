@@ -66,7 +66,8 @@ create_thing_spec_test() ->
 		{activ, true},
 		{description,"Switches in my office"}]}],
 	P = [{name, "Switches office"},{type, actor}, {driver, transmitter_433_driver, [{"Ventilator",1},{"Licht",2}]}, {activ, true},{description,"Switches in my office"}],
-	?assertEqual([{'Switches office', {thing, start_link, P}, permanent, 5000, worker, [thing]}], create_thing_spec(Config)).
+	io:format("...~p~n",[create_thing_spec(Config)]),
+	?assertEqual([{'Switches office', {thing, start_link, [P]}, permanent, 5000, worker, [thing]}], create_thing_spec(Config)).
 
 get_config_test() ->
 	application:load(horst),

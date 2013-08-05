@@ -38,6 +38,7 @@ get_type() ->
     sensor.
 get_seconds() ->
     calendar:datetime_to_gregorian_seconds(calendar:local_time()).
+     
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

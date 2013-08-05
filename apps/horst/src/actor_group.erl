@@ -112,7 +112,7 @@ code_change(OldVsn, State, Extra) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 send_msg(Message) ->
-	lists:foreach(fun(Pid) -> Pid ! Message end, actor_sup:get_actors_pids()).
+    lists:foreach(fun(Pid) -> Pid ! Message end, things_sup:get_actors_pids()).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

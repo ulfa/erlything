@@ -94,7 +94,7 @@ handle_call({get_switched, Switch}, From, State=#state{switched = List}) ->
     end,
     {reply, R, State};
 
-handle_call(Request, From, State=#state{switched = List}) ->
+handle_call({get_list_of_switches}, From, State=#state{switched = List}) ->
     {reply, {node(),List}, State};
 
 handle_call(Request, From, State) ->
