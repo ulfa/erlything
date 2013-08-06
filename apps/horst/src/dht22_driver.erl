@@ -21,7 +21,7 @@ call_sensor(Config) when is_list(Config)->
     Msg = sensor:create_message(node(), ?MODULE, "0", date:get_date_seconds(), parse_message_from_dht22(Value)),
     lager:debug("got the temp and the humidity from the DHT22 ~p",[Msg]),
     sensor:send_message(nodes(), Msg),
-    {noreply, Config}.
+    Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------

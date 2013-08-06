@@ -135,6 +135,7 @@ handle_cast(Msg, State) ->
 %% --------------------------------------------------------------------
 handle_info(timeout, State=#state{config = Config}) ->
 	{driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
+    driver_init(Module, lists:keyfind(init, 1, Module_config)),
 	start_timer(proplists:get_value(timer, Config, 0)),
     {noreply, State#state{allowed_msgs = config_handler:get_messages_for_module(Module, "0")}};
 
@@ -146,7 +147,13 @@ handle_info({call_sensor}, State=#state{config = Config}) ->
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
     Config_1 = Module:Func(Config),
     start_timer(proplists:get_value(timer, Config, 0)),
-    {noreply, State#state{config = Config}};
+    {noreply, State#state{config = Config_1}};
+
+handle_info({gpio_interrupt, 0, Pin, Status}, State=#state{config = Config}) ->   
+    lager:debug("gpio_interrupt for pin : ~p with status : ~p",[Pin, Status]),
+    {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
+    Config_1 = Module:Func({gpio_interrupt, 0, Pin, Status}, Config, Module_config),
+    {noreply, State#state{config = Config_1}};
 
 handle_info(Info, State) ->
     {noreply, State}.
@@ -171,14 +178,20 @@ code_change(OldVsn, State, Extra) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 handle_msg([Node ,Sensor, Id, Time, Body], Config, true) ->
-    lager:debug("got message : ~p : ~p", [Time, Body]),
+    lager:info("got message : ~p : ~p", [Time, Body]),
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
     Module:Func([Node ,Sensor, Id, Time, Body], Config, Module_config);
 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, false) ->
-    lager:debug("got message which i don't understand : ~p", [{Node, Sensor, Id}]),
+    lager:info("got message which i don't understand : ~p", [{Node, Sensor, Id}]),
     Config.
 
+driver_init(Module, false) ->
+    lager:debug("don't init driver : ~p", [Module]);
+driver_init(Module, {init, false, Config}) ->
+    lager:debug("don't init driver : ~p", [Module]);
+driver_init(Module, {init, true, Config}) ->
+    Module:init(Config).
 
 start_timer(0) ->
 	lager:info("timer for thing  is set to 0");
