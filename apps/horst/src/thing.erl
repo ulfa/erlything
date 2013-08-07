@@ -140,6 +140,7 @@ handle_info(timeout, State=#state{config = Config}) ->
     {noreply, State#state{allowed_msgs = config_handler:get_messages_for_module(Module, "0")}};
 
 handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
+    lager:info("Message=~p ", [[Node ,Sensor, Id, Time, Body]]),
     Config_1 = handle_msg([Node ,Sensor, Id, Time, Body], Config, sets:is_element({Node, Sensor, Id}, Allowed_msgs)),
     {noreply, State#state{config = Config_1}};
 

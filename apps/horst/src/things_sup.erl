@@ -46,11 +46,16 @@ get_actors_pids() ->
 is_actor(actor) ->
 	true;
 is_actor(sensor) ->
+	false;
+is_actor(unknown) ->
 	false.
+
 
 is_sensor(sensor) ->
 	true;
 is_sensor(actor) ->
+	false;
+is_sensor(unknown) ->
 	false.
 	
 -include_lib("eunit/include/eunit.hrl").
