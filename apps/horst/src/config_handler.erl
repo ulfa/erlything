@@ -17,9 +17,7 @@
 %% --------------------------------------------------------------------
 -export([get_config/2, create_child_specs/2, create_thing_spec/1]).
 -export([get_messages_for_module/2]).
-%% --------------------------------------------------------------------
-%% record definitions
-%% --------------------------------------------------------------------
+
 get_messages_for_module(Modul, Id) ->
 	Messages = get_config(horst, ?MESSAGES_CONFIG),
 	case lists:keyfind(Modul, 1, Messages) of 
@@ -34,6 +32,13 @@ get_config(Application, Config_file) ->
 create_child_specs(Type_in, Config) ->
 	[?CHILD(Name, worker) || {Name, Type, Activ} <- Config, is_activ(Activ), is_type(Type, Type_in)].
 
+
+create_thing_spec(Config) ->
+	[?THING(list_to_atom(Name), [{name, Name}|List]) || {thing, Name, List} <- Config, is_activ(List)].
+	
+%% --------------------------------------------------------------------
+%%% Internal functions
+%% --------------------------------------------------------------------
 is_activ(true) ->
 	true;
 is_activ(false) ->
@@ -45,13 +50,6 @@ is_type(Type, Type) ->
 	true;
 is_type(Type, Type_1) ->
 	false.
-
-create_thing_spec(Config) ->
-	[?THING(list_to_atom(Name), [{name, Name}|List]) || {thing, Name, List} <- Config, is_activ(List)].
-	
-%% --------------------------------------------------------------------
-%%% Internal functions
-%% --------------------------------------------------------------------
 
 %% --------------------------------------------------------------------
 %%% Test functions
