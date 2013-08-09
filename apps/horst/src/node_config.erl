@@ -18,51 +18,43 @@
 %%%
 %%% Created : 
 %%% -------------------------------------------------------------------
--module(thing).
+-module(node_config).
 
 -behaviour(gen_server).
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
+-include("../include/horst.hrl").
 %% --------------------------------------------------------------------
 %% External exports
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/1]).
+-export([start_link/0]).
 -export([start/0]).
--export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
--export([get_state/1]).
-
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
-get_type(Name) when is_list(Name)->
-	get_type(list_to_atom(Name));
-get_type(Name) ->
-    gen_server:call(Name, {get_type}).
-get_driver(Name) when is_list(Name)->
-    get_driver(list_to_atom(Name));    
-get_driver(Name) ->
-	gen_server:call(Name, {get_driver}).
-is_activ(Name) ->
-	gen_server:call(list_to_atom(Name), {is_activ}).
-get_timer(Name) ->
-	gen_server:call(list_to_atom(Name), {get_timer}).
-get_database(Name) ->
-	gen_server:call(list_to_atom(Name), {get_database}).
-get_description(Name) when is_list(Name) ->
-    get_description(list_to_atom(Name));
-get_description(Name) ->
-	gen_server:call(Name, {get_description}).
-get_state(Name) ->
-    gen_server:call(list_to_atom(Name), {get_state}).
+-export([get_messages_config/0, get_things_config/0]).
+-export([set_messages_config/2, set_things_config/2]).
+-export([get_messages_for_module/2]).
+
+get_messages_config() ->
+	gen_server:call(?MODULE, {get_messages_config}).
+get_things_config() ->
+	gen_server:call(?MODULE, {get_things_config}).
+get_messages_for_module(Module, Id) ->
+	gen_server:call(?MODULE, {get_messages_for_module, Module, Id}).
+set_messages_config(Key, Value) ->
+	gen_server:call(?MODULE, {set_messages_config, Key, Value}).
+set_things_config(Key, Value) ->
+	gen_server:call(?MODULE, {set_things_config, Key, Value}).
 
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {config, allowed_msgs}).
+-record(state, {}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -70,11 +62,11 @@ get_state(Name) ->
 %% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the server
 %%--------------------------------------------------------------------
-start_link(Config) ->
-    gen_server:start_link({local, list_to_atom(proplists:get_value(name, Config))}, ?MODULE, Config, []).
+start_link() ->
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 start() ->
-	start_link([]).
+	start_link().
 %% --------------------------------------------------------------------
 %% Function: init/1
 %% Description: Initiates the server
@@ -83,8 +75,8 @@ start() ->
 %%          ignore               |
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
-init(Config) ->
-    {ok, #state{config=Config, allowed_msgs = []}, 0}.
+init([]) ->
+    {ok, #state{}}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -96,25 +88,27 @@ init(Config) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_call({get_type}, From, State=#state{config = Config}) ->
-    {reply, proplists:get_value(type, Config, unknown) , State};
-handle_call({get_driver}, From, State=#state{config = Config}) ->
-	{driver, Module, Module_config} = lists:keyfind(driver, 1, Config),
-    {reply, {Module, Module_config} , State};
-handle_call({is_activ}, From, State=#state{config = Config}) ->
-    {reply, proplists:get_value(activ, Config) , State};
-handle_call({get_timer}, From, State=#state{config = Config}) ->
-    {reply, proplists:get_value(timer, Config, 0) , State};
-handle_call({get_database}, From, State=#state{config = Config}) ->
-    {reply, proplists:get_value(database, Config) , State};
-handle_call({get_description}, From, State=#state{config = Config}) ->
-    {reply, proplists:get_value(description, Config) , State};
-handle_call({get_state}, From, State) ->
-    {reply, State, State};
-   
-handle_call(Request, From, State) ->
+handle_call({get_messages_config}, From, State) ->
+	Config = config_handler:get_config(?APPLICATION, ?MESSAGES_CONFIG), 
+    {reply, {node(), Config}, State};
+
+handle_call({get_things_config}, From, State) ->
+	Config = config_handler:get_config(?APPLICATION, ?THINGS_CONFIG), 
+    {reply, {node(), Config}, State};
+
+handle_call({get_messages_for_module, Module, Id}, From, State) ->
+	Config = config_handler:get_messages_for_module(Module, Id), 
+    {reply, {node(), Config}, State};
+
+handle_call({set_messages_config, Key, Value}, From, State) ->
     Reply = ok,
-    {reply, Reply, State}.
+    {reply, Reply, State};
+
+handle_call({set_things_config, Key, Value}, From, State) ->
+    {reply, "not implemented yet", State};
+
+handle_call(Request, From, State) ->
+    {reply, "not implemented yet", State}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_cast/2
@@ -133,30 +127,6 @@ handle_cast(Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_info(timeout, State=#state{config = Config}) ->
-	{driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    Allowed_msgs = node_config:get_messages_for_module(Module, "0"), 
-    driver_init(Module, lists:keyfind(init, 1, Module_config)),
-	start_timer(proplists:get_value(timer, Config, 0)),
-    {noreply, State#state{allowed_msgs = Allowed_msgs}};
-
-handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
-    lager:info("Message=~p ", [[Node ,Sensor, Id, Time, Body]]),
-    Config_1 = handle_msg([Node ,Sensor, Id, Time, Body], Config, is_message_well_known({Node, Sensor, Id}, Allowed_msgs)),
-    {noreply, State#state{config = Config_1}};
-
-handle_info({call_sensor}, State=#state{config = Config}) ->
-    {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    Config_1 = Module:Func(Config),
-    start_timer(proplists:get_value(timer, Config, 0)),
-    {noreply, State#state{config = Config_1}};
-
-handle_info({gpio_interrupt, 0, Pin, Status}, State=#state{config = Config}) ->   
-    lager:debug("gpio_interrupt for pin : ~p with status : ~p",[Pin, Status]),
-    {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    Config_1 = Module:Func({gpio_interrupt, 0, Pin, Status}, Config, Module_config),
-    {noreply, State#state{config = Config_1}};
-
 handle_info(Info, State) ->
     {noreply, State}.
 
@@ -179,30 +149,6 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-is_message_well_known({Node, Sensor, Id}, Allowed_msgs) ->
-    sets:is_element({Node, Sensor, Id}, Allowed_msgs).
-
-handle_msg([Node ,Sensor, Id, Time, Body], Config, true) ->
-    lager:info("got message : ~p : ~p", [Time, Body]),
-    {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    Module:Func([Node ,Sensor, Id, Time, Body], Config, Module_config);
-
-handle_msg([Node ,Sensor, Id, Time, Body], Config, false) ->
-    lager:info("got message which i don't understand : ~p", [{Node, Sensor, Id}]),
-    Config.
-
-driver_init(Module, false) ->
-    lager:debug("don't init driver : ~p", [Module]);
-driver_init(Module, {init, false, Config}) ->
-    lager:debug("don't init driver : ~p", [Module]);
-driver_init(Module, {init, true, Config}) ->
-    Module:init(Config).
-
-start_timer(0) ->
-	lager:info("timer for thing  is set to 0");
-start_timer(Time) ->
-    erlang:send_after(Time, self(), {call_sensor}). 
-
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

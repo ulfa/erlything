@@ -69,7 +69,7 @@ create_thing_spec_test() ->
 
 get_config_test() ->
 	application:load(horst),
-	Config = get_config(horst, ?SUPERVISOR_CONFIG).
+	Config = get_config(horst, ?THINGS_CONFIG).
 	%%?assertEqual([{hc_sr501_sensor}, {dht22_sensor}], Config).
 
 start_child_test() ->
