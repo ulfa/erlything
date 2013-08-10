@@ -27,7 +27,7 @@ handle_msg({gpio_interrupt, 0, Pin, Status}, Config, Modul_config) ->
 	Msg = create_message(Status),
 	sensor:send_message(nodes(), Msg),
 	lager:info("send message : ~p", [Msg]),
-	Module_config_1 = lists:keyreplace(last_changed, 1, {last_changed, date:get_date_seconds()}),
+	Module_config_1 = lists:keyreplace(last_changed, 1, Modul_config, {last_changed, date:get_date_seconds()}),
 	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}).
 %% --------------------------------------------------------------------
 %%% Internal functions
