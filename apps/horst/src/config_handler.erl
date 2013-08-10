@@ -18,9 +18,9 @@
 -export([get_config/2, create_child_specs/2, create_thing_spec/1]).
 -export([get_messages_for_module/2]).
 
-get_messages_for_module(Modul, Id) ->
+get_messages_for_module(Module, Id) ->
 	Messages = get_config(horst, ?MESSAGES_CONFIG),
-	case lists:keyfind(Modul, 1, Messages) of 
+	case lists:keyfind(Module, 1, Messages) of 
 		false ->  sets:new();
 		{M, MSGs} -> sets:from_list(MSGs)
 	end. 
