@@ -98,7 +98,7 @@ handle_call({get_things_config}, From, State) ->
 
 handle_call({get_messages_for_module, Module, Id}, From, State) ->
 	Config = config_handler:get_messages_for_module(Module, Id), 
-    {reply, {node(), Config}, State};
+    {reply, Config, State};
 
 handle_call({set_messages_config, Key, Value}, From, State) ->
     Reply = ok,
