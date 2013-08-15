@@ -32,7 +32,7 @@
 -export([start_link/1]).
 -export([start/0]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
--export([get_state/1]).
+-export([get_state/1, get_module_config/1]).
 
 
 %% ====================================================================
@@ -58,6 +58,10 @@ get_description(Name) ->
 	gen_server:call(Name, {get_description}).
 get_state(Name) ->
     gen_server:call(list_to_atom(Name), {get_state}).
+get_module_config(Name) when is_list(Name) ->
+    get_module_config(list_to_atom(Name));
+get_module_config(Name) ->
+    gen_server:call(Name, {get_module_config}).
 
 %% --------------------------------------------------------------------
 %% record definitions
@@ -111,7 +115,10 @@ handle_call({get_description}, From, State=#state{config = Config}) ->
     {reply, proplists:get_value(description, Config) , State};
 handle_call({get_state}, From, State) ->
     {reply, State, State};
-   
+handle_call({get_module_config}, From, State=#state{config = Config}) ->
+    {driver, {_Module, _Func}, Module_config} = lists:keyfind(driver, 1, Config),
+    {reply, Module_config, State};
+
 handle_call(Request, From, State) ->
     Reply = ok,
     {reply, Reply, State}.

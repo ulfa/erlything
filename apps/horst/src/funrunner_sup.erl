@@ -5,16 +5,14 @@
 %%% Author  : Ulf Angermann uaforum1@googlemail.com
 %%% Description :
 %%%
-%%% Created : 
+%%% Created :  
 
--module(horst_sup).
-
+-module(funrunner_sup).
 -behaviour(supervisor).
-
-%% API
+%% --------------------------------------------------------------------
+%% External exports
+%% --------------------------------------------------------------------
 -export([start_link/0]).
-
-%% Supervisor callbacks
 -export([init/1]).
 
 %% Helper macro for declaring children of supervisor
@@ -22,18 +20,12 @@
 %% ===================================================================
 %% API functions
 %% ===================================================================
-
 start_link() ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% ===================================================================
 %% Supervisor callbacks
 %% ===================================================================
-
 init([]) ->
-    {ok, { {one_for_one, 5, 10}, [
-    							  ?CHILD(actor_group, worker),
-    							  ?CHILD(node_config, worker),
-    							  ?CHILD(things_sup,supervisor),
-    							  ?CHILD(funrunner_sup, supervisor)
-    							  ]}}.
+	RestartStrategy = {one_for_one, 1, 3600},
+    {ok, {RestartStrategy, [?CHILD(funrunner, worker)]}}.

@@ -15,12 +15,15 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([create_message/5, send_message/2]).
+-export([create_message/5, create_message/3, send_message/2]).
 -export([get_description/0, get_type/0]).
 -export([get_seconds/0]).
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
+
+create_message(Node, Sensor, Body) ->
+	create_message(Node, Sensor, "0", date:get_date_seconds(), Body).
 create_message(Node, Sensor, Id, Time, Body) ->
     [atom_to_binary(Node, utf8), atom_to_binary(Sensor, utf8), list_to_binary(Id), list_to_binary(integer_to_list(Time)), Body].
 
