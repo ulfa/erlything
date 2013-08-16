@@ -16,7 +16,7 @@
 %% --------------------------------------------------------------------
 -export([handle_msg/3]).
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
+handle_msg([Node ,Sensor, _Id, Time, Body], Config, Module_config) ->
 	{Switch, Number, Status} = Body,
 	call_driver(Number, Status),	
 	Module_config_1 = lists:keyreplace(Switch, 1 , Module_config, {Switch, Number, Status}),

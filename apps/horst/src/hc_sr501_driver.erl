@@ -24,7 +24,7 @@ init(Config) ->
 	gpio:set_interrupt(proplists:get_value(pin, Config) , proplists:get_value(int_type, Config)).
 
 handle_msg({gpio_interrupt, 0, Pin, Status}, Config, Modul_config) ->
-	Msg = create_message(Status),
+	Msg = create_message(Status, sender:get_id(Config)),
 	sensor:send_message(nodes(), Msg),
 	lager:info("send message : ~p", [Msg]),
 	Module_config_1 = lists:keyreplace(last_changed, 1, Modul_config, {last_changed, date:get_date_seconds()}),
@@ -32,10 +32,10 @@ handle_msg({gpio_interrupt, 0, Pin, Status}, Config, Modul_config) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-create_message(1) ->
-	sensor:create_message(node(), ?MODULE, "0", date:get_date_seconds(), "RISING");
-create_message(0) ->
-	sensor:create_message(node(), ?MODULE, "0", date:get_date_seconds(), "FALLING").
+create_message(1, Id) ->
+	sensor:create_message(node(), ?MODULE, Id, date:get_date_seconds(), "RISING");
+create_message(0, Id) ->
+	sensor:create_message(node(), ?MODULE, Id, date:get_date_seconds(), "FALLING").
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

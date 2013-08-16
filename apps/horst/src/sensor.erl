@@ -16,8 +16,7 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([create_message/5, create_message/3, send_message/2]).
--export([get_description/0, get_type/0]).
--export([get_seconds/0]).
+-export([get_id/1]).
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
@@ -32,16 +31,8 @@ send_message(Nodes, Message) ->
 send_message(Nodes, Target, Message) ->
 	rpc:abcast(Nodes, Target, Message).    
 
-%% --------------------------------------------------------------------
-%%% Internal functions
-%% --------------------------------------------------------------------
-get_description() ->
-	"short description".
-get_type() ->
-    sensor.
-get_seconds() ->
-    calendar:datetime_to_gregorian_seconds(calendar:local_time()).
-     
+get_id(Config) when is_list(Config) ->
+	proplists:get_value(id, Config, "0"). 
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
