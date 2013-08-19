@@ -29,7 +29,7 @@ create_message(Node, Sensor, Id, Time, Body) ->
 send_message(Nodes, Message) ->
 	send_message(Nodes, 'actor_group', Message).    
 send_message(Nodes, Target, Message) ->
-	rpc:abcast(Nodes, Target, Message).    
+	rpc:abcast([node()|Nodes], Target, Message).    
 
 get_id(Config) when is_list(Config) ->
 	proplists:get_value(id, Config, "0"). 
