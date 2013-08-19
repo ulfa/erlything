@@ -24,7 +24,7 @@ init(Config) ->
 	gpio:set_interrupt(proplists:get_value(pin, Config) , proplists:get_value(int_type, Config)).
 
 handle_msg({gpio_interrupt, 0, Pin, Status}, Config, Modul_config) ->
-	Msg = create_message(Status, sender:get_id(Config)),
+	Msg = create_message(Status, sensor:get_id(Config)),
 	sensor:send_message(nodes(), Msg),
 	lager:info("send message : ~p", [Msg]),
 	Module_config_1 = lists:keyreplace(last_changed, 1, Modul_config, {last_changed, date:get_date_seconds()}),
