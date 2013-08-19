@@ -25,8 +25,8 @@ handle_msg([Node ,Sensor, _Id, Time, Body], Config, Module_config) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 call_driver(Switch, Status) ->
-    Driver = filename:join([code:priv_dir(horst), "driver", "remote", "send"]),
-    os:cmd(Driver ++ " 11111 " ++ Switch ++ " " ++ Status).
+    Driver = filename:join([code:priv_dir(horst), "driver", "remote", "send "]),
+    os:cmd(Driver ++ Switch ++ " " ++ Status).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
