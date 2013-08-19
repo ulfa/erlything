@@ -6,4 +6,4 @@
 
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
 
--define(THING(Name, Config), {Name, {thing, start_link, [Config]}, permanent, 5000, worker, [thing]}).
+-define(THING(Name, Config), {Name, {thing, start_link, [Config]}, temporary, 5000, worker, [thing]}).

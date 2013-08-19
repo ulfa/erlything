@@ -24,6 +24,7 @@
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
+-include("../include/horst.hrl").
 %% --------------------------------------------------------------------
 %% External exports
 
@@ -142,13 +143,13 @@ handle_cast(Msg, State) ->
 %% --------------------------------------------------------------------
 handle_info(timeout, State=#state{config = Config}) ->
 	{driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    Allowed_msgs = node_config:get_messages_for_module(Module, "0"), 
+    Allowed_msgs = node_config:get_messages_for_module(Module), 
     driver_init(Module, lists:keyfind(init, 1, Module_config)),
 	start_timer(proplists:get_value(timer, Config, 0)),
     {noreply, State#state{allowed_msgs = Allowed_msgs}};
 
 handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
-    lager:info("Message=~p ", [[Node ,Sensor, Id, Time, Body]]),
+    lager:debug("Message=~p ", [[Node ,Sensor, Id, Time, Body]]),
     Config_1 = handle_msg([Node ,Sensor, Id, Time, Body], Config, is_message_well_known({Node, Sensor, Id}, Allowed_msgs)),
     {noreply, State#state{config = Config_1}};
 
@@ -164,6 +165,12 @@ handle_info({gpio_interrupt, 0, Pin, Status}, State=#state{config = Config}) ->
     Config_1 = Module:Func({gpio_interrupt, 0, Pin, Status}, Config, Module_config),
     {noreply, State#state{config = Config_1}};
 
+handle_info({update_config, ?MESSAGES_CONFIG},  State=#state{config = Config, allowed_msgs = Allowed_msgs}) ->
+    {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config), 
+    Allowed_msgs_1 = node_config:get_messages_for_module(Module),    
+    lager:info("update messages.config for thing : ~p", [Module]),
+    {noreply, State#state{allowed_msgs = Allowed_msgs_1}};
+
 handle_info(Info, State) ->
     {noreply, State}.
 
@@ -173,6 +180,7 @@ handle_info(Info, State) ->
 %% Returns: any (ignored by gen_server)
 %% --------------------------------------------------------------------
 terminate(Reason, State) ->
+    lager:info("stopping thing!"),
     ok.
 
 %% --------------------------------------------------------------------
@@ -190,12 +198,12 @@ is_message_well_known({Node, Sensor, Id}, Allowed_msgs) ->
     sets:is_element({Node, Sensor, Id}, Allowed_msgs).
 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, true) ->
-    lager:info("got message : ~p : ~p", [Time, Body]),
+    lager:debug("got message : ~p : ~p", [Time, Body]),
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
     Module:Func([Node ,Sensor, Id, Time, Body], Config, Module_config);
 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, false) ->
-    lager:info("got message which i don't understand : ~p", [{Node, Sensor, Id}]),
+    lager:debug("got message which i don't understand : ~p", [{Node, Sensor, Id}]),
     Config.
 
 driver_init(Module, false) ->

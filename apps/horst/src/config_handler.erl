@@ -15,11 +15,10 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([get_config/2, create_child_specs/2, create_thing_spec/1]).
--export([get_messages_for_module/2]).
+-export([get_config/2, create_thing_spec/1]).
+-export([get_messages_for_module/2, is_activ/1]).
 
-get_messages_for_module(Module, Id) ->
-	Messages = get_config(horst, ?MESSAGES_CONFIG),
+get_messages_for_module(Messages, Module) ->
 	case lists:keyfind(Module, 1, Messages) of 
 		false ->  sets:new();
 		{M, MSGs} -> sets:from_list(MSGs)
@@ -29,13 +28,9 @@ get_config(Application, Config_file) ->
 	{ok, Config} = file:consult(filename:join([code:priv_dir(Application),"config", Config_file])),
 	Config.
 
-create_child_specs(Type_in, Config) ->
-	[?CHILD(Name, worker) || {Name, Type, Activ} <- Config, is_activ(Activ), is_type(Type, Type_in)].
-
-
-create_thing_spec(Config) ->
+create_thing_spec(Config) when is_list(Config)->
 	[?THING(list_to_atom(Name), [{name, Name}|List]) || {thing, Name, List} <- Config, is_activ(List)].
-	
+
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
@@ -72,13 +67,10 @@ get_config_test() ->
 	Config = get_config(horst, ?THINGS_CONFIG).
 	%%?assertEqual([{hc_sr501_sensor}, {dht22_sensor}], Config).
 
-start_child_test() ->
-	application:load(horst),
-	Config = [{hc_sr501_sensor, sensor, true},
-			  {dht22_sensor, sensor, false},
- 			  {dht22_actor, actor, true}],	
-	?assertEqual([?CHILD(hc_sr501_sensor, worker)], create_child_specs(sensor, Config)).	
-
 get_messages_for_module_test() ->
-	?assertEqual(sets:from_list([{<<"horst@ronja">>,<<"hc_sr501_sensor">>, <<"0">>}]), get_messages_for_module(seven_eleven_actor, "0")).
+	Messages = [{dht22_display_driver, [{<<"horst@raspberrypi">>,<<"dht22_driver">>, <<"0">>}]}, 
+	{usb_cam_driver, [{<<"horst@raspberrypi">>,<<"hc_sr501_driver">>,<<"0">>}]}],
+	?assertEqual(1, sets:size(get_messages_for_module(Messages, usb_cam_driver))),
+	?assertEqual(0, sets:size(get_messages_for_module(Messages, unknown_driver))).
+
 -endif.
