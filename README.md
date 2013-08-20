@@ -1,5 +1,6 @@
 # Overview
 
+This is a kind of sensor / actor plattform. 
 
 ## Feature
 
