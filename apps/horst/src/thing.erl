@@ -195,7 +195,15 @@ code_change(OldVsn, State, Extra) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 is_message_well_known({Node, Sensor, Id}, Allowed_msgs) ->
-    sets:is_element({Node, Sensor, Id}, Allowed_msgs).
+    case  sets:is_element({Node, Sensor, Id}, Allowed_msgs) of 
+        true -> true;
+        false -> are_all_msgs_allowed(sets:to_list(Allowed_msgs))
+    end.
+
+are_all_msgs_allowed([{all, all, all}]) ->
+    true;
+are_all_msgs_allowed(Allowed_msgs) ->
+    false.
 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, true) ->
     lager:debug("got message : ~p : ~p", [Time, Body]),
@@ -226,4 +234,12 @@ start_timer(Time) ->
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
+is_message_well_known_test() ->
+    Allowed_msgs_1 = sets:from_list([{<<"horst@raspberrypi">>,<<"hc_sr501_driver">>,<<"0">>}, {all, all, all}]),
+    Allowed_msgs_2 = sets:from_list([{all, all, all}]),
+    Allowed_msgs_3 = sets:from_list([{all, all, <<"0">>}]),
+    ?assertEqual(true, is_message_well_known({<<"horst@raspberrypi">>,<<"hc_sr501_driver">>,<<"0">>}, Allowed_msgs_1)),
+    ?assertEqual(true, is_message_well_known({<<"test@raspberrypi">>,<<"hc_sr501_driver">>,<<"0">>}, Allowed_msgs_2)),
+    ?assertEqual(false, is_message_well_known({<<"test@raspberrypi">>,<<"hc_sr501_driver">>,<<"0">>}, Allowed_msgs_3)).
+
 -endif.
