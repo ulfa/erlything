@@ -3,6 +3,11 @@
 
 ## Feature
 
+* hosting of things
+* starting and stopping of things via config file
+* configuration of messages which a thing understands
+* dynamic handling of config files (things.config and messages.config)
+* first version of the funrunner which is able to store function and run them if needed (more later)
 
 # Installation and starting
 

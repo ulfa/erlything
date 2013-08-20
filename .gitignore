@@ -1,3 +1,4 @@
+.ct_dialyzer.plt
 erl_crash.dump
 deps/gpio/priv/gpio_drv.so
 log/*

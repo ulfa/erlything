@@ -44,14 +44,5 @@ eunit:
 ct:
 	@$(REBAR) ct
 
-build-plt:
-	@$(DIALYZER) --build_plt --output_plt .ct_dialyzer.plt \
-		--apps kernel stdlib sasl inets crypto public_key ssl
-
-dialyze:
-	@$(DIALYZER) --src src --plt .sue_dialyzer.plt \
-		-Wbehaviours -Werror_handling \
-		-Wrace_conditions -Wunmatched_returns # -Wunderspecs
-
 docs:
 	@$(REBAR) doc skip_deps=true
