@@ -38,8 +38,9 @@ After installing the runtime, you have to install [rebar] (https://github.com/ba
 
 # Supported Sensors
 
-* [DHT22] ()
-* [hc_sr501] ()
+* [DHT22] (http://www.amazon.de/Sensors-Temperature-SEN-10167-Feuchte-und-Temperatur-Sensor/dp/B005A9KJ4I)
+* [hc_sr501] (http://www.elecfreaks.com/wiki/index.php?title=PIR_Motion_Sensor_Module:DYP-ME003)
+* [TK0460] (http://www.aliexpress.com/snapshot/247141960.html)
 
 I will add more in the future...
 
