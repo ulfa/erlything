@@ -16,11 +16,14 @@
 %% --------------------------------------------------------------------
 -export([handle_msg/3]).
 
-handle_msg([Node ,Sensor, _Id, Time, Body], Config, Module_config) ->
-	{Switch, Number, Status} = Body,
+handle_msg([Node ,Sensor, _Id, Time, {Switch, Number, Status}], Config, Module_config) ->
 	call_driver(Number, Status),	
 	Module_config_1 = lists:keyreplace(Switch, 1 , Module_config, {Switch, Number, Status}),
-	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}).
+	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1});
+
+handle_msg([Node ,Sensor, _Id, Time, Body], Config, Module_config) ->
+	lager:warning("transmitter_433_driver got the wrong message : ~p", [[Node ,Sensor, _Id, Time, Body]]),
+	Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------

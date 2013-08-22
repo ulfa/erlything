@@ -36,6 +36,7 @@ After installing the runtime, you have to install [rebar] (https://github.com/ba
 * [wiringpi] (https://projects.drogon.net/raspberry-pi/wiringpi/) a GPIO access library written in C for the BCM2835
 * [Adafruit_DHT] (https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code/tree/master/Adafruit_DHT_Driver)
 * [rc-switch] (https://code.google.com/p/rc-switch/) library to operate with 315/433 MHZ remote control devices
+* [streamer] (http://manpages.ubuntu.com/manpages/gutsy/man1/streamer.1.html) record audio and/or video 
 
 # Supported Sensors
 

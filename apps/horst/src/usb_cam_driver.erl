@@ -29,6 +29,7 @@ handle_msg([Node ,Sensor, Id, Time, "RISING"], Config, Module_config) ->
 	end;
 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
+	lager:warning("usb_cam_driver got the wrong message : ~p", [[Node ,Sensor, Id, Time, Body]]),
 	Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
@@ -39,7 +40,7 @@ call_driver(Path, Actual_time) ->
     os:cmd("streamer -o " ++ filename:join([Path, integer_to_list(Actual_time) ++ ".jpeg"])).
 
 check_time(Last_shot, Actual_time) ->
-	(Actual_time - Last_shot) > 60.
+	(Actual_time - Last_shot) > 15.
 
 %% --------------------------------------------------------------------
 %%% Test functions
