@@ -13,7 +13,7 @@
 %% Application callbacks
 -export([start/0, stop/0]).
 -export([set_debug/0, set_info/0]).
--export([get_things/1]).
+-export([get_things/0, get_things/1]).
 
 start() ->
 	application:start(crypto),
@@ -28,6 +28,8 @@ stop() ->
     application:stop(gpio), 
     application:stop(horst).
 
+get_things() ->
+    {node(), get_things(things_sup:get_things(), [])}.
 get_things(sensor) ->
     {node(), get_things(things_sup:get_sensors(), [])};
 get_things(actor) ->

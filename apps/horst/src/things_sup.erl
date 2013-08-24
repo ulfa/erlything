@@ -17,7 +17,7 @@
 %% Supervisor callbacks
 -export([init/1]).
 -export([get_sensors/0, get_actors/0, get_sensors_pids/0, get_actors_pids/0]).
--export([get_things_pids/0, update_list_of_things/1]).
+-export([get_things/0, get_things_pids/0, update_list_of_things/1]).
 -export([is_thing_running/2]).
 
 -include("../include/horst.hrl").
@@ -44,6 +44,9 @@ get_sensors_pids() ->
 
 get_actors_pids() ->
 	[Pid || {Name, Pid, Type, Modules} <- supervisor:which_children(things_sup),  is_valid_pid(Pid), is_actor(thing:get_type(Name))].
+
+get_things() ->
+	supervisor:which_children(things_sup).
 
 get_things_pids() ->
 	[Pid || {Name, Pid, Type, Modules} <- supervisor:which_children(things_sup)].
