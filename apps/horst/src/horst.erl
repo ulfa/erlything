@@ -19,12 +19,15 @@ start() ->
 	application:start(crypto),
 	application:start(public_key),
 	application:start(ssl),
- 	application:start(gpio), 
+	application:start(sue),
+ 	application:start(gpio),
     application:start(horst).
 
 stop() ->
+	application:start(public_key),
 	application:stop(crypto),
 	application:stop(ssl),
+	application:start(sue),
     application:stop(gpio), 
     application:stop(horst).
 
