@@ -17,6 +17,7 @@
 %% --------------------------------------------------------------------
 -export([create_message/5, create_message/3, send_message/2]).
 -export([get_id/1]).
+-export([generate_messages/1, generate_messages/2]).
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
@@ -33,6 +34,16 @@ send_message(Nodes, Target, Message) ->
 
 get_id(Config) when is_list(Config) ->
 	proplists:get_value(id, Config, "0"). 
+
+generate_messages(Loop_count) ->
+	timer:tc(sensor, generate_messages, [Loop_count, 0]).
+generate_messages(Counter, Counter) ->
+	lager:info("finished generate_messages. ~p were generated.", [Counter]);
+generate_messages(Counter, Value) ->
+	Msg = create_message(node(), ?MODULE, {test_message, Value}),
+	send_message(nodes(), Msg),
+	generate_messages(Counter, Value + 1).
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
