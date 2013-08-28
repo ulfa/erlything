@@ -28,8 +28,12 @@ handle_msg([Node ,Sensor, _Id, Time, Body], Config, Module_config) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 call_driver(Switch, Status) ->
+	lager:debug("switch state from : ~p to : ~p", [Switch, Status]),
     Driver = filename:join([code:priv_dir(horst), "driver", "remote", "send "]),
-    os:cmd(Driver ++ Switch ++ " " ++ Status).
+    Command=Driver ++ Switch ++ " " ++ Status,
+    lager:debug("Command : ~p", [Command]),
+    os:cmd(Command),
+    os:cmd(Command).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
