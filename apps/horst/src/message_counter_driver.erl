@@ -20,7 +20,8 @@
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
 	Data = proplists:get_value(data, Module_config, []),
 	Counter = proplists:get_value(counter, Module_config, 0),
-	Module_config_1 = lists:keyreplace(data, 1 , Module_config, {data, add(Data, {date:timestamp_to_date(Time), [Node ,Sensor, Id, Time, Body]})}),
+	Module_config_1 = lists:keyreplace(data, 1 , Module_config, {data, add(Data, {date:timestamp_to_date(Time), 
+		[binary_to_list(Node) ,binary_to_list(Sensor), binary_to_list(Id), date:timestamp_to_date(Time), Body]})}),
 	Module_config_2 = lists:keyreplace(counter, 1 , Module_config_1, {counter, Counter + 1}),
 	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_2}).
 %% --------------------------------------------------------------------
