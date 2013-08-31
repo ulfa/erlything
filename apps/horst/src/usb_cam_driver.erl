@@ -40,7 +40,7 @@ call_driver(Path, Actual_time) ->
     os:cmd("streamer -o " ++ filename:join([Path, integer_to_list(Actual_time) ++ ".jpeg"])).
 
 check_time(Last_shot, Actual_time) ->
-	(Actual_time - Last_shot) > 15.
+	(Actual_time - Last_shot) > 5.
 
 %% --------------------------------------------------------------------
 %%% Test functions
