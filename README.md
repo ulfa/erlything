@@ -33,6 +33,7 @@ After installing the runtime, you have to install [rebar] (https://github.com/ba
 
 * [lager](https://github.com/basho/lager) a logging framework
 * [gpio](https://github.com/Feuerlabs/gpio) sysfs GPIO port driver and erlang module
+* [erlcron](https://github.com/erlware/erlcron.git) Erlang cronish system
 * [wiringpi] (https://projects.drogon.net/raspberry-pi/wiringpi/) a GPIO access library written in C for the BCM2835
 * [Adafruit_DHT] (https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code/tree/master/Adafruit_DHT_Driver)
 * [rc-switch] (https://code.google.com/p/rc-switch/) library to operate with 315/433 MHZ remote control devices
@@ -91,3 +92,18 @@ This configuartion file contains the drivers and the messages which they underst
 The driver dht22_display_driver which is implemented in module dht22_display_driver.erl is
 able to understand messages from node : horst@raspberrypi and generarted by module  dht22_driver.
 The "0" stands for an unique id which is not implemented yet.
+
+### Things which are implemented (in an very early version)
+
+The following things (driver) are an example of how to implement a thing.
+These things are used in my internal project and they work for me.
+
+* mail_client driver sends a mail 
+* usb_cam_driver makes pictures 
+* seven_eleven_driver play the seven eleven melody 
+* message_count_driver stores 20 messages and the overall count of messages
+* cron_driver a cron thing. 
+* dht22_driver the sensor thing which triggers the dht22 sensor
+* dht22_display_driver stores 20 values of the dht22 
+* transmitter_433_driver sends a signal via the transmitter to a switch
+
