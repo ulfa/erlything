@@ -34,6 +34,7 @@
 -export([start/0]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
 -export([get_state/1, get_module_config/1]).
+-export([stop/1]).
 
 
 %% ====================================================================
@@ -63,6 +64,10 @@ get_module_config(Name) when is_list(Name) ->
     get_module_config(list_to_atom(Name));
 get_module_config(Name) ->
     gen_server:call(Name, {get_module_config}).
+stop(Name) when is_list(Name) ->
+    stop(list_to_atom(Name));
+stop(Name) ->
+    gen_server:cast(Name, {stop}).
 
 %% --------------------------------------------------------------------
 %% record definitions
@@ -131,6 +136,8 @@ handle_call(Request, From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_cast({stop}, State) ->
+     {stop, normal, State}; 
 handle_cast(Msg, State) ->
     {noreply, State}.
 
@@ -179,9 +186,14 @@ handle_info(Info, State) ->
 %% Description: Shutdown the server
 %% Returns: any (ignored by gen_server)
 %% --------------------------------------------------------------------
-terminate(Reason, State) ->
-    lager:info("stopping thing!"),
-    ok.
+terminate(Reason, State=#state{config = Config}) ->
+    {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config), 
+    lager:info("stopping thing of type : ~p", [Module]),
+    Exports =proplists:get_value(exports,Module:module_info(), []),
+    case proplists:get_value(stop, Exports) of 
+        undefined -> lager:warning("there is no stop function in module : ~p", [Module]);
+        1 -> Module:stop(Config)
+    end.
 
 %% --------------------------------------------------------------------
 %% Func: code_change/3

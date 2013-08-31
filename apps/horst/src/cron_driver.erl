@@ -11,7 +11,7 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([init/1, handle_msg/3]).
+-export([init/1, stop/1, handle_msg/3]).
 -export([send_message/1]).
 
 init(Config) ->
@@ -23,7 +23,10 @@ init(Config) ->
         {error, {already_started, erlcron}} ->
             ok
     end.
-
+stop(Config) ->
+	lager:info("stopping Module : ~p ", [?MODULE]),
+	application:stop(erlcron).
+	 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
 	lager:warning("cron_driver can't handle any message : ~p", [[Node ,Sensor, Id, Time, Body]]),
 	Config.

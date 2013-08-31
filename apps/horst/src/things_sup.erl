@@ -89,7 +89,8 @@ start_if_not_running(Config, Things) ->
 kill_if_running(Thing, Things) ->
 	case is_thing_running(Thing, Things) of 
 		false -> ok;
-		true -> Result = supervisor:terminate_child(?MODULE, list_to_atom(Thing)),
+		true -> thing:stop(Thing),
+				%%Result = supervisor:terminate_child(?MODULE, list_to_atom(Thing)),
 				lager:info("terminated thing with result : ~p", [Thing]),
 				ok
 	end. 
