@@ -6,28 +6,33 @@
 %%% Description :
 %%%
 %%% Created :  
--module(mail_client_driver).
+-module(cron_driver).
 
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
 -export([init/1, handle_msg/3]).
+-export([send_message/1]).
 
 init(Config) ->
-	lager:info("mail_client_driver:init('~p')", [Config]),	
-	application:start(gen_smtpc).
+	lager:info("cron_driver:init('~p')", [Config]),	
+	application:start(erlcron),
+	Crontab = proplists:get_value(crontab, Config, []), 
+	start_jobs(Crontab).
 
-handle_msg([Node ,Sensor, Id, Time, "RISING"], Config, Module_config) ->
-	{init, Flag, [{options,Options}, {sender, Sender}, {password, Password}, {to, To}, {subject, Subject}]} = lists:keyfind(init, 1, Module_config),
-	gen_smtpc:send({Sender, Password}, To, Subject, "Motion detected", Options),
-	lager:info("send mail notification"),
-	Config;
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
-	lager:warning("mail_client_driver got the wrong message : ~p", [[Node ,Sensor, Id, Time, Body]]),
+	lager:warning("cron_driver can't handle any message : ~p", [[Node ,Sensor, Id, Time, Body]]),
 	Config.
+
+send_message(Message) ->
+	lager:info("cron_driver will send the following message : ~p", [Message]),
+	Msg = sensor:create_message(node(), ?MODULE, Message) ,
+	sensor:send_message(nodes(), Msg). 
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+start_jobs(Crontab) ->
+	[erlcron:cron(Job) || Job <- Crontab].
 
 %% --------------------------------------------------------------------
 %%% Test functions
