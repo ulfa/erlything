@@ -16,9 +16,13 @@
 
 init(Config) ->
 	lager:info("cron_driver:init('~p')", [Config]),	
-	application:start(erlcron),
 	Crontab = proplists:get_value(crontab, Config, []), 
-	start_jobs(Crontab).
+    case application:start(erlcron) of
+        ok -> start_jobs(Crontab),
+        	  ok;
+        {error, {already_started, erlcron}} ->
+            ok
+    end.
 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
 	lager:warning("cron_driver can't handle any message : ~p", [[Node ,Sensor, Id, Time, Body]]),
