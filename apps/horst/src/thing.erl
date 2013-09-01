@@ -192,7 +192,8 @@ terminate(Reason, State=#state{config = Config}) ->
     Exports =proplists:get_value(exports,Module:module_info(), []),
     case proplists:get_value(stop, Exports) of 
         undefined -> lager:warning("there is no stop function in module : ~p", [Module]);
-        1 -> Module:stop(Config)
+        1 -> Module:stop(Config);
+        Any -> lager:waring("the stop function has too many arguments")
     end.
 
 %% --------------------------------------------------------------------
