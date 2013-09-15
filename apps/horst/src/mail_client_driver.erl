@@ -19,7 +19,11 @@ init(Config) ->
 	application:start(gen_smtpc).
 
 handle_msg([Node ,Sensor, Id, Time, "RISING"], Config, Module_config) ->
-	{init, Flag, [{options,Options}, {sender, Sender}, {password, Password}, {to, To}, {subject, Subject}]} = lists:keyfind(init, 1, Module_config),
+	{options, Options} =proplists:get_value(options, Module_config),
+	{sender, Sender} =proplists:get_value(sender, Module_config),
+	{password, Password} = proplists:get_value(password, Module_config),
+	{to, To} = proplists:get_value(to, Module_config),
+	{subject, Subject} = proplists:get_value(subject, Module_config),
 	gen_smtpc:send({Sender, Password}, To, Subject, "Motion detected", Options),
 	lager:info("send mail notification"),
 	Config;
