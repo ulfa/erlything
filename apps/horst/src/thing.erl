@@ -33,13 +33,17 @@
 -export([start_link/1]).
 -export([start/0]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
--export([get_state/1, get_module_config/1]).
+-export([get_state/1, get_module_config/1, get_start_time/1]).
 -export([stop/1]).
 
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
+get_start_time(Name) when is_list(Name) ->
+    get_start_time(list_to_atom(Name));
+get_start_time(Name) ->
+    gen_server:call(Name, {get_start_time}).
 get_type(Name) when is_list(Name)->
 	get_type(list_to_atom(Name));
 get_type(Name) ->
@@ -72,7 +76,7 @@ stop(Name) ->
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {config, allowed_msgs}).
+-record(state, {config, allowed_msgs, start_time}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -94,7 +98,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init(Config) ->
-    {ok, #state{config=Config, allowed_msgs = []}, 0}.
+    {ok, #state{config=Config, allowed_msgs = [], start_time=0}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -106,6 +110,8 @@ init(Config) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_call({get_start_time}, From, State=#state{start_time = Start_time}) ->
+    {reply, Start_time, State};
 handle_call({get_type}, From, State=#state{config = Config}) ->
     {reply, proplists:get_value(type, Config, unknown) , State};
 handle_call({get_driver}, From, State=#state{config = Config}) ->
@@ -153,7 +159,7 @@ handle_info(timeout, State=#state{config = Config}) ->
     Allowed_msgs = node_config:get_messages_for_module(Module), 
     driver_init(Module, lists:keyfind(init, 1, Module_config)),
 	start_timer(proplists:get_value(timer, Config, 0)),
-    {noreply, State#state{allowed_msgs = Allowed_msgs}};
+    {noreply, State#state{allowed_msgs = Allowed_msgs, start_time=now()}};
 
 handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
     lager:debug("Message=~p ", [[Node ,Sensor, Id, Time, Body]]),

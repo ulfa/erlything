@@ -41,7 +41,7 @@ get_things([], Acc) ->
 	Acc;
 get_things([{Name, Pid, _X, _Y}|Things], Acc) ->
 	{{Driver, _Func}, _Config} = thing:get_driver(Name),
-	get_things(Things, [{Pid, Name, thing:get_description(Name), Driver}|Acc]).
+	get_things(Things, [{Pid, Name, thing:get_start_time(Name), thing:get_description(Name), Driver}|Acc]).
 
 
 
