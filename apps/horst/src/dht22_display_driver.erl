@@ -17,10 +17,18 @@
 %% --------------------------------------------------------------------
 -export([handle_msg/3]).
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, [{temp, "0.0"},{hum, "0.0"}]], Config, Module_config) ->
+	lager:warning("dht22_display_driver got a message with incorrect values: ~p", [[Node ,Sensor, Id, Time, [{temp, "0.0"},{hum, "0.0"}]]]),
+	Config;
+
+handle_msg([Node ,Sensor, Id, Time, [{temp, Temp},{hum, Hum}]], Config, Module_config) ->
 	Data = proplists:get_value(data, Module_config, []),
-	Module_config_1 = lists:keyreplace(data, 1 , Module_config, {data, add(Data, {Time, Body})}),
-	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}).
+	Module_config_1 = lists:keyreplace(data, 1 , Module_config, {data, add(Data, {Time, [{temp, Temp},{hum, Hum}]})}),
+	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1});
+
+handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
+	lager:warning("dht22_display_driver got the wrong message : ~p", [[Node ,Sensor, Id, Time, Body]]),
+	Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
@@ -31,6 +39,7 @@ add(List, Value) ->
         true -> [Value|List];
         false -> [Value|lists:sublist(List, ?MAX_QUEUE_LENGTH)]
     end.    
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
