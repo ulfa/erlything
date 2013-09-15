@@ -11,7 +11,8 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([init/1, handle_msg/3]).
+-export([init/1, stop/1]).
+-export([handle_msg/3]).
 
 init(Config) ->
 	lager:info("mail_client_driver:init('~p')", [Config]),	
@@ -25,6 +26,10 @@ handle_msg([Node ,Sensor, Id, Time, "RISING"], Config, Module_config) ->
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
 	lager:warning("mail_client_driver got the wrong message : ~p", [[Node ,Sensor, Id, Time, Body]]),
 	Config.
+
+stop(Config) ->
+    application:stop(gen_smtpc),
+    application:unload(gen_smtpc).  
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
