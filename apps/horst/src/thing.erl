@@ -156,8 +156,7 @@ handle_cast(Msg, State) ->
 %% --------------------------------------------------------------------
 handle_info(timeout, State=#state{config = Config}) ->
 	{driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    Allowed_msgs = node_config:get_messages_for_module(Module), 
-    %%driver_init(Module, lists:keyfind(init, 1, Module_config)),
+    Allowed_msgs = node_config:get_messages_for_module(Module),     
     driver_init(Module, proplists:get_value(init, Module_config, false), Module_config),
 	start_timer(proplists:get_value(timer, Config, 0)),
     {noreply, State#state{allowed_msgs = Allowed_msgs, start_time=now()}};
