@@ -34,5 +34,6 @@ init([]) ->
     {ok, { {one_for_one, 5, 10}, [
     							  ?CHILD(actor_group, worker),
     							  ?CHILD(node_config, worker),
+    							  ?CHILD(ets_mgr, worker),
     							  ?CHILD(things_sup,supervisor)    							  
     							  ]}}.

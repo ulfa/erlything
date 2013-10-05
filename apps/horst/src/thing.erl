@@ -76,7 +76,7 @@ stop(Name) ->
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {config, allowed_msgs, start_time}).
+-record(state, {config, allowed_msgs, start_time, table_id}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -98,7 +98,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init(Config) ->
-    {ok, #state{config=Config, allowed_msgs = [], start_time=0}, 0}.
+    {ok, #state{config=Config, allowed_msgs = [], start_time=0, table_id=0}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -156,10 +156,11 @@ handle_cast(Msg, State) ->
 %% --------------------------------------------------------------------
 handle_info(timeout, State=#state{config = Config}) ->
 	{driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
+    Table_Id = create_ets(Config, Module_config),
     Allowed_msgs = node_config:get_messages_for_module(Module),     
     driver_init(Module, proplists:get_value(init, Module_config, false), Module_config),
 	start_timer(proplists:get_value(timer, Config, 0)),
-    {noreply, State#state{allowed_msgs = Allowed_msgs, start_time=now()}};
+    {noreply, State#state{allowed_msgs = Allowed_msgs, start_time=now(), table_id=Table_Id}};
 
 handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
     lager:debug("Message=~p ", [[Node ,Sensor, Id, Time, Body]]),
@@ -243,6 +244,9 @@ start_timer(0) ->
 start_timer(Time) ->
     erlang:send_after(Time, self(), {call_sensor}). 
 
+create_ets(Config, Module_config) ->
+    Name = proplists:get_value(name, Config),
+    ets_mgr:init_table(list_to_atom(Name), Module_config).  
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
