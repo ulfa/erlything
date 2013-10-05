@@ -21,19 +21,30 @@
 %% --------------------------------------------------------------------
 init(Config) ->
 	lager:info("window_door_driver:init('~p')", [Config]),	
-	gpio:set_interrupt(proplists:get_value(pin, Config) , proplists:get_value(int_type, Config)).
+	Pin = proplists:get_value(pin, Config),
+	gpio:init(Pin), 
+	gpio:set_interrupt(Pin, proplists:get_value(int_type, Config)).
 
-handle_msg({gpio_interrupt, 0, Pin, Status}, Config, Modul_config) ->
-	lager:info("Pin : ~p with Status : ~p ", [Pin, Status]),
-	Msg = create_message(Status, sensor:get_id(Config)),
-	sensor:send_message(Msg),
-	lager:info("send message : ~p", [Msg]),
-	Module_config_1 = lists:keyreplace(last_changed, 1, Modul_config, {last_changed, date:get_date_seconds()}),
+handle_msg({gpio_interrupt, Reg, Pin, Status}, Config, Module_config) ->
+	Time_1 = os:timestamp(),
+%%	Value = proplists:get_value(value, Module_config, []),
+	Time = proplists:get_value(time, Module_config, []),
+	lager:info("Pin : ~p with Status : ~p and time : ~p ", [Pin, Status, timer:now_diff(Time_1, Time)]),
+%%	Msg = create_message(Status, sensor:get_id(Config)),
+%%	sensor:send_message(Msg),
+%%	lager:info("send message : ~p", [Msg]),
+%%	Module_config_1 = lists:keyreplace(value, 1, Module_config, {value,add(Value, Status)}),
+%%	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}).
+
+	Module_config_1 = lists:keyreplace(value, 1, Module_config, {time, Time_1}),
 	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}).
 
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+add(Value, Status)  ->
+	[Status|Value].
+
 create_message(Status, Id) ->
 	sensor:create_message(node(), ?MODULE, Id, date:get_date_seconds(), Status).
 %% --------------------------------------------------------------------
@@ -41,4 +52,6 @@ create_message(Status, Id) ->
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
+add_value_test() ->
+	?assertEqual([1,2], add([2], 1)).
 -endif.
