@@ -33,13 +33,19 @@
 -export([start_link/1]).
 -export([start/0]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
--export([get_state/1, get_module_config/1, get_start_time/1]).
+-export([get_state/1, get_module_config/1, get_start_time/1, get_name/1]).
 -export([stop/1]).
+-export([die/0]).
 
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
+die() ->
+    gen_server:cast('Message_Logger', die).
+
+get_name(Pid) when is_pid(Pid) ->
+    gen_server:call(Pid, {get_name}).
 get_start_time(Name) when is_list(Name) ->
     get_start_time(list_to_atom(Name));
 get_start_time(Name) ->
@@ -110,6 +116,8 @@ init(Config) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_call({get_name}, From, State=#state{config = Config}) ->
+    {reply, proplists:get_value(name, Config) , State};
 handle_call({get_start_time}, From, State=#state{start_time = Start_time}) ->
     {reply, Start_time, State};
 handle_call({get_type}, From, State=#state{config = Config}) ->
@@ -142,7 +150,13 @@ handle_call(Request, From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_cast({stop}, State) ->
+handle_cast(die, State) ->
+    exit(self(),killed),
+    {noreply, State};
+
+handle_cast({stop}, State=#state{config = Config}) ->
+    Name = proplists:get_value(name, Config), 
+    lager:info("stopping thing : ~p ", [Name]),
      {stop, normal, State}; 
 handle_cast(Msg, State) ->
     {noreply, State}.
@@ -157,6 +171,7 @@ handle_cast(Msg, State) ->
 handle_info(timeout, State=#state{config = Config}) ->
 	{driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
     Table_Id = create_ets(Config, Module_config),
+    lager:info("owned from ets manager the table : ~p", [Table_Id]),
     Allowed_msgs = node_config:get_messages_for_module(Module),     
     driver_init(Module, proplists:get_value(init, Module_config, false), Module_config),
 	start_timer(proplists:get_value(timer, Config, 0)),
@@ -185,6 +200,10 @@ handle_info({update_config, ?MESSAGES_CONFIG},  State=#state{config = Config, al
     lager:info("update messages.config for thing : ~p", [Module]),
     {noreply, State#state{allowed_msgs = Allowed_msgs_1}};
 
+handle_info({'ETS-TRANSFER', TableId, Pid, _Data}, State) ->
+    lager:info("ETS Manager (~p) -> Thing (~p) getting TableId: ~p~n", [Pid, self(), TableId]),
+    {noreply, State#state{table_id=TableId}};
+
 handle_info(Info, State) ->
     {noreply, State}.
 
@@ -193,16 +212,18 @@ handle_info(Info, State) ->
 %% Description: Shutdown the server
 %% Returns: any (ignored by gen_server)
 %% --------------------------------------------------------------------
-terminate(Reason, State=#state{config = Config}) ->
+   terminate(Reason, State=#state{config = Config}) ->
+    lager:info("Reason : ~p",[Reason]),
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config), 
     lager:info("stopping thing of type : ~p", [Module]),
-    Exports =proplists:get_value(exports,Module:module_info(), []),
+    Exports = proplists:get_value(exports, Module:module_info(), []),
     case proplists:get_value(stop, Exports) of 
         undefined -> lager:warning("there is no stop function in module : ~p", [Module]);
         1 -> Module:stop(Config);
         Any -> lager:waring("the stop function has too many arguments")
-    end.
-
+    end,
+    ok.
+    
 %% --------------------------------------------------------------------
 %% Func: code_change/3
 %% Purpose: Convert process state when code is changed
@@ -246,7 +267,8 @@ start_timer(Time) ->
 
 create_ets(Config, Module_config) ->
     Name = proplists:get_value(name, Config),
-    ets_mgr:init_table(list_to_atom(Name), Module_config).  
+    Id = sensor:get_id(Config),
+    ets_mgr:init_table(self(), list_to_atom(Name ++ "_" ++ Id), Module_config).  
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

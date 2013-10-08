@@ -31,7 +31,7 @@ start_link() ->
 
 init([]) ->
 	{_Node, Config} = node_config:get_things_config(),
-    {ok, {{one_for_one, 1, 10000}, config_handler:create_thing_spec(Config)}}.
+    {ok, {{one_for_one, 5, 10}, config_handler:create_thing_spec(Config)}}.
 
 get_sensors() ->
 	[{Name, Pid, Type, Modules} || {Name, Pid, Type, Modules} <- supervisor:which_children(things_sup), is_sensor(thing:get_type(Name))].
@@ -89,8 +89,9 @@ start_if_not_running(Config, Things) ->
 kill_if_running(Thing, Things) ->
 	case is_thing_running(Thing, Things) of 
 		false -> ok;
-		true -> thing:stop(Thing),
-				%%Result = supervisor:terminate_child(?MODULE, list_to_atom(Thing)),
+		true -> %%thing:stop(Thing),
+				Result = supervisor:terminate_child(?MODULE, list_to_atom(Thing)),
+				supervisor:delete_child(?MODULE, list_to_atom(Thing)),
 				lager:info("terminated thing with result : ~p", [Thing]),
 				ok
 	end. 
@@ -107,8 +108,10 @@ is_thing_running(Thing, Things) when is_atom(Thing) ->
 -ifdef(TEST).
 
 is_thing_running_test() ->
-	Things = [{'Temperatur_Anzeige',"<0.104.0>",worker,[thing]},{'Temperatur_Sensor',"<0.105.0>",worker,[thing]}],
+	Things = [{'Temperatur_Anzeige',"<0.104.0>",worker,[thing]},{'Temperatur_Sensor',"<0.105.0>",worker,[thing]}, {'Message_Logger',undefined ,worker,[thing]}],
 	?assertEqual(true, is_thing_running('Temperatur_Sensor', Things)),
-	?assertEqual(false, is_thing_running('unknown_Sensor', Things)).
+	?assertEqual(false, is_thing_running('unknown_Sensor', Things)),
+	?assertEqual(false, is_thing_running('Message_Logger', Things)).
+
 
 -endif.
