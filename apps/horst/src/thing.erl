@@ -136,8 +136,12 @@ handle_call({get_description}, From, State=#state{config = Config}) ->
 handle_call({get_state}, From, State) ->
     {reply, State, State};
 handle_call({get_module_config}, From, State=#state{config = Config}) ->
-    Table_Id = proplists:get_value(table_id, Config),
-    {reply, ets:tab2list(Table_Id) , State};
+    case proplists:get_value(ets, Config, false) of 
+        true -> Table_Id = proplists:get_value(table_id, Config),
+                {reply, ets:tab2list(Table_Id) , State};
+        false -> {driver, {_Module, _Func}, Module_config} = lists:keyfind(driver, 1, Config),
+                 {reply, Module_config, State}
+    end;       
 
 handle_call(Request, From, State) ->
     Reply = ok,
@@ -171,8 +175,6 @@ handle_cast(Msg, State) ->
 handle_info(timeout, State=#state{config = Config}) ->
 	{driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
 
-    %%Table_Id = create_ets(Config, Module_config),
-    %%Config_1 = [{table_id, Table_Id}|Config],
     Config_1 = ets_usage(proplists:get_value(ets, Config, false), Config, Module_config),
     Allowed_msgs = node_config:get_messages_for_module(Module),     
     driver_init(Module, proplists:get_value(init, Module_config, false), Module_config),
