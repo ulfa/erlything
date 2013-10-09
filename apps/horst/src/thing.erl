@@ -82,7 +82,7 @@ stop(Name) ->
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {config, allowed_msgs, start_time, table_id}).
+-record(state, {config, allowed_msgs, start_time}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -104,7 +104,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init(Config) ->
-    {ok, #state{config=Config, allowed_msgs = [], start_time=0, table_id=0}, 0}.
+    {ok, #state{config=Config, allowed_msgs = [], start_time=0}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -136,8 +136,8 @@ handle_call({get_description}, From, State=#state{config = Config}) ->
 handle_call({get_state}, From, State) ->
     {reply, State, State};
 handle_call({get_module_config}, From, State=#state{config = Config}) ->
-    {driver, {_Module, _Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    {reply, Module_config, State};
+    Table_Id = proplists:get_value(table_id, Config),
+    {reply, ets:tab2list(Table_Id) , State};
 
 handle_call(Request, From, State) ->
     Reply = ok,
@@ -170,12 +170,14 @@ handle_cast(Msg, State) ->
 %% --------------------------------------------------------------------
 handle_info(timeout, State=#state{config = Config}) ->
 	{driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    Table_Id = create_ets(Config, Module_config),
-    lager:info("owned from ets manager the table : ~p", [Table_Id]),
+
+    %%Table_Id = create_ets(Config, Module_config),
+    %%Config_1 = [{table_id, Table_Id}|Config],
+    Config_1 = ets_usage(proplists:get_value(ets, Config, false), Config, Module_config),
     Allowed_msgs = node_config:get_messages_for_module(Module),     
     driver_init(Module, proplists:get_value(init, Module_config, false), Module_config),
 	start_timer(proplists:get_value(timer, Config, 0)),
-    {noreply, State#state{allowed_msgs = Allowed_msgs, start_time=now(), table_id=Table_Id}};
+    {noreply, State#state{allowed_msgs = Allowed_msgs, start_time=now(), config = Config_1}};
 
 handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
     lager:debug("Message=~p ", [[Node ,Sensor, Id, Time, Body]]),
@@ -200,9 +202,13 @@ handle_info({update_config, ?MESSAGES_CONFIG},  State=#state{config = Config, al
     lager:info("update messages.config for thing : ~p", [Module]),
     {noreply, State#state{allowed_msgs = Allowed_msgs_1}};
 
-handle_info({'ETS-TRANSFER', TableId, Pid, _Data}, State) ->
+handle_info({'ETS-TRANSFER', TableId, Pid, _Data}, State=#state{config = Config}) ->
     lager:info("ETS Manager (~p) -> Thing (~p) getting TableId: ~p~n", [Pid, self(), TableId]),
-    {noreply, State#state{table_id=TableId}};
+    Config_1 = case lists:keysearch(table_id, 1, Config) of 
+        false -> [{table_id, TableId}| Config];
+        {value, Table} -> lists:keyreplace(table_id, 1, Config, {table_id, TableId})  
+    end,
+    {noreply, State#state{config = Config_1}};
 
 handle_info(Info, State) ->
     {noreply, State}.
@@ -265,6 +271,13 @@ start_timer(0) ->
 start_timer(Time) ->
     erlang:send_after(Time, self(), {call_sensor}). 
 
+ets_usage(true, Config, Module_config) ->
+    Table_Id = create_ets(Config, Module_config),
+    lager:info("owned from ets manager the table : ~p", [Table_Id]),
+    [{table_id, Table_Id}|Config];
+ets_usage(false, Config, _Module_config) ->
+    Config.
+    
 create_ets(Config, Module_config) ->
     Name = proplists:get_value(name, Config),
     Id = sensor:get_id(Config),

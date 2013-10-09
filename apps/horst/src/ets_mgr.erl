@@ -82,7 +82,7 @@ handle_call({init_table, Pid, Name, Data}, From, State) ->
 	Table_Name = case ets:info(Name) of 
 		undefined ->
 			lager:info("create new table ~p", [Name]),
-		    TableId = ets:new(Name, [private, named_table]),
+		    TableId = ets:new(Name, [public, named_table]),
     		ets:insert(TableId, Data),
     		ets:setopts(TableId, {heir, self(), Data}),
     		ets:give_away(TableId, Pid, Data),
