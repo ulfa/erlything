@@ -11,15 +11,19 @@
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
+-include("../include/horst.hrl").
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
 -export([handle_msg/3]).
 
 handle_msg([Node ,Sensor, _Id, Time, {Switch, Number, Status}], Config, Module_config) ->
-	call_driver(Number, Status),	
-	Module_config_1 = lists:keyreplace(Switch, 1 , Module_config, {Switch, Number, Status}),
-	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1});
+	call_driver(Number, Status),
+	Table_Id = proplists:get_value(?TABLE, Config),
+	Data = ets:tab2list(Table_Id), 	
+	Data1 = lists:keyreplace(Switch, 1 , Data, {Switch, Number, Status}),
+	ets:insert(Table_Id, Data1),
+	Config;
 
 handle_msg([Node ,Sensor, _Id, Time, Body], Config, Module_config) ->
 	lager:warning("transmitter_433_driver got the wrong message : ~p", [[Node ,Sensor, _Id, Time, Body]]),

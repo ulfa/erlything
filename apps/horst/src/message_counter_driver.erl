@@ -11,6 +11,7 @@
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
+-include("../include/horst.hrl").
 -define(MAX_QUEUE_LENGTH, 20).
 %% --------------------------------------------------------------------
 %% External exports
@@ -18,12 +19,12 @@
 -export([handle_msg/3]).
 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
-	Data = proplists:get_value(data, Module_config, []),
-	Counter = proplists:get_value(counter, Module_config, 0),
-	Module_config_1 = lists:keyreplace(data, 1 , Module_config, {data, add(Data, {date:timestamp_to_date(Time), 
-		[binary_to_list(Node) ,binary_to_list(Sensor), binary_to_list(Id), date:timestamp_to_date(Time), Body]})}),
-	Module_config_2 = lists:keyreplace(counter, 1 , Module_config_1, {counter, Counter + 1}),
-	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_2}).
+	Table_Id = proplists:get_value(?TABLE, Config),
+	ets:update_counter(Table_Id, counter, 1),
+	[{data, Data}] = ets:lookup(Table_Id, data),
+	ets:insert(Table_Id, [{data, add(Data, {date:timestamp_to_date(Time), [binary_to_list(Node),
+		binary_to_list(Sensor), binary_to_list(Id), date:timestamp_to_date(Time), Body]})}]), 
+	Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
