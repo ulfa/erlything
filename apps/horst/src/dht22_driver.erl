@@ -14,9 +14,9 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([call_sensor/1]).
+-export([call_sensor/2]).
 
-call_sensor(Config) when is_list(Config)->
+call_sensor(Config, Module_config) ->
     Value = call_driver(),
     Msg = sensor:create_message(node(), ?MODULE, sensor:get_id(Config), date:get_date_seconds(), parse_message_from_dht22(Value)),
     lager:debug("got the temp and the humidity from the DHT22 ~p",[Msg]),

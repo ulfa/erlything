@@ -174,7 +174,6 @@ handle_cast(Msg, State) ->
 %% --------------------------------------------------------------------
 handle_info(timeout, State=#state{config = Config}) ->
 	{driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-
     Config_1 = ets_usage(proplists:get_value(ets, Config, false), Config, Module_config),
     Allowed_msgs = node_config:get_messages_for_module(Module),     
     driver_init(Module, proplists:get_value(init, Module_config, false), Module_config),
@@ -188,7 +187,7 @@ handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_
 
 handle_info({call_sensor}, State=#state{config = Config}) ->
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    Config_1 = Module:Func(Config),
+    Config_1 = Module:Func(Config, Module_config),
     start_timer(proplists:get_value(timer, Config, 0)),
     {noreply, State#state{config = Config_1}};
 
@@ -272,7 +271,7 @@ start_timer(0) ->
 	lager:info("timer for thing  is set to 0");
 start_timer(Time) ->
     erlang:send_after(Time, self(), {call_sensor}). 
-
+    
 ets_usage(true, Config, Module_config) ->
     Table_Id = create_ets(Config, Module_config),
     lager:info("owned from ets manager the table : ~p", [Table_Id]),

@@ -11,20 +11,23 @@
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
+-include("../include/horst.hrl").
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([init/1, call_sensor/1]).
+-export([init/1, call_sensor/2]).
 
 init(Config) ->
     lager:info("ds18b20_driver:init('~p')", [Config]),  
     os:cmd("modprobe w1-gpio"),
     os:cmd("modprobe w1-therm").
 
-call_sensor(Config) ->
+call_sensor(Config, Module_config) ->
     Temp_line = call_driver(),
-    Msg = sensor:create_message(node(), ?MODULE, sensor:get_id(Config), parse_message(Temp_line)),
+    Value = parse_message(Temp_line),
+    Msg = sensor:create_message(node(), ?MODULE, sensor:get_id(Config), Value),
     sensor:send_message(Msg),
+    save_data(Config, Value),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
@@ -44,7 +47,11 @@ parse_message(Msg) ->
        nomatch -> {temp, 0.0};
        {match,[{C1,C2},{C3,C4}]} -> {temp, erlang:list_to_integer(string:substr(Msg, C3 + 1, C4))/1000}
     end.
-    
+
+save_data(Config, Value) ->
+  Table_Id = proplists:get_value(?TABLE, Config),
+  ets:insert(Table_Id, [{data, Value}]).
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
