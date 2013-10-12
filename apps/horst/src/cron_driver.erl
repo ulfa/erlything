@@ -23,8 +23,11 @@ init(Config) ->
         {error, {already_started, erlcron}} ->
             ok
     end.
+    
 stop(Config) ->
 	lager:info("stopping Module : ~p ", [?MODULE]),
+	Crontab = proplists:get_value(crontab, Config, []), 
+	stop_jobs(Crontab),
 	application:stop(erlcron).
 	 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
@@ -40,6 +43,10 @@ send_message(Message) ->
 %% --------------------------------------------------------------------
 start_jobs(Crontab) ->
 	[erlcron:cron(Job) || Job <- Crontab].
+
+stop_jobs(Crontab) ->
+	[erlcron:cancel(Job) || Job <- Crontab].
+
 
 %% --------------------------------------------------------------------
 %%% Test functions

@@ -11,6 +11,7 @@
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
+-include("../include/horst.hrl").
 -define(MAX_QUEUE_LENGTH, 19).
 %% --------------------------------------------------------------------
 %% External exports
@@ -22,9 +23,10 @@ handle_msg([Node ,Sensor, Id, Time, [{temp, 0.0},{hum, 0.0}]], Config, Module_co
 	Config;
 
 handle_msg([Node ,Sensor, Id, Time, [{temp, Temp},{hum, Hum}]], Config, Module_config) ->
-	Data = proplists:get_value(data, Module_config, []),
-	Module_config_1 = lists:keyreplace(data, 1 , Module_config, {data, add(Data, {Time, [{temp, Temp},{hum, Hum}]})}),
-	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1});
+	Table_Id = proplists:get_value(?TABLE, Config),
+	[{data, Data}] = ets:lookup(Table_Id, data),	
+	ets:insert(Table_Id, [{data, add(Data, {Time, [{temp, Temp},{hum, Hum}]})}]),
+	Config;
 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
 	lager:warning("dht22_display_driver got the wrong message : ~p", [[Node ,Sensor, Id, Time, Body]]),
