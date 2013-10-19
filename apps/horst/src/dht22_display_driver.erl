@@ -19,7 +19,7 @@
 -export([handle_msg/3]).
 
 handle_msg([Node ,Sensor, Id, Time, [{temp, 0.0},{hum, 0.0}]], Config, Module_config) ->
-	lager:warning("dht22_display_driver got a message with incorrect values: ~p", [[Node ,Sensor, Id, Time, [{temp, "0.0"},{hum, "0.0"}]]]),
+	lager:warning("dht22_display_driver got a message with incorrect values: ~p", [[Node ,Sensor, Id, Time, [{temp, 0.0},{hum, 0.0}]]]),
 	Config;
 
 handle_msg([Node ,Sensor, Id, Time, [{temp, Temp},{hum, Hum}]], Config, Module_config) ->
