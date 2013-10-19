@@ -34,6 +34,7 @@
 -export([start/0]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
 -export([get_state/1, get_module_config/1, get_start_time/1, get_name/1]).
+-export([save_data_to_ets/2]).
 -export([stop/1]).
 -export([die/0]).
 
@@ -147,6 +148,14 @@ handle_call(Request, From, State) ->
     Reply = ok,
     {reply, Reply, State}.
 
+%% --------------------------------------------------------------------
+%% Function: save_data_to_ets/2
+%% Description: Saves data to the ets of the thing
+%% Returns: true
+%% --------------------------------------------------------------------
+save_data_to_ets(Config, Value) ->
+  Table_Id = proplists:get_value(?TABLE, Config),
+  ets:insert(Table_Id, [{data, Value}]).
 %% --------------------------------------------------------------------
 %% Function: handle_cast/2
 %% Description: Handling cast messages

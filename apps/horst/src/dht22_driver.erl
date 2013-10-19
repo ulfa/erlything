@@ -11,6 +11,7 @@
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
+-include("../include/horst.hrl").
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
@@ -18,9 +19,11 @@
 
 call_sensor(Config, Module_config) ->
     Value = call_driver(),
-    Msg = sensor:create_message(node(), ?MODULE, sensor:get_id(Config), date:get_date_seconds(), parse_message_from_dht22(Value)),
+    Value_1 = parse_message_from_dht22(Value),
+    Msg = sensor:create_message(node(), ?MODULE, sensor:get_id(Config), date:get_date_seconds(), Value_1),
     lager:debug("got the temp and the humidity from the DHT22 ~p",[Msg]),
     sensor:send_message(nodes(), Msg),
+    thing:save_data_to_ets(Config, Value_1),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
@@ -40,6 +43,7 @@ parse_message_from_dht22(Msg) ->
        {match,[{C11,C22},{C33,C44}]} -> {hum, string:substr(Msg, C33 + 1, C44)}
     end,
     [Temp, Hum].
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

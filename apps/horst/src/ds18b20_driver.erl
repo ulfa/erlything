@@ -27,7 +27,7 @@ call_sensor(Config, Module_config) ->
     Value = parse_message(Temp_line),
     Msg = sensor:create_message(node(), ?MODULE, sensor:get_id(Config), Value),
     sensor:send_message(Msg),
-    save_data(Config, Value),
+    thing:save_data_to_ets(Config, Value),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
@@ -47,11 +47,6 @@ parse_message(Msg) ->
        nomatch -> {temp, 0.0};
        {match,[{C1,C2},{C3,C4}]} -> {temp, erlang:list_to_integer(string:substr(Msg, C3 + 1, C4))/1000}
     end.
-
-save_data(Config, Value) ->
-  Table_Id = proplists:get_value(?TABLE, Config),
-  ets:insert(Table_Id, [{data, Value}]).
-
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
