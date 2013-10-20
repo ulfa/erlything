@@ -72,8 +72,6 @@ get_description(Name) ->
 	gen_server:call(Name, {get_description}).
 get_state(Name) ->
     gen_server:call(list_to_atom(Name), {get_state}).
-set_state(Name, State) ->
-    gen_server:call(list_to_atom(Name), {set_state, State}).
 get_module_config(Name) when is_list(Name) ->
     get_module_config(list_to_atom(Name));
 get_module_config(Name) ->
@@ -139,8 +137,6 @@ handle_call({get_description}, From, State=#state{config = Config}) ->
     {reply, proplists:get_value(description, Config) , State};
 handle_call({get_state}, From, State) ->
     {reply, State, State};
-handle_call({set_state, New_State}, From, State) ->
-    {reply, State, New_State};
 handle_call({get_module_config}, From, State=#state{config = Config}) ->
     case proplists:get_value(ets, Config, false) of 
         true -> Table_Id = proplists:get_value(table_id, Config),
