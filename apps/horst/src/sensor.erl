@@ -38,6 +38,7 @@ send_message(Nodes, Message) ->
 send_message(Nodes, Target, Message) ->
 	rpc:abcast([node()|Nodes], Target, Message).    
 
+%% ToDo I have to move this into the config_handler!
 get_id([]) ->
 	"default";
 get_id(Config) when is_list(Config) ->

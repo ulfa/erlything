@@ -27,14 +27,22 @@
 %% ====================================================================
 -export([get_messages_config/0, get_things_config/0]).
 -export([set_messages_config/2, set_things_config/2]).
--export([get_messages_for_module/1]).
+-export([get_messages_for_module/2]).
+-export([set_active/2]).
 
+set_active(Thing, true) ->
+    gen_server:call(?MODULE, {set_active, Thing, true});
+set_active(Thing, false) ->
+    gen_server:call(?MODULE, {set_active, Thing, false});
+set_active(Thing, Status) ->
+    lager:error("Activ : ~p is not a valid value!", [Status]),
+    {false, wrong_value}.
 get_messages_config() ->
 	gen_server:call(?MODULE, {get_messages_config}).
 get_things_config() ->
 	gen_server:call(?MODULE, {get_things_config}).
-get_messages_for_module(Module) ->
-	gen_server:call(?MODULE, {get_messages_for_module, Module}).
+get_messages_for_module(Module, Id) ->
+	gen_server:call(?MODULE, {get_messages_for_module, Module, Id}).
 set_messages_config(Key, Value) ->
 	gen_server:call(?MODULE, {set_messages_config, Key, Value}).
 set_things_config(Key, Value) ->
@@ -77,14 +85,18 @@ init([]) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_call({set_active, Thing, Status}, From, State=#state{things = Thing_Config}) -> 
+    Thing_Config_1 = config_handler:set_active(Thing_Config, Thing, Status),
+    {reply, ok, State#state{things = Thing_Config_1}};
+
 handle_call({get_messages_config}, From, State=#state{messages=Messages}) -> 
     {reply, {node(), Messages}, State};
 
 handle_call({get_things_config}, From, State=#state{things=Things}) ->
     {reply, {node(), Things}, State};
 
-handle_call({get_messages_for_module, Module}, From, State=#state{messages=Messages}) ->
-	Config = config_handler:get_messages_for_module(Messages, Module), 
+handle_call({get_messages_for_module, Module, Id}, From, State=#state{messages=Messages}) ->
+	Config = config_handler:get_messages_for_module(Messages, Module, Id), 
     {reply, Config, State};
 
 handle_call({set_messages_config, Key, Value}, From, State) ->

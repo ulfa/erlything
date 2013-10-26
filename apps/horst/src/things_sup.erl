@@ -71,8 +71,8 @@ is_valid_pid(Pid) when is_pid(Pid) ->
 
 update_list_of_things(Config) ->
 	lager:info("update the list of sensors and actors, because the things.config changed"),
-	[start_if_not_running([{thing, Name, List}], supervisor:which_children(things_sup)) || {thing, Name, List} <- Config, config_handler:is_activ(List)],
-	[kill_if_running(Name, supervisor:which_children(things_sup)) || {thing, Name, List} <- Config, false =:= config_handler:is_activ(List)].
+	[start_if_not_running([{thing, Name, List}], supervisor:which_children(things_sup)) || {thing, Name, List} <- Config, config_handler:is_active(List)],
+	[kill_if_running(Name, supervisor:which_children(things_sup)) || {thing, Name, List} <- Config, false =:= config_handler:is_active(List)].
 
 start_if_not_running([], Things) ->
 	ok;
