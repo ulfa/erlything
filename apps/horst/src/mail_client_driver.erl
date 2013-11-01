@@ -18,18 +18,32 @@ init(Config) ->
 	lager:info("mail_client_driver:init('~p')", [Config]),	
 	application:start(gen_smtpc).
 
-handle_msg([Node ,Sensor, Id, Time, "RISING"], Config, Module_config) ->
-	{options, Options} =proplists:get_value(options, Module_config),
-	{sender, Sender} =proplists:get_value(sender, Module_config),
-	{password, Password} = proplists:get_value(password, Module_config),
-	{to, To} = proplists:get_value(to, Module_config),
-	{subject, Subject} = proplists:get_value(subject, Module_config),
-	gen_smtpc:send({Sender, Password}, To, Subject, "Motion detected", Options),
-	lager:info("send mail notification"),
+
+handle_msg([Node ,Sensor, Id, Time, [{to, To}, {subject, Subject}, {content, Content}]], Config, Module_config) ->
+	Options = proplists:get_value(options, Module_config),
+	Sender = proplists:get_value(sender, Module_config),
+	Password = proplists:get_value(password, Module_config),
+	send_email(Sender, Password, To, Subject, "Motion detected", Options),
 	Config;
+
+handle_msg([Node ,Sensor, Id, Time, "RISING"], Config, Module_config) ->
+	Options = proplists:get_value(options, Module_config),
+	Sender  = proplists:get_value(sender, Module_config),
+	Password  = proplists:get_value(password, Module_config),
+	To = proplists:get_value(to, Module_config),
+	Subject = proplists:get_value(subject, Module_config),
+	send_email(Sender, Password, To, Subject, "Motion detected", Options),
+	Config;
+
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
 	lager:warning("mail_client_driver got the wrong message : ~p", [[Node ,Sensor, Id, Time, Body]]),
 	Config.
+
+send_email(Sender, Password, To, Subject, Content, Options) ->
+	lager:debug("Sender : ~p Password : ~p To : ~p Subject : ~p Content : ~p Options : ~p", [Sender, Password, To, Subject, Content, Options]),
+	gen_smtpc:send({Sender, Password}, To, Subject, Content, Options),
+	lager:info("sending email").
+
 
 stop(Config) ->
     application:stop(gen_smtpc),
