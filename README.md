@@ -74,6 +74,7 @@ This configuration file contains the things, which you want to use in your env.
 Type        | Value                       |Description
 ------------|-----------------------------|--------------------------------------------------------------
 thing       | Name of the thing           | must be unique in a node
+ets	      | true/false | should we use an ets or the thing state (for more see the documentation)
 type        | sensor / actor              | type of thing (actor or sensor)
 driver      | {Module, Function}, []      | the list contains driver specific paramter
 activ       | true / false                | the thing will only be started if activ = true
@@ -93,7 +94,7 @@ The driver dht22_display_driver which is implemented in module dht22_display_dri
 able to understand messages from node : horst@raspberrypi and generarted by module  dht22_driver.
 The "0" stands for an unique id which is not implemented yet.
 
-### Things which are implemented (in an very early version)
+### Things which are implemented (in a very early version)
 
 The following things (driver) are an example of how to implement a thing.
 These things are used in my internal project and they work for me.
