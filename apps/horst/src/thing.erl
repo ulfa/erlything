@@ -34,7 +34,7 @@
 -export([start/0]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
 -export([get_state/1, get_module_config/1, get_start_time/1, get_name/1]).
--export([save_data_to_ets/2]).
+-export([save_data_to_ets/2, get_table_id/1]).
 -export([stop/1]).
 -export([die/0]).
 
@@ -106,6 +106,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init(Config) ->
+    process_flag(trap_exit, true),
     {ok, #state{config=Config, allowed_msgs = [], start_time=0}, 0}.
 
 %% --------------------------------------------------------------------
@@ -157,6 +158,9 @@ handle_call(Request, From, State) ->
 save_data_to_ets(Config, Value) ->
   Table_Id = proplists:get_value(?TABLE, Config),
   ets:insert(Table_Id, [{data, Value}]).
+
+get_table_id(Config) ->
+    proplists:get_value(?TABLE, Config).
 %% --------------------------------------------------------------------
 %% Function: handle_cast/2
 %% Description: Handling cast messages
