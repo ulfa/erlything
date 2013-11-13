@@ -35,5 +35,6 @@ init([]) ->
     							  ?CHILD(actor_group, worker),
     							  ?CHILD(node_config, worker),
     							  ?CHILD(ets_mgr, worker),
-    							  ?CHILD(things_sup,supervisor)    							  
+    							  ?CHILD(things_sup,supervisor),
+                                  ?CHILD(file_provider_sup,supervisor)    							  
     							  ]}}.

@@ -33,19 +33,14 @@
 -export([start_link/1]).
 -export([start/0]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
--export([get_state/1, get_module_config/1, get_start_time/1, get_name/1]).
+-export([get_state/1, get_module_config/1, get_start_time/1, get_name/1, get_icon/1]).
 -export([save_data_to_ets/2, get_table_id/1]).
 -export([stop/1]).
--export([die/0]).
-
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
 %% only to demonstration for the ets stuff
-die() ->
-    gen_server:cast('Message_Logger', die).
-
 get_name(Pid) when is_pid(Pid) ->
     gen_server:call(Pid, {get_name}).
 get_start_time(Name) when is_list(Name) ->
@@ -56,6 +51,10 @@ get_type(Name) when is_list(Name)->
 	get_type(list_to_atom(Name));
 get_type(Name) ->
     gen_server:call(Name, {get_type}).
+get_icon(Name) when is_list(Name)->
+    get_icon(list_to_atom(Name));
+get_icon(Name) ->
+    gen_server:call(Name, {get_icon}).
 get_driver(Name) when is_list(Name)->
     get_driver(list_to_atom(Name));    
 get_driver(Name) ->
@@ -128,6 +127,8 @@ handle_call({get_type}, From, State=#state{config = Config}) ->
 handle_call({get_driver}, From, State=#state{config = Config}) ->
 	{driver, Module, Module_config} = lists:keyfind(driver, 1, Config),
     {reply, {Module, Module_config} , State};
+handle_call({get_icon}, From, State=#state{config = Config}) ->
+    {reply, proplists:get_value(icon, Config, "thing.png") , State};
 handle_call({is_activ}, From, State=#state{config = Config}) ->
     {reply, proplists:get_value(activ, Config) , State};
 handle_call({get_timer}, From, State=#state{config = Config}) ->

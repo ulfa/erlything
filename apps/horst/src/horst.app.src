@@ -8,5 +8,5 @@
                   stdlib
                  ]},
   {mod, { horst_app, []}},
-  {env, []}
+  {env, [{port, 8888}]}
  ]}.
