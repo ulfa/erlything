@@ -75,6 +75,7 @@ Type        | Value                       |Description
 ------------|-----------------------------|--------------------------------------------------------------
 thing       | Name of the thing           | must be unique in a node
 ets	      | true/false | should we use an ets or the thing state (for more see the documentation)
+icon        | "/images/" and the name of the image.| The image must be placed in the apps/horst/priv/images/.  
 type        | sensor / actor              | type of thing (actor or sensor)
 driver      | {Module, Function}, []      | the list contains driver specific paramter
 activ       | true / false                | the thing will only be started if activ = true
