@@ -212,6 +212,12 @@ handle_info({gpio_interrupt, 0, Pin, Status}, State=#state{config = Config}) ->
     Config_1 = Module:Func({gpio_interrupt, 0, Pin, Status}, Config, Module_config),
     {noreply, State#state{config = Config_1}};
 
+handle_info({external_event, Application,  Body}, State=#state{config = Config}) ->   
+    lager:info("external_event from Application : ~p with Body : ~p",[Application, Body]),
+    {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
+    Config_1 = Module:Func({external_event, Application,  Body}, Config, Module_config),
+    {noreply, State#state{config = Config_1}};
+
 handle_info({update_config, ?MESSAGES_CONFIG},  State=#state{config = Config, allowed_msgs = Allowed_msgs}) ->
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config), 
     Allowed_msgs_1 = node_config:get_messages_for_module(Module, config_handler:get_id(Config)),    
