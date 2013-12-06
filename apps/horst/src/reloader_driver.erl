@@ -19,14 +19,16 @@
 -export([init/1, stop/1]).
 
 init(Config) ->
+    lager:info("~p:init('~p')", [?MODULE, Config]),
     application:start(reloader).
 
 stop(Config) ->
+    lager:info("~p:stop('~p')", [?MODULE, Config]),
     application:stop(reloader),
     application:unload(reloader).  
 
 call_sensor(Config, Module_config) ->   
-    Changed_Modules = code_reloader:reload(),
+    Changed_Modules = re_reloader:reload(),
     send_message(Config, Changed_Modules),
     Config.
 

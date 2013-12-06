@@ -284,8 +284,10 @@ handle_msg([Node ,Sensor, Id, Time, Body], Config, false) ->
     Config.
 
 driver_init(Module, false, Config) ->
-    lager:debug("don't init driver : ~p", [Module]);
+    lager:debug("don't init driver : ~p", [Module]),
+    check_init(Module);
 driver_init(Module, true, Config) ->
+    lager:debug("call init for driver : ~p", [Module]),
     Module:init(Config).
 
 start_timer(0) ->
@@ -304,9 +306,16 @@ create_ets(Config, Module_config) ->
     Name = proplists:get_value(name, Config),
     Id = sensor:get_id(Config),
     ets_mgr:init_table(self(), list_to_atom(Name ++ "_" ++ Id), Module_config).  
-%% --------------------------------------------------------------------
-%%% Test functions
-%% --------------------------------------------------------------------
+
+check_init(Module) ->
+    Exports = proplists:get_value(exports, Module:module_info(), []),
+    case proplists:get_value(init, Exports) of 
+        undefined -> true;
+        1 -> lager:warning("there is a init function in the module '~p', but it is false or not available in the config"),
+             false;
+        Any -> lager:waring("the init function has too many arguments"),
+                false
+    end.
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
