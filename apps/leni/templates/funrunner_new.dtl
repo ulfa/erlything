@@ -1,0 +1,29 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}new Fun{% endblock %}
+
+{% block body %}
+        
+    <form class="form-horizontal">
+        <div class="control-group">
+            <label class="control-label" for="inputFunName">Name</label>
+            <div class="controls">
+                <input type="text" id="inputFunName" placeholder="Fun Name">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="inputFun">Fun</label>
+            <div class="controls">
+                <textarea id="inputFun" rows="6" placeholder="fun(X) -> X + 1 end."></textarea>
+            </div>
+        </div>
+        <div class="control-group">
+        <div class="controls">
+          <button type="submit" class="btn">Save</button>
+        </div>
+  </div>
+        
+    
+    </form>
+    
+{% endblock %}

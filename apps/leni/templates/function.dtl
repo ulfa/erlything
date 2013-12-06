@@ -1,0 +1,46 @@
+{% extends "base_without.dtl" %}
+
+
+{% block title %} Funs on {{node}}{% endblock %}
+
+{% block body %}
+
+<div class="well">
+   <form class="form-horizontal" action="/actors/funrunner" method="post">
+        <div class="control-group">
+            <label class="control-label" for="inputFunName">Name</label>
+            <div class="controls">
+                <input type="text" id="inputFunName" name="inputFunName" placeholder="Fun Name" value="{{fname}}">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="inputFun">Fun</label>
+            <div class="controls">
+                <textarea id="inputFun" name="inputFun" rows="6" placeholder="fun(X) -> X + 1 end.">{{command}}</textarea>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="inputComment">Comment</label>
+            <div class="controls">
+                <textarea id="inputFunComment" name="inputFunComment" rows="3" >{{comment}}</textarea>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="inputArgs">Comment</label>
+            <div class="controls">
+                <input type="text" id="inputArgs" name="inputArgs" placeholder="Arguments">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="controls">
+                <button type="submit" class="btn">Save</button>
+                <button type="submit" class="btn">Run</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

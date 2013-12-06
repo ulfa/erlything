@@ -1,0 +1,88 @@
+{% extends "base_without.dtl" %}
+
+
+
+{% block title %}Temp{% endblock %}
+
+{% block body %}
+
+<div class="tabbable">
+        <ul class="nav nav-tabs">
+                <li class="active"><a href="#table" data-toggle="tab">Table view</a></li>
+                <li><a href="#graphic" data-toggle="tab">Graphic view</a></li>
+        </ul>
+
+<div class="tab-content">
+        <div id="table" class="tab-pane active">
+        <div class="well">
+        <table class="table">
+                <thead>
+                        <tr>
+                                <th>Time</th>
+                                <th>Temp in °C</th>
+                                <th>Humidity in %</th>
+                        </tr>
+                </thead>
+                <tbody>
+                        <tr>
+                        {% for time, temp_hum_list in temp_hum_list %}
+                                <td>{{time}}</td>
+                        {% for key, value in temp_hum_list%}
+                                <td>{{value}}</td>
+                        {% endfor %}
+                        </tr>
+                </tbody>
+        {% endfor %}
+        </table>
+        </div>
+
+</div>
+        <div id="graphic" class="tab-pane">
+        <div class="row-fluid">
+                <div class="span5"><div id="chart_temp"></div></div>
+                <div class="span5"><div id="chart_hum"></div></div>
+        </div>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+
+
+        var data = google.visualization.arrayToDataTable([
+          ['Date', 'Temp'],
+          {% for date, temp in temp_list%}
+            ['{{date}}',  {{temp}}],
+          {% endfor %}
+        ]);
+
+
+       var data1 = google.visualization.arrayToDataTable([
+          ['Date', 'Humidity'],
+          {% for date, hum in hum_list%}
+            ['{{date}}',  {{hum}}],
+          {% endfor %}
+        ]);
+
+
+        var options = {
+          title: 'Temperature'
+        };
+
+        var options1 = {
+          title: 'Humidity'
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('chart_temp'));
+        chart.draw(data, options);
+        var chart = new google.visualization.LineChart(document.getElementById('chart_hum'));
+        chart.draw(data1, options1);
+
+      }
+
+    </script>
+        </div>
+</div>
+</div>
+{% endblock %}

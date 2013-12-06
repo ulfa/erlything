@@ -1,0 +1,11 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}Temp{% endblock %}
+
+{% block body %}
+
+<h1>{{node}}</h1>
+<div class="well">
+	<h2>{{temp}}</h2>
+</div>
+{% endblock %}

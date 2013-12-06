@@ -1,0 +1,11 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}seven eleven{% endblock %}
+
+{% block body %}
+ 		<div>
+				<form method="post">
+					<button type="submit" class="btn btn-danger btn-large">Ring</button>
+				</form>
+		</div>
+{% endblock %}

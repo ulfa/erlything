@@ -1,0 +1,10 @@
+{% extends "base.dtl" %}
+
+{% block title %}Logging{% endblock %}
+
+{% block body %}
+<div class="container">    
+    <textarea  id="logging" rows="30" >{{content}}</textarea>
+
+</div>
+{% endblock %}

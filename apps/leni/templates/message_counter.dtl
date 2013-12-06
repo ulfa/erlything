@@ -1,0 +1,35 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}Messages{% endblock %}
+
+{% block body %}
+
+<div class="well">
+		<h1>Message count : {{counter}}</h1>
+</div>
+
+<div class="well">
+<table class="table">
+	<thead>
+		<tr>
+			<th>Time</th>
+			<th>Node</th>
+			<th>Thing</th>
+			<th>Id</th>
+			<th>Time</th>
+			<th>Payload</th>
+		</tr>	
+	</thead>
+	<tbody>
+	{% for date, message in data %}
+		<tr>
+			<td>{{date}}</td>
+			{% for detail in message%}
+			<td>{{detail}}</td>
+			{% endfor %}
+		</tr>
+	{% endfor %}
+	</tbody>
+</table>
+</div>
+{% endblock %}

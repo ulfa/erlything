@@ -1,0 +1,36 @@
+{% extends "base.dtl" %}
+
+{% block title %}Fun Runner{% endblock %}
+
+{% block body %}
+
+<div class="container">
+	<div class="row-fluid">
+		<div class="span8">
+			<div class="well">
+				{% for node, list_of_funs in funs%}
+				<h1>{{node}}</h1>
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Command</th>
+							<th>Comment</th>
+						</tr>	
+					</thead>
+				{% if list_of_funs %}
+				<tbody>
+					{% for fun,  command , comment in list_of_funs %}
+					<tr>			
+						<td><a href="/funrunner?node={{node}}&fun_name={{fun}}">{{ fun }}</a></td>		
+						<td>{{ command }}</td>
+						<td>{{ comment }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+				{% endif%}
+			</table>
+			{%endfor%}
+		</div>
+</div>
+{% endblock %}

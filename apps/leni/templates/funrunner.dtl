@@ -1,0 +1,30 @@
+{% extends "base.dtl" %}
+
+
+{% block title %} Funs on {{node}}{% endblock %}
+
+{% block body %}
+
+
+<div class="well">
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Command</th>
+            <th>Comment</th>
+        </tr>   
+    </thead>
+    <tbody>
+    {% for fun_name, fun, command, comment in funs%}
+        <tr>            
+            <td><a href="/actors/funrunner?node={{node}}&name={{name}}&fun_name={{fun_name}}">{{fun_name}}</a></td>      
+            <td>{{command}}</td>
+            <td>{{comment}}</td>            
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+{% endblock %}

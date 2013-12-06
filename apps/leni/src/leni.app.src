@@ -1,0 +1,15 @@
+{application, leni,
+ [
+  {description, "web ui for the actors and sensor"},
+  {vsn, "0.1.1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { leni_app, []}},
+  {env, [
+        {timer, 5000},
+        {peers, ["127.0.0.1", "192.168.178.28", "192.168.178.38"]}
+        ]}
+ ]}.

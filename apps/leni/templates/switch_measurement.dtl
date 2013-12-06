@@ -1,0 +1,28 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}Switch Measurement{% endblock %}
+
+{% block body %}
+
+<div class="well">
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Time in sec.</th>
+        </tr>   
+    </thead>
+    <tbody>
+        <tr>
+            {% for device, name, data in measurements %}
+            <td>{{name}}</td>        
+            <td><progress value="{{data}}" max="86400"></progress><p>{{data}}</p></td>        
+            </div>
+        </tr>
+        {%endfor%}
+    </tbody>
+</table>
+	
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}Cron Config{% endblock %}
+
+{% block body %}
+
+
+
+<div class="well">
+	<h1>Crontab on node : {{node}}</h1>
+
+	{%for job in config%}
+	<p><strong>{{job}}<p>
+	{%endfor%}
+
+</div>
+
+{% endblock %}

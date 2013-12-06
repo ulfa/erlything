@@ -1,0 +1,62 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}Switch{% endblock %}
+
+{% block body %}
+
+    <div class="well">
+    <h1>{{node}}</h1>        
+        <ul class="nav" >
+        {% for thing, number, state in list %}
+        <li>
+        <div class="row">
+        <div class="span1">
+            {% if state == "1" %}
+                <img src="/images/light_on.png" class="img-rounded">
+            {% else %}
+                <img src="/images/light_off.png" class="img-rounded">
+            {% endif %}
+        </div>
+        <div class="span1">
+        <p>{{thing}}</p>
+        </div>
+        <div class="span1">
+            <form name="switch_on" method="post">
+            {% if state == "1" %}
+                <button type="submit" class="btn btn-large">On</button>
+            {% else %}
+                <button type="submit" class="btn btn-large btn-primary">On</button>
+            {% endif %}                                
+                <input type="hidden" name="node" value="{{node}}"/>
+                <input type="hidden" name="name" value="{{name}}"/>                        
+                <input type="hidden" name="switch" value="{{thing}}"/>
+                <input type="hidden" name="number" value="{{number}}"/>
+                <input type="hidden" name="status" value="1"/>                
+            </form>
+        </div>
+        <div class="span1">
+            <form name="switch_off" method="post">
+            {% if state == "1" %}
+                <button type="submit" class="btn btn-large btn-primary">Off</button>
+            {% else %}
+                <button type="submit" class="btn btn-large">Off</button>
+            {% endif %}                                
+                <input type="hidden" name="node" value="{{node}}"/>
+                <input type="hidden" name="name" value="{{name}}"/>
+                <input type="hidden" name="switch" value="{{thing}}"/>
+                <input type="hidden" name="number" value="{{number}}"/>
+                <input type="hidden" name="status" value="0"/>
+            </form>
+        </div>
+        </li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+
+
+
+<div class="btn-group">
+
+
+{% endblock %}

@@ -1,0 +1,8 @@
+erl_crash.dump
+log/*
+ebin/*
+accounts.conf
+.eunit/
+deps
+rel/leni
+.ct_dialyzer.plt
