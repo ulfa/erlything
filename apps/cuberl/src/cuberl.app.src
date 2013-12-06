@@ -1,0 +1,15 @@
+{application, cuberl,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { cuberl_app, []}},
+  {env, [
+  		 {port, 62910},
+  		 {ip, {192,168,178,23}}
+  		]}
+ ]}.
