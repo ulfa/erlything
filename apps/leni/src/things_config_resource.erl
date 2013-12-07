@@ -139,7 +139,9 @@ process_post(ReqData, Context) ->
 	{"thing", Thing} = lists:keyfind("thing",1, Body),
 	{"active", Active} = lists:keyfind("active",1, Body),
 	rpc:call(erlang:list_to_atom(Node), node_config, set_active, [Thing, list_to_atom(Active)]),
-	{true, ReqData, Context}.
+	Location = "/things_config", 
+	{true, wrq:do_redirect(true, wrq:set_resp_header("location", Location, ReqData)), Context}.
+
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 
 % where Mediatype is a string of content-type format and the Handler is an atom naming 
