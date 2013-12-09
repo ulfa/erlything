@@ -228,7 +228,7 @@ finish_request(ReqData, Context) ->
 to_html(ReqData, Context) ->
     Node = wrq:path_info(node, ReqData),
     lager:info("Node : ~p", [Node]), 
-    {ok, Content} = logging_dtl:render([{links, create_links(nodes())}, {content, get_console_file(Node, "console.log")}]),
+    {ok, Content} = logging_dtl:render([{links, create_links([node()|nodes()])}, {content, get_console_file(Node, "console.log")}]),
     {Content, ReqData, Context}. 
  
 create_links(Nodes) ->
@@ -238,7 +238,7 @@ get_console_file(Node, Name) ->
     Content = rpc:call(list_to_atom(Node), horst, get_log, [Name]),    
     lager:debug("get the file : ~p from node : ~p", [Name, Node]),
     binary_to_list(Content).
-
+    
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
