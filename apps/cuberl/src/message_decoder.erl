@@ -44,7 +44,7 @@
 %%    03          ? Could be the HW-Revision of Cube
 %%    0000        ?
 decode(<<"H:", Rest/binary>> = Message) ->
-	lager:debug("H - Message : ~p", [Message]),
+	lager:info("H - Message : ~p", [Message]),
 	M_1 =  binary:replace(Rest, <<"\r\n">>, <<>>, []),
 	M_2 = binary:split(M_1, <<",">>, [global]),
 	Fields = [serial, rf_address, firmware, unknown_1, connection_ip, cycle, unknown_2, system_date, system_time, hw_revision, unknown_3],
@@ -57,7 +57,7 @@ decode(<<"M:", Unknown:6/binary, Rest/binary>> = Message) ->
 	lager:info("Devices : ~p", [Devices]),
 	[{rooms, Rooms}, {devices, Devices}];
 decode(<<"C:",RF_address:6/binary, "," ,Rest/binary>> = Message) ->
-	lager:debug("C - Message : ~p", [Message]),	
+	lager:info("C - Message : ~p", [Message]),	
 	Messages = binary:split(Message, <<"\r\n">>, [global]), 
 	[decode_c_m(<<"C:", RF_address/binary, ",", (base64:decode(Body))/binary>>) || <<"C:",RF_address:6/binary, "," , Body/binary>> <- Messages];
 decode(<<"L:", Rest/binary>> = Message) ->
@@ -159,7 +159,7 @@ decode_l(<<11,
 		   Time:1/binary,	
 		   Rest/binary>>, Acc) ->
 	<<U4:1, U3:1,U2:1, Valid:1, Error:1, Answer:1, State:1, U1:1>> = Status_1, 
-	<<Battery:1, Linkstatus:1, Panel:1, Gateway:1, Dst:1, U:1, Mode_1:1, Mode_0:1>> = Status_1,
+	<<Battery:1, Linkstatus:1, Panel:1, Gateway:1, Dst:1, U:1, Mode_1:1, Mode_0:1>> = Status_2,
 	%%lager:info("Length : ~p", [Length]),
 %%	lager:info("RF_address : ~p", [RF_address]),
 %%	lager:info("Unknown : ~p", [Unknown]),
@@ -173,7 +173,8 @@ decode_l(<<11,
 	Result = {rf_address, RF_address, [{temp, Temp/2}, {value, Value}, {date, Date}, {time, Time},
 							 {error, value(error,Error)}, {answer,value(answer,Answer)},{state,State}, 
 							 {battery, value(battery, Battery)}, {linkstatus, value(linkstatus,Linkstatus)}, 
-							 {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)}]},	
+							 {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)}]},
+	lager:info("1.Length of the rest : ~p", [byte_size(Rest) ]),
 	decode_l(Rest, [Result|Acc]);
 
 decode_l(<<12,
@@ -188,7 +189,7 @@ decode_l(<<12,
 		   Temp1:?BYTE,	
 		   Rest/binary>>, Acc) ->
 	<<U4:1, U3:1,U2:1, Valid:1, Error:1, Answer:1, State:1, U1:1>> = Status_1, 
-	<<Battery:1, Linkstatus:1, Panel:1, Gateway:1, Dst:1, U:1, Mode_1:1, Mode_0:1>> = Status_1,
+	<<Battery:1, Linkstatus:1, Panel:1, Gateway:1, Dst:1, U:1, Mode_1:1, Mode_0:1>> = Status_2,
 	%%lager:info("Length : ~p", [Length]),
 %%	lager:info("RF_address : ~p", [RF_address]),
 %%	lager:info("Unknown : ~p", [Unknown]),
@@ -200,10 +201,23 @@ decode_l(<<12,
 %%	lager:info("Time : ~p", [Time]),
 %%	lager:info("Temp1 : ~p C", [Temp1/2]),
 %%	lager:info("Rest : ~p", [Rest]),
-	Result = {rf_address, RF_address, {temp, Temp/2}, {value, Value}, {date, Date}, {time, Time},
-							 [{state_1, [{error, value(error,Error)}, {answer,value(answer,Answer)},{state,State}]}, 
-							 [state_1, [{battery, value(battery, Battery)}, {linkstatus, value(linkstatus,Linkstatus)}, {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)}]]]},	
-	%%decode_l(binary:part(Rest, (Length - 11), byte_size(Rest) - (Length - 11)), [Result|Acc]).
+	Result = {rf_address, RF_address, [{temp, Temp/2}, {value, Value}, {date, Date}, {time, Time},
+							 {error, value(error,Error)}, {answer,value(answer,Answer)},{state,State}, 
+							 {battery, value(battery, Battery)}, {linkstatus, value(linkstatus,Linkstatus)}, {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)}]},	
+	lager:info("2. Length of the rest : ~p", [byte_size(Rest) ]),
+	decode_l(Rest, [Result|Acc]);
+decode_l(<<6,
+		   RF_address:?RF_ADDRESS, 
+		   Unknown:1/binary, 
+		   Status_1:1/binary, 
+		   Status_2:1/binary, 
+		   Rest/binary>>, Acc) ->
+	<<U4:1, U3:1,U2:1, Valid:1, Error:1, Answer:1, State:1, U1:1>> = Status_1, 
+	<<Battery:1, Linkstatus:1, Panel:1, Gateway:1, Dst:1, U:1, Mode_1:1, Mode_0:1>> = Status_2,
+	Result = {rf_address, RF_address, [
+							 {error, value(error,Error)}, {answer,value(answer,Answer)},{state,State}, 
+							 {battery, value(battery, Battery)}, {linkstatus, value(linkstatus,Linkstatus)}, 
+							 {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)}]},
 	decode_l(Rest, [Result|Acc]).
 
 
@@ -245,11 +259,14 @@ decode_c_m(<<C:2/binary,
 			 _Comma:1/binary, 
 			 Length/integer, 
 			 Message:Length/binary>>) ->
+	lager:info("Length : ~p", [Length]),
 	decode_c_m1(Message).
 
 decode_c_m1(<<RF_address:?RF_ADDRESS, 
 			  Device_type:?BYTE, 
-			  Room_id:3/binary, 
+			  Room_id:?BYTE, 
+			  Firmware:?BYTE,
+			  Unknown:?BYTE,
 			  Serial:10/binary, 
 			  Com_temp:?BYTE, 
 			  Eco_temp:?BYTE,
@@ -266,7 +283,21 @@ decode_c_m1(<<RF_address:?RF_ADDRESS,
 	{rf_address, RF_address, [{device_type, Device_type}, {room_id, Room_id}, {serial, Serial}, {com_temp, Com_temp}, {eco_temp, Eco_temp},
 	{max_set_point, Max_set_point_temp}, {min_set_point_temp, Min_set_point_temp},{temp_offset, Temp_offset}, {Window_open_temp, Window_open_temp},
 	{window_open_duration, Window_open_duration}, {boost_duration_value, Boost_duration_value}, {day_of_week_and_time, Day_of_week_and_time}, {max_value, Max_value},
-	{value_offset, Value_offset}]}.
+	{value_offset, Value_offset}]};
+
+decode_c_m1(<<RF_address:?RF_ADDRESS, 
+			  Device_type:?BYTE, 
+			  Room_id:?BYTE, 
+			  Firmware:?BYTE,
+			  Unknown:?BYTE,
+			  Serial:10/binary, 
+			  Rest/binary>>) ->
+	lager:info("RF_address : ~p", [RF_address]),
+	lager:info("Device_type : ~p", [Device_type]),
+	lager:info("Room_id : ~p", [Room_id]),
+	lager:info("Serial ~p", [Serial]),
+	{rf_address, RF_address, [{device_type, Device_type}, {room_id, Room_id}, {serial, Serial}]}.
+
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
@@ -316,9 +347,16 @@ decode_m_test() ->
 decode_m_1_test() ->
 	M = <<"M:00,01,VgICAgpXb2huemltbWVyCyORAQpOw6RoemltbWVyCG1IBAELI5FLRVEwNTU4NjU1EFRoZXJtb3N0YXQgbGlua3MCAQlCUktFUTA1MjUxMDMRVGhlcm1vc3RhdCByZWNodHMCAwePbUtFUTAwNjQ1MzkOV2FuZHRoZXJtb3N0YXQCAQhtSEtFUTA0MDIxODIMVGhlcm1vc3RhdCAxAQE=\r\n">>,
 	decode(M).
+decode_m_2_test() ->
+	M = <<"M:00,01,VgICAgpXb2huemltbWVyCyORAQpOw6RoemltbWVyCG1IBQELI5FLRVEwNTU4NjU1EFRoZXJtb3N0YXQgbGlua3MCAQlCUktFUTA1MjUxMDMRVGhlcm1vc3RhdCByZWNodHMCAwePbUtFUTAwNjQ1MzkOV2FuZHRoZXJtb3N0YXQCAQhtSEtFUTA0MDIxODIMVGhlcm1vc3RhdCAxAQQFOLNKRVEwNDA0NjM3DkZlbnN0ZXJrb250YWt0AgE=\r\n">>,
+	decode(M).
 
 decode_l_test() ->
 	M = <<"L:CwlCUgkSGAkqAOIACwsjkQkSGA4qAN4A\r\n">>,
+	decode(M).
+
+decode_l_1_test() ->
+	M = <<"L:CwlCUgkSGAAYAAAACwsjkQkSGAAYAAAADAePbfYSGAQYAAAAyQsIbUhNEhkIIgCoAAYFOLNsEhJ=\r\n">>,
 	decode(M).
 
 decode_l_2_test() ->
@@ -335,6 +373,10 @@ decode_c_message_1_test() ->
 
 decode_c_message_2_test() ->	
 	M =  <<"C:094252,0glCUgECGP9LRVEwNTI1MTAzKiEsCQcYAzAM/wBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:0b2391,0gsjkQECGP9LRVEwNTU4NjU1KiEsCQcYAzAM/wBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:078f6d,zgePbQMCEABLRVEwMDY0NTM5KiE9CURITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgBxgw\r\n">>,
+	decode(M).
+
+decode_c_message_3_test() ->
+	M = <<"C:094252,0glCUgECGP9LRVEwNTI1MTAzKiEsCQcYAzAM/wBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERUTG9UnVT3RSBFIEUgRSBFIEUgRSBFIEUgREhMbVadVvdFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:0b2391,0gsjkQECGP9LRVEwNTU4NjU1KiEsCQcYAzAM/wBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERUTG9UnVT3RSBFIEUgRSBFIEUgRSBFIEUgREhMbVadVvdFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:078f6d,zgePbQMCEABLRVEwMDY0NTM5KiE9CURITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgRFRMb1SdVPdFIEUgRSBFIEUgRSBFIEUgRSBESExtVp1W90UgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgBxgw\r\nC:086d48,0ghtSAEBGP9LRVEwNDAyMTgyKyE9CQcYAzAM/wBESFUIRSBFIEUgRSBFIEUgRSBFIEUgRSBFIERIVQhFIEUgRSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIERIVGxEzFUURSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:0538b3,EQU4swQCEw9KRVEwNDA0NjM3\r\n">>,
 	decode(M).
 
 decode_date_test() ->
