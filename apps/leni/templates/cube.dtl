@@ -1,0 +1,12 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}Max Cube{% endblock %}
+
+{% block body %}
+
+<h1>{{node}}</h1>
+<div class="well">
+{{data}}
+<h1>under construction!</h1>
+</div>
+{% endblock %}
