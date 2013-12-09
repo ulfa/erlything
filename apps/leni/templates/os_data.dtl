@@ -6,6 +6,7 @@
 
 <h1>{{node}}</h1>
 <div class="well">
+<h1>under construction!</h1>
 {{os_data}}
 </div>
 {% endblock %}
