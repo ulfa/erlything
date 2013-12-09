@@ -13,27 +13,36 @@
 %% --------------------------------------------------------------------
 -export([init/1, stop/1]).
 -export([handle_msg/3]).
--export([test_me/0, test_me_1/0]).
+-export([test_me/0, test_me_1/0, test_exception/0]).
 
 init(Config) ->
-    lager:info("funrunner_driver:init('~p')", [Config]),  
-    application:start(gen_smtpc).
+    lager:info("funrunner_driver:init('~p')", [Config]),
+    Config.
 
 handle_msg([Node ,Sensor, Id, Time, {save, Name, Command, Comment}], Config, Module_config) ->
     lager:info("save fun under name : ~p with command : ~p and comment : ~p ", [Name, Command, Comment]),
     Funs = proplists:get_value(funs, Module_config, []),
-    {ok, Fun} = command_to_fun(Command),
-    create_message_and_send(Module_config, {saved, Name, ok}),
-    Module_config_1 = lists:keyreplace(funs, 1 , Module_config, {funs, [{Name, Fun, Command, Comment}|Funs]}),    
-    lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1});
+    try 
+        {ok, Fun} = command_to_fun(Command),
+        create_message_and_send(Module_config, {saved, Name, ok}),
+        Module_config_1 = lists:keyreplace(funs, 1 , Module_config, {funs, [{Name, Fun, Command, Comment}|Funs]}),    
+        lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1})
+    catch
+        _:Error -> create_message_and_send(Module_config, {error, "saving fun with name : " ++ Name ++ " command : " ++ Command, Error}),
+                 Module_config
+    end;
 
 handle_msg([Node ,Sensor, Id, Time, {run, Name, Args}], Config, Module_config) ->
     lager:info("run fun with name : ~p and arguments : ~p", [Name, Args]),
     Funs = proplists:get_value(funs, Module_config, []),
     Fun = get_fun(Funs, Name),
-    Result = run_fun(Fun, Args),
-    lager:info("Result : ~p", [Result]),
-    create_message_and_send(Module_config, Name,{run, Name, {ok,Result}}),
+    try
+        Result = run_fun(Fun, Args),
+        lager:info("Result : ~p", [Result]),
+        create_message_and_send(Module_config, Name,{run, Name, {ok,Result}})
+    catch 
+        _:Error -> create_message_and_send(Module_config, {error, "running fun with name : " ++ Name ++ "and args : ~p " ++ Args ++ " ", Error})
+    end,
     Config;
 
 handle_msg([Node ,Sensor, Id, Time, {list, Name}], Config, Module_config) ->
@@ -108,6 +117,12 @@ test_me_1() ->
     Message2=sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {run, "send_test", []}), 
     sensor:send_message(nodes(), Message2).
 
+test_exception() ->
+    try  
+        command_to_fun("fun(X) -> X + 1 end")
+    catch
+        _:Error -> lager:info("Error : ~p", [Error])
+    end.
 
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).

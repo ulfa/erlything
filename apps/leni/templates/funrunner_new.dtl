@@ -14,7 +14,7 @@
         <div class="control-group">
             <label class="control-label" for="inputFun">Fun</label>
             <div class="controls">
-                <textarea id="inputFun" rows="6" placeholder="fun(X) -> X + 1 end."></textarea>
+                <textarea class="span8" id="inputFun" rows="6" placeholder="fun(X) -> X + 1 end."></textarea>
             </div>
         </div>
         <div class="control-group">

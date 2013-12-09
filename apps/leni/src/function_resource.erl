@@ -130,6 +130,11 @@ create_path(ReqData, Context) ->
 %
 process_post(ReqData, Context) ->
     lager:info("...... this is a test ....~p",[wrq:req_body(ReqData)]),
+    Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
+    {"inputFunName", Fun_name} = lists:keyfind("inputFunName",1, Body),
+    {"inputArgs", Args} = lists:keyfind("inputArgs",1, Body),
+    Msg = sender_util:create_message(node(), ?MODULE, "default", date:get_date_seconds(), {run, Fun_name, Args }), 
+    sender_util:send_message([node()|nodes()], Msg), 
     {true, ReqData, Context}.
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 
