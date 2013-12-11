@@ -73,18 +73,22 @@
         var options = {
           title: 'Temperature',
           width: 1170,
-          height:400,
+          height:500,
           curveType: 'function',
           colors:['red','#004411'],
-          backgroundColor: {fill:'#F2F2F2'}
+          backgroundColor: {fill:'#F2F2F2'},
+          hAxis: {title:'time', textPosition:'out',slantedText:true},
+          vAxis: {title:'temp in C'}
         };
 
         var options1 = {
           title: 'Humidity',
           width: 1170,
-          height:400,
+          height:500,
           curveType: 'function',
-          backgroundColor: {fill:'#F2F2F2'}
+          backgroundColor: {fill:'#F2F2F2'},
+          hAxis: {title:'time', textPosition:'out',slantedText:true},
+          vAxis: {title:'humidity in %'}
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('chart_temp'));
