@@ -248,12 +248,12 @@ convert_timestamp_to_date(List_of_temps) ->
 create_temp_list([]) ->
     [];
 create_temp_list(List) ->
-    [{T1, T} || {T1, [{temp, T}, {hum, H}]} <- List].
+    lists:reverse([{T1, T} || {T1, [{temp, T}, {hum, H}]} <- List]).
 
 create_hum_list([]) ->
     [];
 create_hum_list(List) ->
-    [{T1, H} || {T1, [{temp, T}, {hum, H}]} <- List].
+    lists:reverse([{T1, H} || {T1, [{temp, T}, {hum, H}]} <- List]).
 
 %% --------------------------------------------------------------------
 %%% Test functions

@@ -39,8 +39,12 @@
 </div>
         <div id="graphic" class="tab-pane">
         <div class="row-fluid">
-                <div class="span5"><div id="chart_temp"></div></div>
-                <div class="span5"><div id="chart_hum"></div></div>
+          <div class="container">
+                <div id="chart_temp"></div>
+          </div>
+          <div class="container">
+                <div id="chart_hum"></div>
+          </div>
         </div>
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -67,11 +71,20 @@
 
 
         var options = {
-          title: 'Temperature'
+          title: 'Temperature',
+          width: 1170,
+          height:400,
+          curveType: 'function',
+          colors:['red','#004411'],
+          backgroundColor: {fill:'#F2F2F2'}
         };
 
         var options1 = {
-          title: 'Humidity'
+          title: 'Humidity',
+          width: 1170,
+          height:400,
+          curveType: 'function',
+          backgroundColor: {fill:'#F2F2F2'}
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('chart_temp'));
