@@ -72,22 +72,22 @@
 
         var options = {
           title: 'Temperature',
-          width: 1170,
-          height:500,
+          width: 960,
+          height:400,
           curveType: 'function',
           colors:['red','#004411'],
           backgroundColor: {fill:'#F2F2F2'},
-          hAxis: {title:'time', textPosition:'out',slantedText:true},
+          hAxis: {textPosition:'out',slantedText:true, textStyle: {fontSize:8, bold:true}},
           vAxis: {title:'temp in C'}
         };
 
         var options1 = {
           title: 'Humidity',
-          width: 1170,
-          height:500,
+          width: 960,
+          height:400,
           curveType: 'function',
           backgroundColor: {fill:'#F2F2F2'},
-          hAxis: {title:'time', textPosition:'out',slantedText:true},
+          hAxis: {textPosition:'out',slantedText:true, textStyle: {fontSize:8, bold:true}},
           vAxis: {title:'humidity in %'}
         };
 
