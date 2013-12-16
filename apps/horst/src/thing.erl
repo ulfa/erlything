@@ -34,7 +34,7 @@
 -export([start/0]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
 -export([get_state/1, get_module_config/1, get_start_time/1, get_name/1, get_icon/1]).
--export([save_data_to_ets/2, get_table_id/1]).
+-export([save_data_to_ets/2, get_table_id/1, get_model/1]).
 -export([stop/1]).
 
 %% ====================================================================
@@ -75,6 +75,11 @@ get_module_config(Name) when is_list(Name) ->
     get_module_config(list_to_atom(Name));
 get_module_config(Name) ->
     gen_server:call(Name, {get_module_config}).
+get_model(Name) when is_list(Name) ->
+    get_model(list_to_atom(Name));
+get_model(Name) ->
+    gen_server:call(Name, {get_model}).
+
 stop(Name) when is_list(Name) ->
     stop(list_to_atom(Name));
 stop(Name) ->
@@ -145,8 +150,15 @@ handle_call({get_module_config}, From, State=#state{config = Config}) ->
                 {reply, ets:tab2list(Table_Id) , State};
         false -> {driver, {_Module, _Func}, Module_config} = lists:keyfind(driver, 1, Config),
                  {reply, Module_config, State}
-    end;       
-
+    end;
+handle_call({get_model}, From, State=#state{config = Config}) ->    
+    Reply = case proplists:get_value(model_fun, Config, []) of
+        [] -> [];
+        {Model, Function} -> F=list_to_atom(Function), 
+                             Fun = fun Model:F/0,
+                             Fun()
+    end,
+    {reply, Reply, State};   
 handle_call(Request, From, State) ->
     Reply = ok,
     {reply, Reply, State}.
@@ -212,7 +224,7 @@ handle_info({gpio_interrupt, 0, Pin, Status}, State=#state{config = Config}) ->
     Config_1 = Module:Func({gpio_interrupt, 0, Pin, Status}, Config, Module_config),
     {noreply, State#state{config = Config_1}};
 
-handle_info({external_event, Application,  Body}, State=#state{config = Config}) ->   
+handle_info({external_interrupt, Application,  Body}, State=#state{config = Config}) ->   
     lager:info("external_event from Application : ~p with Body : ~p",[Application, Body]),
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
     Config_1 = Module:Func({external_event, Application,  Body}, Config, Module_config),
