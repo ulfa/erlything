@@ -234,11 +234,16 @@ get_data(Node, Name) when is_list(Node)->
     case rpc:call(list_to_atom(Node), thing, get_module_config, [Name]) of 
         {badrpc, Reason} -> lager:error("got error during call ~p thing:get_driver(~p) with reason ~p", [Node, Name, Reason]),
                             [];
-        Data -> Data
+        [{data, Data}] -> D= create_data(Data),
+                            lager:info("~p", [D]),
+                          D
     end.
 
-convert_timestamp_to_date(List_of_temps) ->
-    lists:foldr(fun({Timestamp, Temp_hum}, Acc) -> [{date:timestamp_to_date(Timestamp), Temp_hum}|Acc] end, [], List_of_temps).
+
+create_data([]) ->
+    [];
+create_data(List) ->
+    lists:reverse([{binary_to_list(Node), Temp, Avg1, Avg5, Avg15} || {Node, [{temp, Temp}, {avg1, Avg1}, {avg5, Avg5}, {avg15, Avg15}]} <- List]).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

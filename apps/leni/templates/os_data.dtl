@@ -4,9 +4,14 @@
 
 {% block body %}
 
-<h1>{{node}}</h1>
+{% for node, temp, avg1, avg5, avg15 in os_data %}
 <div class="well">
-<h1>under construction!</h1>
-{{os_data}}
+	<h1>{{node}}</h1>
+	<p><strong>Temperature 	:</strong> {{temp}} C</p>
+	<p><strong>Load 1  min. :</strong> {{avg1}}</p>
+	<p><strong>Load 5  min. :</strong>{{avg5}}</p>
+	<p><strong>Load 15 min. :</strong>{{avg15}}</p>
+</div>
+{% endfor %}
 </div>
 {% endblock %}
