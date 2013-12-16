@@ -20,7 +20,7 @@
 %% if you want to initialize during startup, you have to do it here
 %% --------------------------------------------------------------------
 init(Config) ->
-	lager:info("hc_sr501_driver:init('~p')", [Config]),	
+	lager:info("~p:init('~p')", [?MODULE, Config]),
 	gpio:set_interrupt(proplists:get_value(pin, Config) , proplists:get_value(int_type, Config)).
 
 handle_msg({gpio_interrupt, 0, Pin, Status}, Config, Modul_config) ->
