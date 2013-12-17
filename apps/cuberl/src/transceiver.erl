@@ -24,7 +24,7 @@
 -export([start/0]).
 -export([get_live_data/0]).
 -export([connect/2, disconnect/0]).
-
+-export([send_command/1]).
 %% ====================================================================
 %% External functions
 %% ====================================================================
@@ -36,6 +36,10 @@ disconnect() ->
 
 get_live_data() ->
 	gen_server:cast(?MODULE, {get_live_data}).
+
+send_command(Command) ->
+    gen_server:cast(?MODULE, {send_command, Command}).
+
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
@@ -63,7 +67,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{}}.
+    {ok, #state{}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -89,7 +93,6 @@ handle_call({disconnect}, _From, State=#state{socket = Socket}) ->
 handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
-
 %% --------------------------------------------------------------------
 %% Function: handle_cast/2
 %% Description: Handling cast messages
@@ -98,13 +101,17 @@ handle_call(_Request, _From, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------	
 handle_cast({get_live_data}, State=#state{socket = Socket}) ->
-	lager:info("sending info message to the cube"),	
-	send_command(Socket, "l:\r\n"), 
+	lager:debug("sending info message to the cube"),	
+	send_command(Socket, "l:"), 
+    {noreply, State};
+
+handle_cast({send_command, Command}, State=#state{socket = Socket}) ->
+    lager:debug("sending command : ~p to the cube.", [Command]), 
+    send_command(Socket, Command), 
     {noreply, State};
 
 handle_cast(_Msg, State) ->
     {noreply, State}.
-
 %% --------------------------------------------------------------------
 %% Function: handle_info/2
 %% Description: Handling all non call/cast messages
@@ -118,10 +125,26 @@ handle_info({tcp, Socket, Data}, State) ->
 
 handle_info({tcp_closed, Socket}, State) ->
     lager:info("Socket closed closed by peer"),
-    gen_tcp:close(Socket); 
+    gen_tcp:close(Socket),
+    {noreply, State};
+
+handle_info({tcp_closed, undefined}, State) ->
+    lager:info("Socket is undefined, please check your cube!"),
+    {noreply, State};
+
 
 handle_info(timeout, State) ->	
-	{noreply, State};
+    Port = get_env(port),
+    Ip = get_env(ip),
+    {ok, Socket} = gen_tcp:connect(Ip, Port, []),
+    {ok, ListenSocket} = gen_tcp:listen(Port, []),
+    start_timer(get_env(timer)),
+	{noreply, #state{socket = Socket, listenSocket = ListenSocket}};
+
+handle_info({get_live_data}, State=#state{socket = Socket}) ->
+    send_command(Socket, "l:"),
+    start_timer(get_env(timer)),    
+    {noreply, State};
 
 handle_info(Info, State) ->
 	lager:info("don't understand this message : ~p", [Info]),	
@@ -148,11 +171,15 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 send_command(Socket, Command) ->
-    gen_tcp:send(Socket, Command).
+    lager:debug("Command : ~p", [Command]),
+    gen_tcp:send(Socket, Command ++ "\r\n").
 
 get_env(Key) ->
 	{ok, Value} = application:get_env(cuberl, Key),
 	Value.
+
+start_timer(Time) ->
+    erlang:send_after(Time, self(), {get_live_data}).     
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
