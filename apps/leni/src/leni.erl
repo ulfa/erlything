@@ -47,6 +47,8 @@ start() ->
 	application:start(?MODULE).
 
 stop() ->
+    application:stop(webmachine),
+    application:stop(mochiweb),
     application:stop(?MODULE).
 
 set_debug() ->

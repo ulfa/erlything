@@ -52,9 +52,10 @@ init([]) ->
                           "..", "priv", "dispatch.conf"])),
     WebConfig = [
                  {ip, Ip},
-                 {port, 8080},
-                 {log_dir, "priv/log"},
-                 {dispatch, Dispatch}],               
-    Web = {webmachine_mochiweb, {webmachine_mochiweb, start, [WebConfig]}, permanent, 5000, worker, dynamic},
-    Processes = [Web, ?CHILD(account_sup, supervisor, [leni])],
+                 {port, 8080},                 
+                 {dispatch, Dispatch},
+                 {dispatch_group, leni},
+                 {name, leni}],               
+    Web = {wm_instance_2, {webmachine_mochiweb, start, [WebConfig]}, permanent, 5000, worker, dynamic},
+    Processes = [Web],
     {ok, { {one_for_one, 10, 10}, Processes} }.
