@@ -234,8 +234,11 @@ get_data(Node, Name) when is_list(Node)->
     case rpc:call(list_to_atom(Node), thing, get_module_config, [Name]) of 
         {badrpc, Reason} -> lager:error("got error during call ~p thing:get_driver(~p) with reason ~p", [Node, Name, Reason]),
                             [];
-        [{data, Data}] -> create_data(Data)
+        [{data, Data}] -> D= create_data(Data),
+                            lager:info("~p", [D]),
+                          D
     end.
+
 
 create_data([]) ->
     [];

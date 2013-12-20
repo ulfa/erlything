@@ -18,6 +18,7 @@
 
 handle_message(<<"H:", Rest/binary>> = Message) ->
 	Msg = message_decoder:decode(Message);
+
 handle_message(<<"M:", Rest/binary>> = Message) ->
 	[{rooms, Rooms}, {devices, Devices}] = message_decoder:decode(Message),
 	[house:add_room(Room) || Room <- Rooms],
@@ -25,6 +26,7 @@ handle_message(<<"M:", Rest/binary>> = Message) ->
 	[room:add_device(Room_id, Device)  || {room_id, Room_id, Device} <- Devices];
 handle_message(<<"L:", Rest/binary>> = Message) ->
 	Msg = message_decoder:decode(Message),
+	lager:info("l-data : ~p", [Msg]),
 	[device:set_l_data(RF_address, L_data) || {rf_address, RF_address, L_data} <- Msg];
 handle_message(<<"C:", Rest/binary>> = Message) ->
 	Msg = message_decoder:decode(Message),

@@ -235,7 +235,8 @@ get_data(Node, Name) when is_list(Node)->
     case rpc:call(list_to_atom(Node), thing, get_module_config, [Name]) of 
         {badrpc, Reason} -> lager:error("got error during call ~p thing:get_driver(~p) with reason ~p", [Node, Name, Reason]),
                             [];
-        [{data, Data}]     ->  convert_timestamp_to_date(Data)
+        Data -> {temp, Temp} = proplists:get_value(data, Data, []),
+                Temp
     end.
 
 convert_timestamp_to_date(List_of_temps) ->

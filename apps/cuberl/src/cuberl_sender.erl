@@ -30,7 +30,7 @@ send_message(Message) ->
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {listener=[]}).
+-record(state, {listener}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -52,7 +52,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{listener=[]}}.
+    {ok, #state{}}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -75,23 +75,14 @@ handle_call(Request, From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_cast({send_message, Message}, State=#state{listener = Listener}) when is_pid(Listener)->
+handle_cast({send_message, Message}, State=#state{listener = Listener}) ->
     lager:debug("sending message : ~p to listener pid : ~p", [Message, Listener]),
     Listener ! Message,
     {noreply, State};
 
-handle_cast({send_message, Message}, State) ->
-    lager:warning("you want to send a message to a none pid!"),
-    {noreply, State};
-
-handle_cast({add_listener, Pid}, State) when is_pid(Pid)->
+handle_cast({add_listener, Pid}, State) ->
     lager:info("register listener pid : ~p", [Pid]),
     {noreply, State#state{listener = Pid}};
-
-handle_cast({add_listener, Pid}, State) ->
-    lager:warning("you want to register something which is not a pid : ~p", [Pid]),
-    {noreply, State};
-
 
 handle_cast(Msg, State) ->
     {noreply, State}.

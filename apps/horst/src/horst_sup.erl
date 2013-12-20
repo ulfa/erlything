@@ -19,6 +19,7 @@
 
 %% Helper macro for declaring children of supervisor
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
+-define(CHILD_ARG(I, Type, Arg), {I, {I, start_link, [Arg]}, permanent, 5000, Type, [I]}).
 %% ===================================================================
 %% API functions
 %% ===================================================================
@@ -32,6 +33,7 @@ start_link() ->
 
 init([]) ->
     {ok, { {one_for_one, 5, 10}, [
+                                  ?CHILD_ARG(account_sup, supervisor, [horst]),
     							  ?CHILD(actor_group, worker),
     							  ?CHILD(node_config, worker),
     							  ?CHILD(ets_mgr, worker),

@@ -24,7 +24,7 @@
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
--import(values, [value/2, value/3]).
+-import(values, [value/2]).
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
@@ -44,22 +44,24 @@
 %%    03          ? Could be the HW-Revision of Cube
 %%    0000        ?
 decode(<<"H:", Rest/binary>> = Message) ->
-	lager:debug("H - Message : ~p", [Message]),
+	lager:info("H - Message : ~p", [Message]),
 	M_1 =  binary:replace(Rest, <<"\r\n">>, <<>>, []),
 	M_2 = binary:split(M_1, <<",">>, [global]),
 	Fields = [serial, rf_address, firmware, unknown_1, connection_ip, cycle, unknown_2, system_date, system_time, hw_revision, unknown_3],
 	[decode(Step, Entry) || {Step, Entry} <- lists:zip(Fields, M_2)];
 decode(<<"M:", Unknown:6/binary, Rest/binary>> = Message) ->
-	lager:debug("M - Message : ~p", [Message]),
+	lager:info("M - Message : ~p", [Message]),
 	{Rooms, Devices_encoded} = decode_room(base64:decode(Rest)),
 	Devices = decode_devices(Devices_encoded),
+	lager:info("Rooms : ~p", [Rooms]),
+	lager:info("Devices : ~p", [Devices]),
 	[{rooms, Rooms}, {devices, Devices}];
 decode(<<"C:",RF_address:6/binary, "," ,Rest/binary>> = Message) ->
-	lager:debug("C - Message : ~p", [Message]),	
+	lager:info("C - Message : ~p", [Message]),	
 	Messages = binary:split(Message, <<"\r\n">>, [global]), 
 	[decode_c_m(<<"C:", RF_address/binary, ",", (base64:decode(Body))/binary>>) || <<"C:",RF_address:6/binary, "," , Body/binary>> <- Messages];
 decode(<<"L:", Rest/binary>> = Message) ->
-	lager:debug("L - Message : ~p", [Message]),
+	lager:info("L - Message : ~p", [Message]),
 	decode_l(base64:decode(Rest), []);
 decode(Message) ->
 	lager:info("unknown Message : ~p", [Message]).
@@ -158,11 +160,21 @@ decode_l(<<11,
 		   Rest/binary>>, Acc) ->
 	<<U4:1, U3:1,U2:1, Valid:1, Error:1, Answer:1, State:1, U1:1>> = Status_1, 
 	<<Battery:1, Linkstatus:1, Panel:1, Gateway:1, Dst:1, U:1, Mode_1:1, Mode_0:1>> = Status_2,
-	Result = {rf_address, RF_address, [{rf_address, RF_address},{temp, Temp/2}, {value, Value}, {date, Date}, {time, Time},
-							 {error, value(error,Error)}, {answer,value(answer,Answer)},{state,value(state,State)}, 
+	%%lager:info("Length : ~p", [Length]),
+%%	lager:info("RF_address : ~p", [RF_address]),
+%%	lager:info("Unknown : ~p", [Unknown]),
+%%	lager:info("State : ~p Answer : ~p Error : ~p Valid : ~p ", [State, Answer, Error, Valid]),
+%%	lager:info("Battery : ~p Linkstatus : ~p Panel : ~p Gateway : ~p Dst setting : ~p Mode : ~p~p", [Battery,Linkstatus,Panel,Gateway, Dst, Mode_1, Mode_0 ]),
+%%	lager:info("Value : ~p %", [Value]),
+%%	lager:info("Temp : ~p C", [Temp/2]),
+%%	lager:info("Date : ~p", [Date]),
+%%	lager:info("Time : ~p", [Time]),
+%%	lager:info("Rest : ~p", [Rest]),
+	Result = {rf_address, RF_address, [{temp, Temp/2}, {value, Value}, {date, Date}, {time, Time},
+							 {error, value(error,Error)}, {answer,value(answer,Answer)},{state,State}, 
 							 {battery, value(battery, Battery)}, {linkstatus, value(linkstatus,Linkstatus)}, 
-							 {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)},
-							 {mode, value(mode, Mode_1, Mode_0)}]},
+							 {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)}]},
+	lager:info("1.Length of the rest : ~p", [byte_size(Rest) ]),
 	decode_l(Rest, [Result|Acc]);
 
 decode_l(<<12,
@@ -174,19 +186,26 @@ decode_l(<<12,
 		   Temp:?BYTE, 
 		   Date:2/binary, 
 		   Time:1/binary,
-		   Temp1/integer,	
+		   Temp1:?BYTE,	
 		   Rest/binary>>, Acc) ->
 	<<U4:1, U3:1,U2:1, Valid:1, Error:1, Answer:1, State:1, U1:1>> = Status_1, 
 	<<Battery:1, Linkstatus:1, Panel:1, Gateway:1, Dst:1, U:1, Mode_1:1, Mode_0:1>> = Status_2,
-	Result = {rf_address, RF_address, [{rf_address, RF_address}, {temp, Temp / 2.0}, {value, Value}, {date, Date}, {time, Time},
-							 {error, value(error,Error)}, {answer,value(answer,Answer)},{state,value(state,State)}, 
-							 {battery, value(battery, Battery)}, {linkstatus, value(linkstatus,Linkstatus)},
-							 {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)},
-							 {mode, value(mode, Mode_1, Mode_0)}, {temp, Temp1 / 10}]},	
+	%%lager:info("Length : ~p", [Length]),
+%%	lager:info("RF_address : ~p", [RF_address]),
+%%	lager:info("Unknown : ~p", [Unknown]),
+%%	lager:info("State : ~p Answer : ~p Error : ~p Valid : ~p ", [State, Answer, Error, Valid]),
+%%	lager:info("Battery : ~p Linkstatus : ~p Panel : ~p Gateway : ~p Dst setting : ~p Mode : ~p~p", [Battery,Linkstatus,Panel,Gateway, Dst, Mode_1, Mode_0 ]),
+%%	lager:info("Value : ~p %", [Value]),
+%%	lager:info("Temp : ~p C", [Temp/2]),
+%%	lager:info("Date : ~p", [Date]),
+%%	lager:info("Time : ~p", [Time]),
+%%	lager:info("Temp1 : ~p C", [Temp1/2]),
+%%	lager:info("Rest : ~p", [Rest]),
+	Result = {rf_address, RF_address, [{temp, Temp/2}, {value, Value}, {date, Date}, {time, Time},
+							 {error, value(error,Error)}, {answer,value(answer,Answer)},{state,State}, 
+							 {battery, value(battery, Battery)}, {linkstatus, value(linkstatus,Linkstatus)}, {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)}]},	
+	lager:info("2. Length of the rest : ~p", [byte_size(Rest) ]),
 	decode_l(Rest, [Result|Acc]);
-%%
-%% Handling of the shuttercontact live data
-%%
 decode_l(<<6,
 		   RF_address:?RF_ADDRESS, 
 		   Unknown:1/binary, 
@@ -194,12 +213,11 @@ decode_l(<<6,
 		   Status_2:1/binary, 
 		   Rest/binary>>, Acc) ->
 	<<U4:1, U3:1,U2:1, Valid:1, Error:1, Answer:1, State:1, U1:1>> = Status_1, 
-	<<Battery:1, Linkstatus:1, Panel:1, Gateway:1, Dst:1, U:1, Window:1, Mode_0:1>> = Status_2,
-	Result = {rf_address, RF_address, [{rf_address, RF_address},
-							 {error, value(error,Error)}, {answer,value(answer,Answer)},{state,value(state,State)}, 
+	<<Battery:1, Linkstatus:1, Panel:1, Gateway:1, Dst:1, U:1, Mode_1:1, Mode_0:1>> = Status_2,
+	Result = {rf_address, RF_address, [
+							 {error, value(error,Error)}, {answer,value(answer,Answer)},{state,State}, 
 							 {battery, value(battery, Battery)}, {linkstatus, value(linkstatus,Linkstatus)}, 
-							 {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)},
-							 {window, value(window,Window)}]},
+							 {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)}]},
 	decode_l(Rest, [Result|Acc]).
 
 
@@ -274,6 +292,10 @@ decode_c_m1(<<RF_address:?RF_ADDRESS,
 			  Unknown:?BYTE,
 			  Serial:10/binary, 
 			  Rest/binary>>) ->
+	lager:info("RF_address : ~p", [RF_address]),
+	lager:info("Device_type : ~p", [Device_type]),
+	lager:info("Room_id : ~p", [Room_id]),
+	lager:info("Serial ~p", [Serial]),
 	{rf_address, RF_address, [{device_type, Device_type}, {room_id, Room_id}, {serial, Serial}]}.
 
 %% --------------------------------------------------------------------
@@ -313,55 +335,11 @@ decode(hw_revision, Bin) ->
 
 bin_to_dez(Bin) ->
 	list_to_integer(binary_to_list(Bin), 16).
-
-decode_date_time(Date, Time) ->
-	lists:concat([decode_date(Date)," ",decode_time(Time)]).
-
-decode_date(Date) ->
-	<<M1:3, Day:5, M4:1,U:1, Y:6>> = Date,
-	<<Month:4>> = <<M1:3, M4:1>>,
-	Year = 2000 + Y,
-	lists:concat([Day, ".", Month, ".", Year]). 
-decode_time(Time) ->
-	"00:00".
-encode_command(Room_id, RF_address, Mode, Temp, Date, Time) ->
-	ok.
-encode_temp(Mode, Temp) ->
-	<<Mode:2, (Temp * 2):6>>.
-
-encode_date(Date) when is_list(Date) ->
-	[D, M, Y] = string:tokens("29.8.2011","."),
-	D1 = list_to_integer(D),
-	M1 = list_to_integer(M) ,
-	Y1 = list_to_integer(Y) - 2000,
-	encode_date(D1, M1, Y1).
-encode_date(D, M, Y) ->
-	<<Month_1:3, Month_2:1>> = <<M:4>>,
-	<<Month_1:3, D:5, Month_2:1, 0:1, Y:6>>.
-	
-encode_time(Time) ->
-	ok.
-encode_rf_address(RF_address) when is_integer(RF_address) ->
-	<<RF_address:3/little-unsigned-integer-unit:8>>.
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
-decode_date_test() ->
-	?assertEqual("29.8.2011", decode_date(<<157,11>>)).
-decode_date_time_test() ->
-	?assertEqual("29.8.2011 00:00", decode_date_time(<<157,11>>, <<0>>)).
-
-encode_date_test() ->
-	?assertEqual(<<157,11>>, encode_date("29.8.2011")).
-
-encode_temp_test() ->
-	?assertEqual(<<168>>, encode_temp(10, 20)).
-
-encode_rf_address_test() ->
-	?assertEqual(<<11,35,145>>, encode_rf_address(9511691)).
-
 decode_m_test() ->		  
 	M = <<"M:00,01,VgIBAgpXb2huemltbWVyCyORAgELI5FLRVEwNTU4NjU1EFRoZXJtb3N0YXQgbGlua3MCAQlCUktFUTA1MjUxMDMRVGhlcm1vc3RhdCByZWNodHMCAQ==\r\n">>,
 	decode(M).
@@ -401,4 +379,6 @@ decode_c_message_3_test() ->
 	M = <<"C:094252,0glCUgECGP9LRVEwNTI1MTAzKiEsCQcYAzAM/wBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERUTG9UnVT3RSBFIEUgRSBFIEUgRSBFIEUgREhMbVadVvdFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:0b2391,0gsjkQECGP9LRVEwNTU4NjU1KiEsCQcYAzAM/wBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERUTG9UnVT3RSBFIEUgRSBFIEUgRSBFIEUgREhMbVadVvdFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:078f6d,zgePbQMCEABLRVEwMDY0NTM5KiE9CURITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgRFRMb1SdVPdFIEUgRSBFIEUgRSBFIEUgRSBESExtVp1W90UgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgBxgw\r\nC:086d48,0ghtSAEBGP9LRVEwNDAyMTgyKyE9CQcYAzAM/wBESFUIRSBFIEUgRSBFIEUgRSBFIEUgRSBFIERIVQhFIEUgRSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIERIVGxEzFUURSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:0538b3,EQU4swQCEw9KRVEwNDA0NjM3\r\n">>,
 	decode(M).
 
+decode_date_test() ->
+	ok.
 -endif.

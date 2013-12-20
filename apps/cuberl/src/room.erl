@@ -20,7 +20,6 @@
 -export([start_link/1]).
 -export([get_name/1]).
 -export([add_device/2, get_devices/1]).
--export([get_model/1]).
 %% ====================================================================
 %% External functions
 %% ====================================================================
@@ -30,8 +29,6 @@ add_device(Room_id, Device_config) ->
 get_devices(Room_id) ->
     gen_server:call(list_to_atom(integer_to_list(Room_id)), {get_devices}).
 
-get_model(Room_id) when is_atom(Room_id)->
-    gen_server:call(Room_id, {get_model, Room_id}).   
 get_name(Room_id) ->
     gen_server:call(list_to_atom(integer_to_list(Room_id)), {get_name}).
 %% --------------------------------------------------------------------
@@ -75,11 +72,6 @@ handle_call({get_name}, From,  State=#state{config = Config}) ->
 handle_call({get_devices}, From,  State=#state{devices = Devices}) ->
     {reply, Devices, State};
 
-handle_call({get_model, Room_id}, From, State=#state{config = Config, devices = Devices}) ->
-    Devices_model = [device:get_model(int_to_atom(Device))|| Device <- Devices],
-    Model = {Room_id, [{config, Config}, {devices, Devices_model}]},
-    {reply, Model, State};
-
 handle_call(Request, From, State) ->
     Reply = ok,
     {reply, Reply, State}.
@@ -92,7 +84,7 @@ handle_call(Request, From, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_cast({add_device, Config}, State=#state{devices = Devices}) ->
-    house_sup:start_device([{room_id, proplists:get_value(room_id, Config)}|Config]), 
+    house_sup:start_device(Config), 
     {noreply, State#state{devices = [proplists:get_value(rf_address, Config) |Devices]}};
 
 handle_cast(Msg, State) ->
@@ -128,8 +120,9 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-int_to_atom(Int) ->
-    list_to_atom(integer_to_list(Int)).
+%% --------------------------------------------------------------------
+%%% Test functions
+%% --------------------------------------------------------------------
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

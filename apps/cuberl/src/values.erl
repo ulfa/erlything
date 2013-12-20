@@ -20,7 +20,7 @@
 %%% -------------------------------------------------------------------
 -module(values).
 
--export([value/2, value/3]).
+-export([value/2]).
 
 value(valid, 0) ->
     "invalid";
@@ -54,32 +54,11 @@ value(dst, 0) ->
     "inactive";
 value(dst, 1) ->
     "active";
-value(mode, "00") ->
-    "auto";
-value(mode, "01") ->
+value(mode, 00) ->
+    "auto/week schedule";
+value(mode, 01) ->
     "manual";
-value(mode, "10") ->
+value(mode, 10) ->
     "vacation";
-value(mode, "11") ->
-    "boost";
-value(state, 0) ->
-    "not initialized";
-value(state, 1) ->
-    "initialized";
-value(window, 0) ->
-    "closed";
-value(window, 1) ->
-    "open";
-value(device_type, 1) ->
-    "HeatingThermostat";
-value(device_type, 2) ->
-    "HeatingThermostatPlus";
-value(device_type, 3) ->
-    "WallMountedThermostat";
-value(device_type, 4) ->
-    "ShutterContact";
-value(device_type, 5) ->
-    "PushButton".
-
-value(mode, Mode_1, Mode_2) ->
-    value(mode,integer_to_list(Mode_1) ++ integer_to_list(Mode_2)).
+value(mode, 11) ->
+    "boost". 

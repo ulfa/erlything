@@ -22,16 +22,13 @@
 -export([start_link/0]).
 -export([start/0]).
 -export([add_room/1, get_rooms/0]).
--export([get_model/0]).
 %% ====================================================================
 %% External functions
 %% ====================================================================
 add_room(Room_config) ->
 	gen_server:cast(?MODULE, {add_room, Room_config}).
 get_rooms() ->
-	gen_server:call(?MODULE, {get_rooms}).
-get_model() ->
-    gen_server:call(?MODULE, {get_model}).
+	gen_server:call(?MODULE, {get_room}).
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
@@ -69,12 +66,8 @@ init([]) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_call({get_rooms}, From, State=#state{rooms = Rooms}) ->
+handle_call(Request, From, State=#state{rooms = Rooms}) ->
     {reply, Rooms, State};
-
-handle_call({get_model}, From, State=#state{rooms = Rooms}) ->
-    Model = [room:get_model(int_to_atom(Room))||Room <- Rooms],
-    {reply, Model, State};
 
 handle_call(Request, From, State) ->
     Reply = ok,
@@ -122,8 +115,9 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-int_to_atom(Int) ->
-    list_to_atom(integer_to_list(Int)).
+%% --------------------------------------------------------------------
+%%% Test functions
+%% --------------------------------------------------------------------
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

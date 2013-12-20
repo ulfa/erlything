@@ -20,13 +20,12 @@
 -export([start_link/1]).
 -export([set_l_data/2, get_l_data/1]).
 -export([set_c_data/2, get_c_data/1]).
--export([get_model/1]).
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
 set_l_data(RF_address, L_data) ->
-	lager:debug("set_l_data : ~p", [L_data]),
+	lager:info("set_l_data : ~p", [L_data]),
 	gen_server:cast(int_to_atom(RF_address), {set_l_data, L_data}).
 get_l_data(RF_address) ->
 	gen_server:call(int_to_atom(RF_address), {get_l_data}).
@@ -35,13 +34,12 @@ set_c_data(RF_address, C_data) ->
 	gen_server:cast(int_to_atom(RF_address), {set_c_data, C_data}).
 get_c_data(RF_address) ->
 	gen_server:call(int_to_atom(RF_address), {get_c_data}).
-get_model(RF_address) when is_atom(RF_address) ->
-    gen_server:call(RF_address, {get_model, RF_address}).
+
 
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {config=[], l_data=[], c_data=[]}).
+-record(state, {config, l_data, c_data}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -79,9 +77,6 @@ handle_call({get_l_data}, From, State=#state{l_data = L_data}) ->
 handle_call({get_c_data}, From, State=#state{c_data = C_data}) ->
     {reply, C_data, State};
 
-handle_call({get_model, RF_address}, From, State=#state{config = Config, l_data = L_data, c_data = C_data}) ->
-    Model = {RF_address, [{config, Config}, {l_data, L_data}, {c_data, C_data}]},
-    {reply, Model, State};
 handle_call(Request, From, State) ->
     Reply = ok,
     {reply, Reply, State}.
@@ -93,13 +88,15 @@ handle_call(Request, From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_cast({set_l_data, L_data}, State=#state{c_data = C_data, l_data = Old_l_data}) ->
-    set_live_data(get(device_type, C_data), C_data, Old_l_data, L_data),
+handle_cast({set_l_data, L_data}, State) ->
+    lager:info("adasdsadsd"),
+    set_live_data(L_data),
     {noreply, State#state{l_data = L_data}};
 
-handle_cast({set_c_data, C_data_new}, State=#state{c_data = C_data}) ->
-    set_config_data(get(device_type, C_data_new), C_data_new, C_data),
-    {noreply, State#state{c_data = C_data_new}};
+handle_cast({set_c_data, C_data}, State) ->
+	lager:info("set c_data : ~p", [C_data]),
+    set_config_data(proplists:get_value(device_type, C_data), C_data),
+    {noreply, State#state{c_data = C_data}};
 
 handle_cast(Msg, State) ->
     {noreply, State}.
@@ -133,67 +130,26 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+%% Thermostat
+set_live_data(Data) ->
+    cuberl_sender:send_message({external_event, cuberl,  [{type, live_data}, {data, Data}]}).
 
-set_live_data(Device_type, C_data, Data, Data) ->
-    lager:debug("nothing changed for device_type : ~p data: ~p", [proplists:get_value(device_type, C_data), Data]);
-set_live_data(1, C_data, Old_l_data, Data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, live_data}, {device_type, values:value(device_type, 1)},{data, Data}]});
-set_live_data(3, C_data, Old_l_data, Data) ->
-    data_changed(temperature, C_data, Data, Old_l_data),
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, live_data}, {device_type, values:value(device_type, 3)},{data, Data}]});
-set_live_data(4, C_data, Old_l_data, Data) ->
-    data_changed(window, C_data, Data, Old_l_data),
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, live_data}, {device_type, values:value(device_type, 4)},{data, Data}]});
-set_live_data(5, C_data, Old_l_data, Data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, live_data}, {device_type, values:value(device_type, 5)},{data, Data}]}).
-
-set_config_data(1, New_data, C_data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, config_data}, {device_type, values:value(device_type, 1)}, {data, New_data}]});
-set_config_data(3, New_data, C_data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, config_data}, {device_type, values:value(device_type, 3)}, {data, New_data}]});
-set_config_data(4, New_data, C_data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, config_data}, {device_type, values:value(device_type, 4)}, {data, New_data}]});
-set_config_data(5, New_data, C_data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, config_data}, {device_type, values:value(device_type, 5)}, {data, New_data}]});
-set_config_data(Device_type, New_data, C_data) ->
-    lager:warning("don't understand config data : ~p", [New_data]).
+set_config_data(1, Data) ->
+    cuberl_sender:send_message({external_event, cuberl,  [{type, config_data}, {device_type, 1}, {data, Data}]});
+set_config_data(3, Data) ->
+    cuberl_sender:send_message({external_event, cuberl,  [{type, config_data}, {device_type, 3}, {data, Data}]});
+set_config_data(4, Data) ->
+    cuberl_sender:send_message({external_event, cuberl,  [{type, config_data}, {device_type, 4}, {data, Data}]});
+set_config_data(5, Data) ->
+    cuberl_sender:send_message({external_event, cuberl,  [{type, config_data}, {device_type, 5}, {data, Data}]});
+set_config_data(Device_type, Data) ->
+    lager:warning("don't understand config data : ~p", [Data]).
 
 int_to_atom(Int) ->
 	list_to_atom(integer_to_list(Int)).
-
-data_changed(Something, C_data, New_data, New_data) ->
-    lager:warning("No changes on live data for unknown: ~p with data : ~p", [Something, New_data]);
-data_changed(temperature, C_data, New_data, Data) ->
-    Device_type = get(device_type, C_data), 
-    Room_id = get(room_id, C_data), 
-    Temp = get(temp, New_data),
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{act_temp_state, Temp}, {room_id, Room_id}, {device_type, Device_type}]});
-data_changed(window, C_data, New_data, Data) ->
-    Device_type = get(device_type, C_data), 
-    Room_id = get(room_id, C_data), 
-    Window_state = get(window, New_data),
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{window_state, Window_state}, {room_id, Room_id}, {device_type, Device_type}]});
-data_changed(battery, C_data, New_data, Data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, battery_state}, {device_type, 3}, {data, New_data}]}).
-
-get(Key, List) ->
-    proplists:get_value(Key, List).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).    
-list_equal_test() ->
-    A = lists:keysort(1,[{a, "1"}, {b, "2"}, {c, "3"}]),
-    B = lists:keysort(1,[{b, "2"}, {a, "1"}, {c, "3"}]),
-    C = [{a, "1"}, {b, "2"}, {c, "3"}],
-    D = [{b, "2"}, {a, "1"}, {c, "3"}],
-    ?assertEqual(true, A == B),
-    ?assertEqual(true, C /= D).
-
-send_config_data_test() ->
-    A = lists:keysort(1,[{a, "1"}, {b, "2"}, {c, "3"}]),
-    B = lists:keysort(1,[{b, "2"}, {a, "1"}, {c, "3"}]),
-    set_config_data(3, A, B).
-
 -endif.
