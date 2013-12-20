@@ -24,6 +24,7 @@ init(Config) ->
 
 stop(Config) ->
     lager:info("~p:stop('~p')", [?MODULE, Config]),
+    cuberl:disconnect(),
     application:stop(cuberl),
     application:unload(cuberl). 
 

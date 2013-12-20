@@ -27,8 +27,8 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([start/0, stop/0]).
--export([connect/0, connect/2]).
--export([register_listener/1]).
+-export([connect/0, connect/2, disconnect/0]).
+-export([register_listener/1, get_model/0]).
 
 start() ->
   	application:start(?MODULE).
@@ -44,8 +44,14 @@ connect() ->
 connect(Ip, Port) ->
     transceiver:connect(Ip, Port).
 
+disconnect() ->
+    transceiver:disconnect().
+
 register_listener(Pid) when is_pid(Pid) ->
     cuberl_sender:set_listener(Pid). 
+
+get_model() ->
+    house:get_model().
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------

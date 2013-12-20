@@ -231,14 +231,11 @@ to_html(ReqData, Context) ->
     {Content, ReqData, Context}.  
 
 get_data(Node, Name) when is_list(Node)->
-    case rpc:call(list_to_atom(Node), thing, get_module_config, [Name]) of 
+    case rpc:call(list_to_atom(Node), thing, get_model, [Name]) of 
         {badrpc, Reason} -> lager:error("got error during call ~p thing:get_driver(~p) with reason ~p", [Node, Name, Reason]),
                             [];
         Data -> Data
     end.
-
-convert_timestamp_to_date(List_of_temps) ->
-    lists:foldr(fun({Timestamp, Temp_hum}, Acc) -> [{date:timestamp_to_date(Timestamp), Temp_hum}|Acc] end, [], List_of_temps).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
