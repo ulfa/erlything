@@ -55,7 +55,7 @@ decode(<<"M:", Unknown:6/binary, Rest/binary>> = Message) ->
 	Devices = decode_devices(Devices_encoded),
 	[{rooms, Rooms}, {devices, Devices}];
 decode(<<"C:",RF_address:6/binary, "," ,Rest/binary>> = Message) ->
-	lager:debug("C - Message : ~p", [Message]),	
+	lager:info("C - Message : ~p", [Message]),	
 	Messages = binary:split(Message, <<"\r\n">>, [global]), 
 	[decode_c_m(<<"C:", RF_address/binary, ",", (base64:decode(Body))/binary>>) || <<"C:",RF_address:6/binary, "," , Body/binary>> <- Messages];
 decode(<<"L:", Rest/binary>> = Message) ->
@@ -87,7 +87,7 @@ decode_room(Room_count, Count, <<Room_id:?BYTE,
 								 Room_name:Room_name_length/binary, 
 								 Room_address:?RF_ADDRESS, 
 								 Rest/binary>>, Acc) ->
-	Room = [{room_id, Room_id}, {room_name, Room_name}, {room_address, Room_address},{room_name_length, Room_name_length}],
+	Room = [{room_id, Room_id}, {room_name, decode(room_name, Room_name)}, {room_address, Room_address},{room_name_length, Room_name_length}],
 	decode_room(Room_count, Count + 1, Rest, [Room|Acc]).
 
 %%Description        Startpos    Length      Example Value
@@ -104,12 +104,12 @@ decode_devices(<<Device_count:?BYTE, Rest/binary>>) ->
 decode_device(Device_count, Device_count, Rest, Acc) ->
 	Acc;	
 decode_device(Device_count, Count, <<Device_type:?BYTE, 
-										  RF_Address:?RF_ADDRESS, 
-										  Serial:10/binary, 
-										  Device_name_length:?BYTE, 
-										  Device_name:Device_name_length/binary, 
-										  Room_id:?BYTE, 
-										  Rest/binary>>, Acc) ->
+									RF_Address:?RF_ADDRESS, 
+									Serial:10/binary, 
+									Device_name_length:?BYTE, 
+									Device_name:Device_name_length/binary, 
+									Room_id:?BYTE, 
+									Rest/binary>>, Acc) ->
 	Device = {room_id, Room_id,[{device_type, Device_type}, {serial, Serial}, {device_name, Device_name}, {rf_address, RF_Address}]},
 	decode_device(Device_count, Count + 1, Rest, [Device|Acc]).
 
@@ -236,13 +236,27 @@ decode_l(<<6,
 %%        1B         1  FF          Maximum Valve setting; *(100/255) to get in %
 %%        1C         1  00          Valve Offset ; *(100/255) to get in %
 %%        1D         ?  44 48 ...   Weekly program (see The weekly program)
+
+
+decode_c_m(<<C:2/binary, 
+			 RF_address:6/binary, 
+			 _Comma:1/binary, 
+			 Length/integer, 
+			 Message/binary>>) when Length > byte_size(Message) ->
+	S = byte_size(Message),
+	lager:info("1 : ~p", [S]),
+	lager:info("2 : ~p", [Length]),
+	decode_c_m1(Message);
+	
+
 decode_c_m(<<C:2/binary, 
 			 RF_address:6/binary, 
 			 _Comma:1/binary, 
 			 Length/integer, 
 			 Message:Length/binary>>) ->
-	lager:info("Length : ~p", [Length]),
+	lager:info("~p", [Length]),
 	decode_c_m1(Message).
+
 
 decode_c_m1(<<RF_address:?RF_ADDRESS, 
 			  Device_type:?BYTE, 
@@ -262,6 +276,7 @@ decode_c_m1(<<RF_address:?RF_ADDRESS,
 			  Max_value:?BYTE, 
 			  Value_offset:?BYTE, 
 			  Rest/binary>>) ->
+
 	{rf_address, RF_address, [{device_type, Device_type}, {room_id, Room_id}, {serial, Serial}, {com_temp, Com_temp}, {eco_temp, Eco_temp},
 	{max_set_point, Max_set_point_temp}, {min_set_point_temp, Min_set_point_temp},{temp_offset, Temp_offset}, {Window_open_temp, Window_open_temp},
 	{window_open_duration, Window_open_duration}, {boost_duration_value, Boost_duration_value}, {day_of_week_and_time, Day_of_week_and_time}, {max_value, Max_value},
@@ -308,59 +323,91 @@ decode(system_time, Bin) ->
 	Minutes = string:sub_string(T, 3, 4),
 	{system_time, {list_to_integer(Hours, 16), list_to_integer(Minutes, 16)}};
 decode(hw_revision, Bin) ->
-	{hw_revision, bin_to_dez(Bin)}.
+	{hw_revision, bin_to_dez(Bin)};
+decode(room_name, String) ->
+	unicode:characters_to_list(String, utf8);
+decode(date, Date) ->
+	<<M1:3, Day:5, M4:1,U:1, Y:6>> = Date,
+	<<Month:4>> = <<M1:3, M4:1>>,
+	Year = 2000 + Y,
+	lists:concat([Day, ".", Month, ".", Year]);
+decode(time, <<Time>>) ->
+	T = Time / 2,
+	Hour = trunc(T),
+	Minute = trunc(T * 60) rem 60,
+	lists:flatten(io_lib:format("~2..0w:~2..0w", [Hour,Minute])).
+decode(date_time, Date, Time) ->
+	lists:concat([decode(date, Date)," ",decode(time,Time)]).
 
+encode(command, Room_id, RF_address, Mode, Temp, Date, Time) ->
+	Start = <<00,04,64,00,00,00>>,
+	RID = encode(room_id, Room_id),
+	RF = encode(rf_address, RF_address),
+	Te = encode(temp, Mode, Temp),
+	D = encode(date, Date),
+	T = encode(time, Time),
+	C = base64:encode(<<Start/binary, RF/binary, RID/binary, Te/binary, D/binary, T/binary>>),
+	"s:" ++ binary_to_list(C) ++ "\r\n".
+encode(temp, Mode, Temp) ->
+	<<Mode:2, (Temp * 2):6>>.
+encode(date, Date) when is_list(Date) ->
+	[D, M, Y] = string:tokens(Date ,"."),
+	D1 = list_to_integer(D),
+	M1 = list_to_integer(M) ,
+	Y1 = list_to_integer(Y) - 2000,
+	encode(date, {D1, M1, Y1});
+encode(date, {D, M, Y}) ->
+	<<Month_1:3, Month_2:1>> = <<M:4>>,
+	<<Month_1:3, D:5, Month_2:1, 0:1, Y:6>>;
+encode(time, Time) when is_list(Time) ->
+	[Hour, Time1] = string:tokens(Time, ":"),
+	encode(time,{list_to_integer(Hour), list_to_integer(Time1)});
+encode(time, {Hour, Minute}) ->
+	Time = trunc((Hour + (Minute / 60)) * 2),
+	<<T:8>> = <<Time:8>>;
+encode(rf_address,RF_address) when is_integer(RF_address) ->
+	<<RF_address:3/little-unsigned-integer-unit:8>>;
+
+encode(room_id, Room_id) when is_list(Room_id) ->
+	encode(room_id, list_to_integer(Room_id));
+encode(room_id, Room_id) ->
+	<<R:8>> = <<Room_id:8>>.
 
 bin_to_dez(Bin) ->
 	list_to_integer(binary_to_list(Bin), 16).
 
-decode_date_time(Date, Time) ->
-	lists:concat([decode_date(Date)," ",decode_time(Time)]).
 
-decode_date(Date) ->
-	<<M1:3, Day:5, M4:1,U:1, Y:6>> = Date,
-	<<Month:4>> = <<M1:3, M4:1>>,
-	Year = 2000 + Y,
-	lists:concat([Day, ".", Month, ".", Year]). 
-decode_time(Time) ->
-	"00:00".
-encode_command(Room_id, RF_address, Mode, Temp, Date, Time) ->
-	ok.
-encode_temp(Mode, Temp) ->
-	<<Mode:2, (Temp * 2):6>>.
-
-encode_date(Date) when is_list(Date) ->
-	[D, M, Y] = string:tokens("29.8.2011","."),
-	D1 = list_to_integer(D),
-	M1 = list_to_integer(M) ,
-	Y1 = list_to_integer(Y) - 2000,
-	encode_date(D1, M1, Y1).
-encode_date(D, M, Y) ->
-	<<Month_1:3, Month_2:1>> = <<M:4>>,
-	<<Month_1:3, D:5, Month_2:1, 0:1, Y:6>>.
-	
-encode_time(Time) ->
-	ok.
-encode_rf_address(RF_address) when is_integer(RF_address) ->
-	<<RF_address:3/little-unsigned-integer-unit:8>>.
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
+
 decode_date_test() ->
-	?assertEqual("29.8.2011", decode_date(<<157,11>>)).
+	?assertEqual("29.8.2011", decode(date, <<157,11>>)).
 decode_date_time_test() ->
-	?assertEqual("29.8.2011 00:00", decode_date_time(<<157,11>>, <<0>>)).
+	?assertEqual("29.8.2011 00:00", decode(date_time, <<157,11>>, <<0>>)).
+
+decode_time_test() ->
+	?assertEqual("15:30", decode(time, <<31>>)),
+	?assertEqual("02:00", decode(time, <<04>>)).
+
+encode_command_test() ->
+	?assertEqual("s:AARAAAAAAP4wAaiLix8=\r\n", encode(command, "01", 3210752, 10, 20, "11.9.2011", "15:30")).
 
 encode_date_test() ->
-	?assertEqual(<<157,11>>, encode_date("29.8.2011")).
+	?assertEqual(<<157,11>>, encode(date, "29.8.2011")),
+	?assertEqual(<<139,139>>, encode(date, "11.9.2011")).
 
+
+encode_time_test() ->
+	?assertEqual(<<31>>, encode(time, "15:30")),
+	?assertEqual(<<04>>, encode(time, "02:00")).
 encode_temp_test() ->
-	?assertEqual(<<168>>, encode_temp(10, 20)).
+	?assertEqual(<<168>>, encode(temp, 10, 20)).
 
 encode_rf_address_test() ->
-	?assertEqual(<<11,35,145>>, encode_rf_address(9511691)).
+	?assertEqual(<<11,35,145>>, encode(rf_address,9511691)).
 
 decode_m_test() ->		  
 	M = <<"M:00,01,VgIBAgpXb2huemltbWVyCyORAgELI5FLRVEwNTU4NjU1EFRoZXJtb3N0YXQgbGlua3MCAQlCUktFUTA1MjUxMDMRVGhlcm1vc3RhdCByZWNodHMCAQ==\r\n">>,
@@ -401,4 +448,16 @@ decode_c_message_3_test() ->
 	M = <<"C:094252,0glCUgECGP9LRVEwNTI1MTAzKiEsCQcYAzAM/wBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERUTG9UnVT3RSBFIEUgRSBFIEUgRSBFIEUgREhMbVadVvdFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:0b2391,0gsjkQECGP9LRVEwNTU4NjU1KiEsCQcYAzAM/wBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERUTG9UnVT3RSBFIEUgRSBFIEUgRSBFIEUgREhMbVadVvdFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:078f6d,zgePbQMCEABLRVEwMDY0NTM5KiE9CURITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgREhMbVicWPZFIEUgRSBFIEUgRSBFIEUgRSBESExtWJxY9kUgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgRFRMb1SdVPdFIEUgRSBFIEUgRSBFIEUgRSBESExtVp1W90UgRSBFIEUgRSBFIEUgRSBFIERITG1YnFj2RSBFIEUgRSBFIEUgRSBFIEUgBxgw\r\nC:086d48,0ghtSAEBGP9LRVEwNDAyMTgyKyE9CQcYAzAM/wBESFUIRSBFIEUgRSBFIEUgRSBFIEUgRSBFIERIVQhFIEUgRSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIERIVGxEzFUURSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:0538b3,EQU4swQCEw9KRVEwNDA0NjM3\r\n">>,
 	decode(M).
 
+decode_c_message_4_test() ->
+	M = <<"C:0538b3,EQU4swQCEw9KRVEwNDA0NjM3\r\nC:086d48,0ghtSAEBGP9LRVEwNDAyMTgyKyE9CQcYAzAM/wBESFUIRSBFIEUgRSBFIEUgRSBFIEUgRSBFIERIVQhFIEUgRSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIERIVGxEzFUURSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:094252,0glCUgECGP9LRVEwNTI1MTAzKiEsCQcYAzAM/wBEVExuVJ1U+EUgRSBFIEUgRSBFIEUgRSBFIERUTG5UnVT4RSBFIEUgRSBFIEUgRSBFIEUgRFRMblSdVPhFIEUgRSBFIEUgRSBFIEUgRSBEVExuVJ1U+EUgRSBFIEUgRSBFIEUgRSBFIERUTG5UnVT4RSBFIEUgRSBFIEUgRSBFIEUgRFRMblSdVPhFIEUgRSBFIEUgRSBFIEUgRSBEVExuVJ1U+EUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:078f6d,zgePbQMCEABLRVEwMDY0NTM5KiE9CURUTG5UnVT4RSBFIEUgRSBFIEUgRSBFIEUgRFRMblSdVPhFIEUgRSBFIEUgRSBFIEUgRSBEVExuVJ1U+EUgRSBFIEUgRSBFIEUgRSBFIERUTG5UnVT4RSBFIEUgRSBFIEUgRSBFIEUgRFRMblSdVPhFIEUgRSBFIEUgRSBFIEUgRSBEVExuVJ1U+EUgRSBFIEUgRSBFIEUgRSBFIERUTG5UnVT4RSBFIEUgRSBFIEUgRSBFIEUgBxgw\r\nC:0b2391,0gsjkQECGP9LRVEwNTU4NjU1KiEsCQcYAzAM/wBEVExuVJ1U+EUgRSBFIEUgRSBFIEUgRSBFIERUTG5UnVT4RSBFIEUgRSBFIEUgRSBFIEUgRFRMblSdVPhFIEUgRSBFIEUgRSBFIEUgRSBEVExuVJ1U+EUgRSBFIEUgRSBFIEUgRSBFIERUTG5UnVT4RSBFIEUgRSBFIEUgRSBFIEUgRFRMblSdVPhFIEUgRSBFIEUgRSBFIEUgRSBEVExuVJ1U+EUgRSBFIEUgRSBFIEUgRSBFIA==\r\nC:08e1f2,0gjh8gEDGP9LRVEwNjQ3ODc5KyE9CQcYAzAM/wBESFUIRSBFIEUgRSBFIEUgRSBFIEUgRSBFIERIVQhFIEUgRSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIERIVGxEzFUURSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUg">>,
+	decode(M).
+
+decode_c_message_5_test() ->
+	M = <<"C:0538b3,EQU4swQCEw9KRVEwNDA0NjM3\r\n">>,
+	decode(M).
+decode_c_message_6_test() ->
+	M = <<"C:08e1f2,0gjh8gEDGP9LRVEwNjQ3ODc5KyE9CQcYAzAM/wBESFUIRSBFIEUgRSBFIEUgRSBFIEUgRSBFIERIVQhFIEUgRSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIERIVGxEzFUURSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUg">>,
+
+	decode(M).
+	
 -endif.

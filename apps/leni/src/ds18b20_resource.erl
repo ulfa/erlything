@@ -97,7 +97,7 @@ valid_content_headers(ReqData, Context) ->
 % will be sent. Note that these are all-caps and are atoms. (single-quoted)
 %
 allowed_methods(ReqData, Context) ->
-    {['GET', 'POST'], ReqData, Context}.
+    {['GET'], ReqData, Context}.
 %
 % This is called when a DELETE request should be enacted 
 % and should return true if the deletion succeeded.
