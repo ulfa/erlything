@@ -23,7 +23,8 @@ handle_msg([Node ,Sensor, Id, Time, [{temp, 0.0},{hum, 0.0}]=Body], Config, Modu
     lager:warning("~p got a message with incorrect values. message:~p", [?MODULE, [Node ,Sensor, Id, Time, Body]]),
     Config;
 
-handle_msg([Node ,Sensor, Id, Time, [{temp, Temp},{hum, Hum}]], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, [{temp, Temp},{hum, Hum}] = Body], Config, Module_config) ->
+lager:info("~p got a message with body : ~p : ", [?MODULE, Body]),
     Table_Id = proplists:get_value(?TABLE, Config),
     [{data, Data}] = ets:lookup(Table_Id, data),    
     ets:insert(Table_Id, [{data, add(Data, {Time, [{temp, Temp},{hum, Hum}]})}]),
