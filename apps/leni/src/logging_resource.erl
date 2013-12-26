@@ -234,6 +234,8 @@ to_html(ReqData, Context) ->
 create_links(Nodes) ->
     [{logging, "/logger/" ++ atom_to_list(Node) , atom_to_list(Node)}||Node <- Nodes].
 
+get_console_file("none", Name) ->
+    []; 
 get_console_file(Node, Name) ->
     Content = rpc:call(list_to_atom(Node), horst, get_log, [Name]),    
     lager:debug("get the file : ~p from node : ~p", [Name, Node]),

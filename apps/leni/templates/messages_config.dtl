@@ -4,33 +4,48 @@
 
 {% block body %}
 
-{%for node, messages_config in messages %}
+
+
+<div class="tabbable">
+	<ul class="nav nav-tabs">
+	{%for node, messages_config in messages %}
+		{%if forloop.counter == 1%}
+			<li class="active"><a href="#{{node|cut:"@"}}" data-toggle="tab">{{node}}</a></li>
+		{% else %}
+			<li><a href="#{{node|cut:"@"}}" data-toggle="tab">{{node}}</a></li>
+		{% endif %}		
+	{%endfor%}
+	</ul>
 
 <div class="well">
-<h1>Node : {{node}}</h1>
-	{%for driver, messages in messages_config%}
+	<div class="tab-content">
 	
-	<h2>{{driver}}</h2>
-		<table class="table">
-			<thead>  
-          	  <tr>  
-				  <th>Node</th>  
-				  <th>Modul</th>
-				  <th>Id</th>  
-			  </tr>  
-			</thead>
-			<tbody> 
-				{%for n, m, i in messages%}
-				<tr>
-					<td>{{n}}</td>
-					<td>{{m}}</td>
-					<td>{{i}}</td>
-				</tr>	
-				{%endfor%}
-			</tbody> 
-		</table>
-	{%endfor%}
-	</div>
-{%endfor%}
+	{%for node, messages_config in messages %}
 
+		{%for driver, id, messages in messages_config%}
+		
+			<h2>{{driver}} {{id}}</h2>
+			<table class="table">
+				<thead>  
+          	  		<tr>  
+						<th>Node</th>  
+				  		<th>Module</th>
+				  		<th>Id</th>  
+			  		</tr>  
+				</thead>
+				<tbody> 
+					{%for n, m, i in messages%}
+					<tr>
+						<td>{{n}}</td>
+						<td>{{m}}</td>
+						<td>{{i}}</td>
+					</tr>	
+					{%endfor%}
+				</tbody> 
+			</table>
+		{%endfor%}
+	</div>
+	{%endfor%}
+</div>
+</div>
 {% endblock %}
