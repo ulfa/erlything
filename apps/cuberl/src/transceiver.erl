@@ -87,7 +87,7 @@ handle_call({connect, Ip, Port}, _From, State) ->
 
 handle_call({disconnect}, _From, State=#state{socket = Socket}) ->
     lager:info("disconnecting from the cube"),
-    gen_tcp:close(Socket), 
+    close(Socket), 
     {reply, ok, State};
 
 handle_call(_Request, _From, State) ->
@@ -125,7 +125,7 @@ handle_info({tcp, Socket, Data}, State) ->
 
 handle_info({tcp_closed, Socket}, State) ->
     lager:info("Socket closed closed by peer"),
-    gen_tcp:close(Socket),
+    close(Socket),
     {noreply, State};
 
 handle_info({tcp_closed, undefined}, State) ->
@@ -136,10 +136,14 @@ handle_info({tcp_closed, undefined}, State) ->
 handle_info(timeout, State) ->	
     Port = get_env(port),
     Ip = get_env(ip),
-    {ok, Socket} = gen_tcp:connect(Ip, Port, []),
-    {ok, ListenSocket} = gen_tcp:listen(Port, []),
-    start_timer(get_env(timer)),
-	{noreply, #state{socket = Socket, listenSocket = ListenSocket}};
+    case gen_tcp:connect(Ip, Port, []) of 
+        {ok, Socket} -> {ok, ListenSocket} = gen_tcp:listen(Port, []),
+                        start_timer(get_env(timer)),
+	                    {noreply, #state{socket = Socket, listenSocket = ListenSocket}};
+        {error, Reason} -> cuberl_sender:send_message({external_interrupt, cuberl, {fatal, Reason}}),
+                           lager:error("can't connect to the cube, because of : ~p", [Reason]),
+                           {noreply, State}
+    end; 
 
 handle_info({get_live_data}, State=#state{socket = Socket}) ->
     send_command(Socket, "l:"),
@@ -156,7 +160,7 @@ handle_info(Info, State) ->
 %% Returns: any (ignored by gen_server)
 %% --------------------------------------------------------------------
 terminate(_Reason, State=#state{socket = Socket}) ->
-	gen_tcp:close(Socket), 
+	close(Socket), 
     ok.
 
 %% --------------------------------------------------------------------
@@ -170,6 +174,11 @@ code_change(_OldVsn, State, _Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+close(undefined) ->
+    lager:error("Socket is undefined, please check your cube!");
+close(Socket) ->
+    gen_tcp:close(Socket).
+
 send_command(Socket, Command) ->
     lager:debug("Command : ~p", [Command]),
     gen_tcp:send(Socket, Command ++ "\r\n").

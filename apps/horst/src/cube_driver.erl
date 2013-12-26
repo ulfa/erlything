@@ -19,8 +19,13 @@
 
 init(Config) ->
     lager:info("~p:init('~p')", [?MODULE, Config]),
-    application:start(cuberl),
-    cuberl:register_listener(self()).
+    case application:start(cuberl) of
+        ok -> cuberl:register_listener(self()),
+              ok;
+        {error, {already_started, App}} ->
+            ok
+    end.
+    
 
 stop(Config) ->
     lager:info("~p:stop('~p')", [?MODULE, Config]),
@@ -28,16 +33,22 @@ stop(Config) ->
     application:stop(cuberl),
     application:unload(cuberl). 
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
-    lager:warning("~p got a message with incorrect values: ~p", [?MODULE, [Node ,Sensor, Id, Time, Body]]),
+handle_msg({external_event, cuberl,  {fatal, Reason}}, Config, Module_config) ->
+    lager:info("~p got an fatal message with values: ~p. I will stop the cube.", [?MODULE, Reason]),
+    stop(Config),
     Config;
 
 handle_msg({external_event, cuberl,  Body}, Config, Module_config) ->
     lager:info("~p got a message with values: ~p", [?MODULE, Body]),
     send_message(Body),
     Config;
+
 handle_msg({external_event, Application,  Body}, Config, Module_config) ->
     lager:warning("~p got a message with incorrect values: ~p", [?MODULE, {Application, Body}]),
+    Config;
+
+handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
+    lager:warning("~p got a message with incorrect values: ~p", [?MODULE, [Node ,Sensor, Id, Time, Body]]),
     Config.
 
 send_message(Body) ->

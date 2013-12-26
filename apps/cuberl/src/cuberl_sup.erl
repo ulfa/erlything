@@ -10,7 +10,7 @@
 -export([init/1]).
 
 %% Helper macro for declaring children of supervisor
--define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
+-define(CHILD(I, Type), {I, {I, start_link, []}, temporary, 5000, Type, [I]}).
 
 %% ===================================================================
 %% API functions
@@ -24,7 +24,8 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-    {ok, { {one_for_one, 5, 10}, [?CHILD(transceiver_sup, supervisor),
-    							  ?CHILD(house_sup, supervisor),
-                                  ?CHILD(cuberl_sender, worker)]} }.
+    {ok, { {one_for_all, 3, 10}, [?CHILD(cuberl_sender, worker),
+    							  ?CHILD(transceiver_sup, supervisor),
+    							  ?CHILD(house_sup, supervisor)
+                                  ]} }.
 
