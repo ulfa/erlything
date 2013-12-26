@@ -70,6 +70,8 @@ handle_call({get_log, Name}, From, State=#state{log_dir=Log_dir}) ->
     lager:debug("get_log with name : ~p", [Name]),
     {ok, Content} = file:read_file(filename:join(Log_dir, Name)) ,
     {reply, Content, State};
+handle_call(stop, _From, State) ->
+    {stop, normal, shutdown_ok, State};
 
 handle_call(Request, From, State) ->
     Reply = ok,

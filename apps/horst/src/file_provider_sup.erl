@@ -42,7 +42,9 @@ get_log(Name) ->
 	get_file(get_log, Name).
 get_file(File_type, Name) ->
     {ok, Pid} = start_child(),
-    gen_server:call(Pid, {File_type, Name}).
+    File = gen_server:call(Pid, {File_type, Name}),
+    gen_server:call(Pid, stop),
+    File.
 
 %% ===================================================================
 %% Supervisor callbacks
