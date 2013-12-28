@@ -228,7 +228,7 @@ finish_request(ReqData, Context) ->
 to_html(ReqData, Context) ->
     Node = wrq:path_info(node, ReqData),
     lager:info("Node : ~p", [Node]), 
-    {ok, Content} = logging_dtl:render([{links, create_links([node()|nodes()])}, {content, get_console_file(Node, "console.log")}]),
+    {ok, Content} = logging_dtl:render([{node, Node}, {links, create_links([node()|nodes()])}, {content, get_console_file(Node, "console.log")}]),
     {Content, ReqData, Context}. 
  
 create_links(Nodes) ->
