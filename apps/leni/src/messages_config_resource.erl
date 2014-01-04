@@ -27,6 +27,7 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([init/1, to_html/2, content_types_provided/2, allowed_methods/2, resource_exists/2]).
+-export([get_config/2]).
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
@@ -237,16 +238,31 @@ get_config(Nodes, Config) ->
 	{Result, BN} = rpc:multicall(Nodes, node_config, Config, [], 1000),
  	case [R || R <- Result, is_not_badrpc(R)] of 
  		[]-> [];
- 		A -> lists:flatten(A) 
+ 		A -> convert_t(lists:flatten(A))
  	end.
 
 is_not_badrpc({badrpc, Reason}) ->
 	false;
 is_not_badrpc(Any) ->
 	true.
+
+
+convert_t(List) ->
+	[convert_t1(Entry) || Entry <-List].
+
+convert_t1(List) ->
+	{Node, Config} = List,
+	[atom_to_list(Node), [[Node_1, Id, List1] || {{Node_1, Id}, List1} <- Config]].
+
+convert_t2(List) ->
+	[tuple_to_list(Entry) || Entry <- List]. 
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
+convert_tuples_test()->
+	M = [{'horst@ua-TA880GB',[{{dht22_display_driver,"default"}, [{<<"horst@erwin">>,<<"dht22_driver">>, <<"default">>}]},
+		{{transmitter_433_driver, "default"},[{<<"leni@ua-TA880GB">>,<<"transmitter_433_resource">>,<<"default">>}]}]}],
+	convert_t(M).
 -endif.

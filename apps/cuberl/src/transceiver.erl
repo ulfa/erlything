@@ -120,6 +120,7 @@ handle_cast(_Msg, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_info({tcp, Socket, Data}, State) ->
+    lager:debug("Data :~p", [Data]),
 	message_handler:handle_message(list_to_binary(Data)),
 	{noreply, State};
 
@@ -148,12 +149,7 @@ handle_info(timeout, State) ->
 handle_info({get_live_data}, State=#state{socket = Socket}) ->
     send_command(Socket, "l:"),
     start_timer(get_env(timer)),    
-    {noreply, State};
-
-handle_info(Info, State) ->
-	lager:info("don't understand this message : ~p", [Info]),	
     {noreply, State}.
-
 %% --------------------------------------------------------------------
 %% Function: terminate/2
 %% Description: Shutdown the server

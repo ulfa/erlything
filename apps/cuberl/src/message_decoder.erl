@@ -135,7 +135,7 @@ decode_device(Device_count, Count, <<Device_type:?BYTE,
 %%                           bit 2     Not used
 %%                           bit 1,0   Mode         00=auto/week schedule
 %%                                                  01=Manual
-%%                                                  10=Vacation
+%%                                                  10=Vacation/Temporary
 %%                                                  11=Boost   
 %%                           1A  = 00011010b
 %%                               = Battery OK, Linkstatus OK, Panel unlocked, Gateway known, DST active, Mode Vacation.
@@ -146,6 +146,9 @@ decode_device(Device_count, Count, <<Device_type:?BYTE,
 %% B       1     2E          Time until (23:00) (see Encoding/Decoding date/time)
 decode_l(<<>>, Acc) ->
 	Acc;
+%%
+%% This is for a Thermostat
+%%
 decode_l(<<11,
 		   RF_address:?RF_ADDRESS, 
 		   Unknown:1/binary, 
@@ -153,7 +156,7 @@ decode_l(<<11,
 		   Status_2:1/binary, 
 		   Value:?BYTE, 
 		   Temp:?BYTE, 
-		   Date:2/binary, 
+		   Date:2/binary,
 		   Time:1/binary,	
 		   Rest/binary>>, Acc) ->
 	<<U4:1, U3:1,U2:1, Valid:1, Error:1, Answer:1, State:1, U1:1>> = Status_1, 
@@ -162,9 +165,11 @@ decode_l(<<11,
 							 {error, value(error,Error)}, {answer,value(answer,Answer)},{state,value(state,State)}, 
 							 {battery, value(battery, Battery)}, {linkstatus, value(linkstatus,Linkstatus)}, 
 							 {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)},
-							 {mode, value(mode, Mode_1, Mode_0)}]},
+							 {mode, value(mode, Mode_1, Mode_0)}, {act_temp, decode(act_temp, Mode_1, Mode_0, Date)}]},
 	decode_l(Rest, [Result|Acc]);
-
+%%
+%% This is for a wallThermostat
+%%
 decode_l(<<12,
 		   RF_address:?RF_ADDRESS, 
 		   Unknown:1/binary, 
@@ -182,7 +187,7 @@ decode_l(<<12,
 							 {error, value(error,Error)}, {answer,value(answer,Answer)},{state,value(state,State)}, 
 							 {battery, value(battery, Battery)}, {linkstatus, value(linkstatus,Linkstatus)},
 							 {panel, value(panel,Panel)}, {gateway, value(gateway,Gateway)}, {dst, value(dst,Dst)},
-							 {mode, value(mode, Mode_1, Mode_0)}, {temp, Temp1 / 10}]},	
+							 {mode, value(mode, Mode_1, Mode_0)}, {act_temp, Temp1 / 10}]},	
 	decode_l(Rest, [Result|Acc]);
 %%
 %% Handling of the shuttercontact live data
@@ -243,9 +248,6 @@ decode_c_m(<<C:2/binary,
 			 _Comma:1/binary, 
 			 Length/integer, 
 			 Message/binary>>) when Length > byte_size(Message) ->
-	S = byte_size(Message),
-	lager:info("1 : ~p", [S]),
-	lager:info("2 : ~p", [Length]),
 	decode_c_m1(Message);
 	
 
@@ -338,6 +340,13 @@ decode(time, <<Time>>) ->
 	lists:flatten(io_lib:format("~2..0w:~2..0w", [Hour,Minute])).
 decode(date_time, Date, Time) ->
 	lists:concat([decode(date, Date)," ",decode(time,Time)]).
+
+decode(act_temp, 1,0, Date) ->
+	undefined;
+decode(act_temp, _M1, _M2, Date) ->
+	<<M1:3, Day:5, M4:1,T:1, Y:6>> = Date,
+	<<A:8, Temp:8>> = Date,
+	Temp / 10.0.
 
 encode(command, Room_id, RF_address, Mode, Temp, Date, Time) ->
 	Start = <<00,04,64,00,00,00>>,
@@ -432,6 +441,10 @@ decode_l_2_test() ->
 	M = <<"L:CwlCUgkSGBYsAAAACwsjkQkSGBgsAAAADAePbfYSGAQsAAAA1g==\r\n">>,
 	decode(M).
 
+decode_l_3_test() ->
+	M = <<"L:Cwjh8gkSGQAAAAAABgU4swkSEAsIbUgJEhkCKAAAAAsJQlIJEhlDKgAAAAwHj20JEhkEKgAAAMULCyORCRIZQyoAAAA=\r\n">>,	
+	decode(M).
+	
 decode_c_message_test() ->
 	M = <<"C:003508,0gA1CAEBFP9JRVEwMTA5MTI1KCg9CQcoAzAM/wBESFUIRSBFIEUgRSBFIEUgRSBFIEUgRSBFIERIVQhFIEUgRSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIERIUmxEzFUURSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIA==\r\n">>,
 	decode(M).

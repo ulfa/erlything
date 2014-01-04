@@ -137,9 +137,10 @@ code_change(OldVsn, State, Extra) ->
 set_live_data(Device_type, C_data, Data, Data) ->
     lager:debug("nothing changed for device_type : ~p data: ~p", [proplists:get_value(device_type, C_data), Data]);
 set_live_data(1, C_data, Old_l_data, Data) ->
+    data_changed(act_temp, C_data, Data, Old_l_data),
     cuberl_sender:send_message({external_interrupt, cuberl,  [{type, live_data}, {device_type, values:value(device_type, 1)},{data, Data}]});
 set_live_data(3, C_data, Old_l_data, Data) ->
-    data_changed(temperature, C_data, Data, Old_l_data),
+    data_changed(act_temp, C_data, Data, Old_l_data),
     cuberl_sender:send_message({external_interrupt, cuberl,  [{type, live_data}, {device_type, values:value(device_type, 3)},{data, Data}]});
 set_live_data(4, C_data, Old_l_data, Data) ->
     data_changed(window, C_data, Data, Old_l_data),
@@ -163,10 +164,10 @@ int_to_atom(Int) ->
 
 data_changed(Something, C_data, New_data, New_data) ->
     lager:warning("No changes on live data for unknown: ~p with data : ~p", [Something, New_data]);
-data_changed(temperature, C_data, New_data, Data) ->
+data_changed(act_temp, C_data, New_data, Data) ->
     Device_type = get(device_type, C_data), 
     Room_id = get(room_id, C_data), 
-    Temp = get(temp, New_data),
+    Temp = get(act_temp, New_data),
     cuberl_sender:send_message({external_interrupt, cuberl,  [{act_temp_state, Temp}, {room_id, Room_id}, {device_type, Device_type}]});
 data_changed(window, C_data, New_data, Data) ->
     Device_type = get(device_type, C_data), 

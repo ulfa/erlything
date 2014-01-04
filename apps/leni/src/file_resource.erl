@@ -27,7 +27,7 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([init/1, provide_content/2, content_types_provided/2, allowed_methods/2, resource_exists/2]).
--export([is_authorized/2, provide_logging/2]).
+-export([is_authorized/2, provide_logging/2, generate_etag/2]).
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------

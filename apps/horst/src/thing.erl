@@ -253,7 +253,7 @@ handle_info(Info, State) ->
 %% Returns: any (ignored by gen_server)
 %% --------------------------------------------------------------------
    terminate(Reason, State=#state{config = Config}) ->
-    lager:info("Reason : ~p",[Reason]),
+    lager:info("Reason for termination : ~p",[Reason]),
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config), 
     lager:info("stopping thing of type : ~p", [Module]),
     Exports = proplists:get_value(exports, Module:module_info(), []),

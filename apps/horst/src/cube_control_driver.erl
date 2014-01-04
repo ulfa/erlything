@@ -24,7 +24,7 @@ handle_msg([Node ,Sensor, Id, Time, [{temp, 0.0},{hum, 0.0}]=Body], Config, Modu
     Config;
 
 handle_msg([Node ,Sensor, Id, Time, [{temp, Temp},{hum, Hum}] = Body], Config, Module_config) ->
-lager:info("~p got a message with body : ~p : ", [?MODULE, Body]),
+    lager:info("~p got a message with body : ~p : ", [?MODULE, Body]),
     Table_Id = proplists:get_value(?TABLE, Config),
     [{data, Data}] = ets:lookup(Table_Id, data),    
     ets:insert(Table_Id, [{data, add(Data, {Time, [{temp, Temp},{hum, Hum}]})}]),
