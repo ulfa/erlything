@@ -1,0 +1,96 @@
+{% extends "base.dtl" %}
+
+{% block title %}Memory : {{node}}{% endblock %}
+
+{% block body %}
+
+<script src="/js/highcharts.js" type="text/javascript"></script>
+<script>
+$(function () {
+    $(document).ready(function() {
+        Highcharts.setOptions({
+            global: {
+                useUTC: false
+            }
+        });
+    
+        var chart;
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'memory',
+                type: 'spline',
+                marginRight: 10,
+				events: {
+					load: function(event) {						
+						var series0 = this.series[0];
+						var response = 0;	
+							setInterval(function() {
+								$.ajax({
+						  		  		url: "/memory/{{node}}",
+										dataType : "json",
+										success : function(d) {
+										             response = d;
+										         }
+										
+										 });
+								var x = (new Date()).getTime(); // current time
+							    series0.addPoint([x, response.total], true, true);
+							}, 1000);																	
+
+				         }
+					 }        
+            },
+            title: {
+                text: 'Memory : {{node}}' 
+            },
+            xAxis: {
+                type: 'datetime',
+                tickPixelInterval: 150
+            },
+            yAxis: {
+                title: {
+                    text: 'Value'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            tooltip: {
+                formatter: function() {
+                        return '<b>'+ this.series.name +'</b><br/>'+
+                        Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) +'<br/>'+
+                        Highcharts.numberFormat(this.y, 2);
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            exporting: {
+                enabled: false
+            },
+            series: [{
+                name: 'total',
+                data: (function() {
+                    var data = [],
+                        time = (new Date()).getTime(),
+                        i;
+                    for (i = -19; i <= 0; i++) {
+                        data.push({
+                            x: time + i * 1000,
+                            y: 0
+                        });
+                    }
+                    return data;
+                })()		
+			}]
+        });
+    });
+    
+});
+</script>
+    <div class="well">
+        <div id="memory"></div>    
+    </div>
+{% endblock %}

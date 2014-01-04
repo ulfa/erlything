@@ -1,0 +1,7 @@
+erl_crash.dump
+log/*
+apps/moni/ebin/*
+.eunit/
+deps
+rel/moni
+.ct_dialyzer.plt

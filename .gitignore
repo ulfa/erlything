@@ -2,7 +2,7 @@
 erl_crash.dump
 deps/gpio/priv/gpio_drv.so
 log/*
-apps/horst/ebin/*
+apps/*/ebin/*
 .eunit/
 rel/horst/*
 deps
