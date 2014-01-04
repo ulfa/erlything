@@ -227,7 +227,8 @@ finish_request(ReqData, Context) ->
 %%% Additional functions
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->
-	{ok, Content} = funrunners_dtl:render([{funs, get_list_of_funs(nodes())}, {links, create_links()}]),
+	Node = wrq:get_qs_value("node",ReqData),
+	{ok, Content} = funrunners_dtl:render([{funs, get_list_of_funs(nodes())}, {links, create_links(Node)}]),
     {Content, ReqData, Context}.
 
 to_json(ReqData, Context) ->
@@ -245,8 +246,8 @@ is_not_badrpc({badrpc, Reason}) ->
 is_not_badrpc(Any) ->
 	true.
 
-create_links() ->
-	[{new, "funrunners/new", "New"}].
+create_links(Node) ->
+	[{new, "funrunners/new?node=" ++ Node, "New"}].
 
 %% --------------------------------------------------------------------
 %%% Test functions

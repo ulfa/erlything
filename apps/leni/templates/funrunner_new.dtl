@@ -1,29 +1,45 @@
 {% extends "base_without.dtl" %}
 
-{% block title %}new Fun{% endblock %}
+{% block title %}new{% endblock %}
 
 {% block body %}
-        
-    <form class="form-horizontal">
+    <div class="well">    
+    <form class="form-horizontal" method="post">
+        <input type="hidden" name="node" value="{{node}}">
+    
         <div class="control-group">
             <label class="control-label" for="inputFunName">Name</label>
             <div class="controls">
-                <input type="text" id="inputFunName" placeholder="Fun Name">
+                <input type="text" id="inputFunName" name="name" placeholder="Fun Name">
             </div>
         </div>
         <div class="control-group">
             <label class="control-label" for="inputFun">Fun</label>
             <div class="controls">
-                <textarea class="span8" id="inputFun" rows="6" placeholder="fun(X) -> X + 1 end."></textarea>
+                <textarea class="span8" id="inputFun" name="fun" rows="6" placeholder="fun(X) -> X + 1 end."></textarea>
             </div>
         </div>
+
+        <div class="control-group">
+            <label class="control-label" for="inputComment">Comment</label>
+            <div class="controls">
+                <textarea class="span8" id="inputFunComment" name="comment" rows="3" >{{comment}}</textarea>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="inputArgs">Arguments</label>
+            <div class="controls">
+                <input type="text" class="span8" id="inputArgs" name="args" placeholder="Arguments">
+            </div>
+        </div>
+
         <div class="control-group">
         <div class="controls">
-          <button type="submit" class="btn">Save</button>
+          <button type="submit" class="btn btn-primary">Save</button>
         </div>
-  </div>
-        
-    
+        </div>
+          
     </form>
-    
+    </div>
 {% endblock %}

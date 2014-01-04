@@ -132,7 +132,14 @@ create_path(ReqData, Context) ->
 % If it succeeds, it should return true.
 %
 process_post(ReqData, Context) ->
-    
+%%[{"name","testFault"},{"fun","asd"},{"comment","asd"},{"args",[]}]
+    Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
+    lager:info("body : ~p", [Body]),
+    {"node", Node} = lists:keyfind("node",1, Body),
+    {"name", Name} = lists:keyfind("name",1, Body),
+    {"fun", Fun} = lists:keyfind("fun",1, Body),
+    {"comment", Comment} = lists:keyfind("comment",1, Body),
+    {"args", Args} = lists:keyfind("args",1, Body),    
     {true, ReqData, Context}.
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 

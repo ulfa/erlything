@@ -229,7 +229,7 @@ finish_request(ReqData, Context) ->
 to_html(ReqData, Context) ->
 	Node = wrq:get_qs_value("node",ReqData),
 	Name = wrq:get_qs_value("name",ReqData),
-	{ok, Content} = funrunner_dtl:render([{node, Node},{name, Name},{links, create_links()},{funs, get_funs(Node, Name)}]),
+	{ok, Content} = funrunner_dtl:render([{node, Node},{name, Name},{links, create_links(Node)},{funs, get_funs(Node, Name)}]),
     {Content, ReqData, Context}.
 
 to_json(ReqData, Context) ->
@@ -242,8 +242,8 @@ get_funs(Node, Name) when is_list(Node)->
         {Driver, Config} -> proplists:get_value(funs, Config, [])
     end.
 
-create_links() ->
-	[{new, "funrunners/new", "New"}].
+create_links(Node) ->
+	[{new, "funrunners/new?node=" ++ Node, "New"}].
 
 
 %% --------------------------------------------------------------------

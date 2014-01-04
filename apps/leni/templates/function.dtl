@@ -30,7 +30,7 @@
         <div class="control-group">
             <label class="control-label" for="inputArgs">Arguments</label>
             <div class="controls">
-                <input type="text" class="span8" id="inputArgs" name="inputArgs" placeholder="Arguments">
+                <input type="text" class="span8" id="inputArgs" name="inputArgs" placeholder="{Value, Type}">
             </div>
         </div>
 
