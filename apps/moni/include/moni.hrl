@@ -1,0 +1,5 @@
+-define(NODES(Node), {node, "/nodes/" ++ Node, "Nodes"}).
+-define(MEMORY(Node), {memory, "/memory/" ++ Node, "Memory"}).
+-define(ETOP(Node), {etop, "/etop/" ++ Node, "etop"}).
+-define(APPMON(Node), {app_mon, "/appmon/" ++ Node, "Appmon"}).
+-define(SYSINFO(Node), {sysinfo, "/sysinfo/" ++ Node, "SysInfo"}).
