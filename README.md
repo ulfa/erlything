@@ -1,24 +1,31 @@
 # Overview
 
-This is a kind of sensor / actor plattform. 
+This is a runtime plattform  for sensors and actors. 
 
-## Feature
+## Features
 
-* hosting of things
-* starting and stopping of things via config file
+* distributed system which communicate over messages
+* internal monitoring system:
+	* webbased application explorer
+	* webbased process explorer
+	* list of all nodes in a network (alive or dead)
+	* systen information of a node
+
+* Logging. Every node writes their own logs. You can have a look throw the logging ui,
+* starting and stopping of things during runtime
 * configuration of messages which a thing understands
 * dynamic handling of config files (things.config and messages.config)
-* first version of the funrunner which is able to store function and run them if needed (more later)
+* Integration of 3rd party applications is simple.(look at the examples)
 
 # Installation and starting
 
 To install the application on your machine, please do the following steps :
 
 ```bash
-$ git clone https://github.com/ulfa/horst 
-$ cd horst
-$ make all
-$ ./dev.sh
+$ git clone https://github.com/ulfa/erlything 
+$ cd erlything
+$ make
+$ ./dev_leni.sh
 ```
 
 ## Dependencies
