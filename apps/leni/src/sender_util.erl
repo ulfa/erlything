@@ -29,7 +29,7 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([create_message/5, send_message/2]).
+-export([create_message/5, create_message/4, create_message/3, send_message/2]).
 -export([encode/1]).
 %% --------------------------------------------------------------------
 %% record definitions
@@ -37,6 +37,11 @@
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+create_message(Node, Module, Body) ->
+  create_message(Node, Module, get_id([]), date:get_date_seconds(), Body).
+
+create_message(Node, Module, Id, Body) ->
+  create_message(Node, Module, Id, date:get_date_seconds(), Body).
 
 create_message(Node, Sensor, Id, Time, Body) ->
     [atom_to_binary(Node, utf8), atom_to_binary(Sensor, utf8), list_to_binary(Id), list_to_binary(integer_to_list(Time)), Body].
@@ -53,6 +58,11 @@ encode(List) ->
 
 get_result({}) ->
 	[].
+
+get_id([]) ->
+  "default";
+get_id(Config) when is_list(Config) ->
+  proplists:get_value(id, Config, "default"). 
 
 %% --------------------------------------------------------------------
 %%% Test functions

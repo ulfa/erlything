@@ -20,7 +20,7 @@
 
 handle_msg([Node ,Sensor, Id, Time, {temp, Temp}], Config, Module_config) ->
 	Table_Id = proplists:get_value(?TABLE, Config),
-	[{data, Data}] = ets:lookup(Table_Id, data),	
+	[{data, Data}] = ets:lookup(Table_Id, data),
 	ets:insert(Table_Id, [{data, add(Data, {Time, Temp})}]),
 	Config;
 

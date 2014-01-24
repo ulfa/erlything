@@ -34,7 +34,7 @@
 -export([start/0]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
 -export([get_state/1, get_module_config/1, get_start_time/1, get_name/1, get_icon/1]).
--export([save_data_to_ets/2, get_table_id/1, get_model/1]).
+-export([save_data_to_ets/2, save_data_to_ets/3, get_table_id/1, get_model/1]).
 -export([stop/1]).
 
 %% ====================================================================
@@ -169,8 +169,12 @@ handle_call(Request, From, State) ->
 %% Returns: true
 %% --------------------------------------------------------------------
 save_data_to_ets(Config, Value) ->
+    save_data_to_ets(Config, data, Value).
+
+save_data_to_ets(Config, Key, Value) ->
   Table_Id = proplists:get_value(?TABLE, Config),
-  ets:insert(Table_Id, [{data, Value}]).
+  ets:insert(Table_Id, [{Key, Value}]).
+
 
 get_table_id(Config) ->
     proplists:get_value(?TABLE, Config).
@@ -203,8 +207,8 @@ handle_info(timeout, State=#state{config = Config}) ->
 	{driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
     Config_1 = ets_usage(proplists:get_value(ets, Config, false), Config, Module_config),
     Allowed_msgs = node_config:get_messages_for_module(Module, config_handler:get_id(Config)),     
-    driver_init(Module, proplists:get_value(init, Module_config, false), Module_config),
-	start_timer(proplists:get_value(timer, Config, 0)),
+    driver_init(Module, proplists:get_value(init, Module_config, false), Config_1),
+	start_timer(proplists:get_value(timer, Config_1, 0)),
     {noreply, State#state{allowed_msgs = Allowed_msgs, start_time=now(), config = Config_1}};
 
 handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->

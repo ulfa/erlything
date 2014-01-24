@@ -138,8 +138,9 @@ process_post(ReqData, Context) ->
     {"node", Node} = lists:keyfind("node",1, Body),
     {"name", Name} = lists:keyfind("name",1, Body),
     {"fun", Fun} = lists:keyfind("fun",1, Body),
-    {"comment", Comment} = lists:keyfind("comment",1, Body),
-    {"args", Args} = lists:keyfind("args",1, Body),    
+    {"comment", Comment} = lists:keyfind("comment",1, Body),    
+    Msg = sender_util:create_message(node(), funrunner_new_resource, {save, Name, Fun, Comment}),    
+    sender_util:send_message([list_to_atom(Node)], Msg), 
     {true, ReqData, Context}.
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 
@@ -235,16 +236,17 @@ finish_request(ReqData, Context) ->
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->
     Node = wrq:get_qs_value("node",ReqData),
-    {ok, Content} = funrunner_new_dtl:render([{node, Node}]),
+    Name = wrq:get_qs_value("name",ReqData),
+    {ok, Content} = funrunner_new_dtl:render([{node, Node}, {errors, get_errors(Node, Name)}]),
     {Content, ReqData, Context}.
 
 to_json(ReqData, Context) ->
-    {"asdsads", ReqData, Context}.
+    {"not implemented yet", ReqData, Context}.
 
-get_fun_for_funname(Node, Fun_name) ->
-    case rpc:call(list_to_atom(Node), funrunner, list, [Fun_name]) of 
-        Result -> Result;
-        {badrpc, Reason} -> lager:error("got error calling : ~p thing:get_module_config(~p)", [Node, Fun_name]), 
+get_errors(Node, Name) ->
+    case rpc:call(list_to_atom(Node), thing, get_module_config, ['Fun_Runner']) of 
+        Result -> proplists:get_value(errors, Result, []);
+        {badrpc, Reason} -> lager:error("got error calling : ~p thing:get_module_config(~p)", [Node, Name]), 
                             {[],[],[]}
     end.
 

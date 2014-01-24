@@ -29,8 +29,7 @@ handle_msg([Node ,Sensor, Id, Time, {save, Name, Command, Comment}], Config, Mod
         lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1})
     catch
         _:Error -> create_message_and_send(Module_config, {error, "saving fun with name : " ++ Name ++ " command : " ++ Command, Error}),
-                   Module_config_2 = lists:keyreplace(errors, 1 , Module_config, {errors, [{Name, "saving command : " ++ Command, Error}]}),    
-                   lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_2})
+                   handle_error(Config, Module_config, Name, "saving fun with name : " ++ Name ++ " command : " ++ Command, Error)
     end;
 
 handle_msg([Node ,Sensor, Id, Time, {run, Name, Args}], Config, Module_config) ->
@@ -43,7 +42,8 @@ handle_msg([Node ,Sensor, Id, Time, {run, Name, Args}], Config, Module_config) -
         lager:info("Result for fun with name : ~p is : ~p", [Name, Result]),
         create_message_and_send(Module_config, Name,{run_result, Name, {ok,Result}})
     catch 
-        _:Error -> create_message_and_send(Module_config, {error, "running fun with name : " ++ Name ++ " and args : ~p " ++ Args ++ " ", Error})
+        _:Error -> create_message_and_send(Module_config, {error, "running fun with name : " ++ Name ++ " and args : ~p " ++ Args ++ " ", Error}),
+                    handle_error(Config, Module_config, Name, "running fun with name : " ++ Name ++ " and args : ~p " ++ Args ++ " ", Error)
     end,
     Config;
 
@@ -78,6 +78,9 @@ stop(Config) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+handle_error(Config, Module_config, Name, Error_text, Error) ->
+    Module_config_2 = lists:keyreplace(errors, 1 , Module_config, {errors, [{Name, Error_text, Error}]}),    
+    lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_2}).
 
 create_message_and_send(Module_config, Result) ->
     create_message_and_send(Module_config, sensor:get_id(Module_config), Result).

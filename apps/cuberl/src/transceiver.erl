@@ -81,12 +81,14 @@ init([]) ->
 %% --------------------------------------------------------------------
 handle_call({connect, Ip, Port}, _From, State) ->
     lager:info("connecting to the cube with ip : ~p and on port : ~p", [Ip, Port]),
+    cuberl_sender:send_message(?MESSAGE_INFO("connecting to the cube")),
     {ok, Socket} = gen_tcp:connect(Ip, Port, []),
     {ok, ListenSocket} = gen_tcp:listen(Port, []),
     {reply, ok, #state{socket = Socket, listenSocket = ListenSocket}};
 
 handle_call({disconnect}, _From, State=#state{socket = Socket}) ->
     lager:info("disconnecting from the cube"),
+    cuberl_sender:send_message(?MESSAGE_INFO("disconnecting from the cube")),
     close(Socket), 
     {reply, ok, State};
 
@@ -125,12 +127,14 @@ handle_info({tcp, Socket, Data}, State) ->
 	{noreply, State};
 
 handle_info({tcp_closed, Socket}, State) ->
-    lager:info("Socket closed closed by peer"),
+    lager:info("Socket closed by peer"),
+    cuberl_sender:send_message(?MESSAGE_ERROR("Socket closed by peer")),
     close(Socket),
     {noreply, State};
 
 handle_info({tcp_closed, undefined}, State) ->
     lager:info("Socket is undefined, please check your cube!"),
+    cuberl_sender:send_message(?MESSAGE_ERROR("Socket is undefined, please check your cube!")),
     {noreply, State};
 
 
@@ -143,6 +147,7 @@ handle_info(timeout, State) ->
 	                    {noreply, #state{socket = Socket, listenSocket = ListenSocket}};
         {error, Reason} -> cuberl_sender:send_message({external_interrupt, cuberl, {fatal, Reason}}),
                            lager:error("can't connect to the cube, because of : ~p", [Reason]),
+                           cuberl_sender:send_message(?MESSAGE_ERROR("can't connect to the cube, because of", Reason)),
                            {noreply, State}
     end; 
 

@@ -12,6 +12,7 @@
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
+-include("../include/cuberl.hrl").
 %% --------------------------------------------------------------------
 %% External exports
 
@@ -138,24 +139,25 @@ set_live_data(Device_type, C_data, Data, Data) ->
     lager:debug("nothing changed for device_type : ~p data: ~p", [proplists:get_value(device_type, C_data), Data]);
 set_live_data(1, C_data, Old_l_data, Data) ->
     data_changed(act_temp, C_data, Data, Old_l_data),
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, live_data}, {device_type, values:value(device_type, 1)},{data, Data}]});
+
+    cuberl_sender:send_message(?MESSAGE([{type, live_data}, {device_type, values:value(device_type, 1)},{data, Data}]));
 set_live_data(3, C_data, Old_l_data, Data) ->
     data_changed(act_temp, C_data, Data, Old_l_data),
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, live_data}, {device_type, values:value(device_type, 3)},{data, Data}]});
+    cuberl_sender:send_message(?MESSAGE([{type, live_data}, {device_type, values:value(device_type, 3)},{data, Data}]));
 set_live_data(4, C_data, Old_l_data, Data) ->
     data_changed(window, C_data, Data, Old_l_data),
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, live_data}, {device_type, values:value(device_type, 4)},{data, Data}]});
+    cuberl_sender:send_message(?MESSAGE([{type, live_data}, {device_type, values:value(device_type, 4)},{data, Data}]));
 set_live_data(5, C_data, Old_l_data, Data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, live_data}, {device_type, values:value(device_type, 5)},{data, Data}]}).
+    cuberl_sender:send_message(?MESSAGE([{type, live_data}, {device_type, values:value(device_type, 5)},{data, Data}])).
 
 set_config_data(1, New_data, C_data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, config_data}, {device_type, values:value(device_type, 1)}, {data, New_data}]});
+    cuberl_sender:send_message(?MESSAGE([{type, config_data}, {device_type, values:value(device_type, 1)}, {data, New_data}]));
 set_config_data(3, New_data, C_data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, config_data}, {device_type, values:value(device_type, 3)}, {data, New_data}]});
+    cuberl_sender:send_message(?MESSAGE([{type, config_data}, {device_type, values:value(device_type, 3)}, {data, New_data}]));
 set_config_data(4, New_data, C_data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, config_data}, {device_type, values:value(device_type, 4)}, {data, New_data}]});
+    cuberl_sender:send_message(?MESSAGE([{type, config_data}, {device_type, values:value(device_type, 4)}, {data, New_data}]));
 set_config_data(5, New_data, C_data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, config_data}, {device_type, values:value(device_type, 5)}, {data, New_data}]});
+    cuberl_sender:send_message(?MESSAGE([{type, config_data}, {device_type, values:value(device_type, 5)}, {data, New_data}]));
 set_config_data(Device_type, New_data, C_data) ->
     lager:warning("don't understand config data : ~p", [New_data]).
 
@@ -168,14 +170,14 @@ data_changed(act_temp, C_data, New_data, Data) ->
     Device_type = get(device_type, C_data), 
     Room_id = get(room_id, C_data), 
     Temp = get(act_temp, New_data),
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{act_temp_state, Temp}, {room_id, Room_id}, {device_type, Device_type}]});
+    cuberl_sender:send_message(?MESSAGE([{act_temp_state, Temp}, {room_id, Room_id}, {device_type, Device_type}]));
 data_changed(window, C_data, New_data, Data) ->
     Device_type = get(device_type, C_data), 
     Room_id = get(room_id, C_data), 
     Window_state = get(window, New_data),
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{window_state, Window_state}, {room_id, Room_id}, {device_type, Device_type}]});
+    cuberl_sender:send_message(?MESSAGE([{window_state, Window_state}, {room_id, Room_id}, {device_type, Device_type}]));
 data_changed(battery, C_data, New_data, Data) ->
-    cuberl_sender:send_message({external_interrupt, cuberl,  [{type, battery_state}, {device_type, 3}, {data, New_data}]}).
+    cuberl_sender:send_message(?MESSAGE([{type, battery_state}, {device_type, 3}, {data, New_data}])).
 
 get(Key, List) ->
     proplists:get_value(Key, List).
