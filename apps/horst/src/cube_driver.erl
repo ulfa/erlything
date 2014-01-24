@@ -35,7 +35,7 @@ stop(Config) ->
 
 handle_msg({external_event, cuberl,  {fatal, Reason}}, Config, Module_config) ->
     lager:info("~p got an fatal message with values: ~p. I will stop the cube.", [?MODULE, Reason]),
-    stop(Config),
+    node_config:set_active(proplists:get_value(name, Config) , false), 
     Config;
 
 handle_msg({external_event, cuberl,  Body}, Config, Module_config) ->
