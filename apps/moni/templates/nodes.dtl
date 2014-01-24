@@ -1,0 +1,36 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}Nodes Overiew{% endblock %}
+
+{% block body %}
+
+	<div class="well">
+		<table class="table">  
+        	<thead>  
+          	  <tr>  
+				  <th>Node Name</th>  
+				  <th>Ip address</th>  
+				  <th>Status</th>  
+				  <th>Last update</th>
+				  <th>Reason</th>
+				  
+			  </tr>  
+			</thead>  
+			{% for node, state, detail in nodes %}		
+			<tbody>  
+				<tr> 
+					{% ifequal state "Alive" %} 
+					<td><a href="/sysinfo/{{ node }}">{{ node }}</a></td>  
+					{% else %}
+					<td> {{node}} </td>
+					{% endifequal %}
+					{% for Key, Value in detail %}
+					<td>{{ Value }}</td>  
+					{% endfor %}
+				</tr>  
+			</tbody>
+			{% endfor %}
+		</table>
+	</div>
+
+{% endblock %}

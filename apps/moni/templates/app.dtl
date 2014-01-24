@@ -1,0 +1,27 @@
+{% extends "base.dtl" %}
+<title>{% block title %}Detail: {{app}}{% endblock %}</title>
+
+{% block body %}        
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load('visualization', '1', {packages: ['orgchart']});
+  google.setOnLoadCallback(drawVisualization);
+  function drawVisualization() {
+  // Create and populate the data table.
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'Process');
+    data.addColumn('string', 'App');
+    data.addColumn('string', 'ToolTip');
+        
+		{% for process, parent in processes %}
+			data.addRow([{v:'{{process}}', f:'<a href=/process_info/{{node}}/{{process|escape}}>{{process|escape}}</a>'}, '{{parent}}','test']),
+		{% endfor %}
+			
+    // Create and draw the visualization.					      
+        new google.visualization.OrgChart(document.getElementById('app')).
+        draw(data, {allowHtml: true, size: 'large'});
+  }
+
+</script>
+    <div id="app"></div> 
+{% endblock %}

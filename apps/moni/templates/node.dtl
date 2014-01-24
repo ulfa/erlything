@@ -1,0 +1,7 @@
+{% extends "base.dtl" %}
+
+{% block title %}{{node}}{% endblock %}
+
+{% block body %}
+
+{% endblock %}

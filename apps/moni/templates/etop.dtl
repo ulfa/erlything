@@ -1,0 +1,52 @@
+{% extends "base.dtl" %}
+{% block title %}etop: {{node}}{% endblock %}
+
+{% block body %}	
+			<div class="well scroller">
+				<table class="table table-hover table-condensed">
+					<thead>
+					<tr>
+						<th>Pid</th>
+						<th>Size</th>
+						<th>Reds</th>
+						<th>Name</th>
+						<th>Runtime</th>
+						<th>Current Function</th>				
+						<th>Msgs</th>				
+					</tr>	
+					</thead>
+					<tbody>
+						{% for proc in list %}								
+						<tr>
+							{% for k, v in proc %}
+							{% ifequal k "pid" %}
+    						<td><a href="/process_info/{{node}}/{{v}}">{{v}}</a></td>
+    						{% else %}
+    						<td>{{v}}</td>
+							{% endifequal %}						
+							{% endfor %}
+						</tr>	
+					{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			<div class="well">		
+				<table class="table">		
+					<thead>
+						<tr>
+							<th>Key</th>
+							<th>Value</th>
+						</tr>
+					</thead>
+					<tbody>						
+						{% for k,v in info %}								
+						<tr>
+							<td>{{k}}</td>
+							<td>{{v}}</td>
+						</tr>	
+						{% endfor %}
+					</tbody>					
+				</table>
+			</div>
+
+{% endblock %}
