@@ -24,7 +24,7 @@ To install the application on your machine, please do the following steps :
 Before you can install this appliction on your machine, you have to install an [erlang R15] (https://www.erlang-solutions.com/downloads/download-erlang-otp) runtime. 
 After installing the runtime, you have to install [rebar] (https://github.com/basho/rebar) on your machine. rebar is the build tool for erlang.
 
-* [erlang R15] (https://www.erlang-solutions.com/downloads/download-erlang-otp)
+* [erlang R1503] (https://www.erlang-solutions.com/downloads/download-erlang-otp)
 * [rebar] (https://github.com/basho/rebar) the build tool for erlang
 
 
