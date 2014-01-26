@@ -169,18 +169,25 @@ data_changed(Something, C_data, New_data, New_data) ->
 data_changed(act_temp, C_data, New_data, Data) ->
     Device_type = get(device_type, C_data), 
     Room_id = get(room_id, C_data), 
+    Room_name = get(room_name, Room_id),
     Temp = get(act_temp, New_data),
-    cuberl_sender:send_message(?MESSAGE([{act_temp_state, Temp}, {room_id, Room_id}, {device_type, Device_type}]));
+    cuberl_sender:send_message(?MESSAGE([{act_temp_state, Temp}, {room_id, Room_id}, {room_name, Room_name}, {device_type, Device_type}]));
 data_changed(window, C_data, New_data, Data) ->
     Device_type = get(device_type, C_data), 
     Room_id = get(room_id, C_data), 
+    Room_name = get(room_name, Room_id),
     Window_state = get(window, New_data),
-    cuberl_sender:send_message(?MESSAGE([{window_state, Window_state}, {room_id, Room_id}, {device_type, Device_type}]));
+    cuberl_sender:send_message(?MESSAGE([{window_state, Window_state}, {room_id, Room_id}, {room_name, Room_name}, {device_type, Device_type}]));
 data_changed(battery, C_data, New_data, Data) ->
     cuberl_sender:send_message(?MESSAGE([{type, battery_state}, {device_type, 3}, {data, New_data}])).
 
+
+get(room_name, Room_id) ->
+    room:get_name(Room_id);
+
 get(Key, List) ->
     proplists:get_value(Key, List).
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
