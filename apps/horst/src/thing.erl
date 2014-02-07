@@ -228,10 +228,10 @@ handle_info({gpio_interrupt, 0, Pin, Status}, State=#state{config = Config}) ->
     Config_1 = Module:Func({gpio_interrupt, 0, Pin, Status}, Config, Module_config),
     {noreply, State#state{config = Config_1}};
 
-handle_info({external_interrupt, Application,  Body}, State=#state{config = Config}) ->   
-    lager:info("external_event from Application : ~p with Body : ~p",[Application, Body]),
+handle_info({external_interrupt, Application, Data_type, Body} = Msg, State=#state{config = Config}) ->   
+    lager:info("external_interrupt from Application : ~p with Body : ~p",[Application, Body]),
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    Config_1 = Module:Func({external_event, Application,  Body}, Config, Module_config),
+    Config_1 = Module:Func(Msg, Config, Module_config),
     {noreply, State#state{config = Config_1}};
 
 handle_info({update_config, ?MESSAGES_CONFIG},  State=#state{config = Config, allowed_msgs = Allowed_msgs}) ->
@@ -249,6 +249,7 @@ handle_info({'ETS-TRANSFER', TableId, Pid, _Data}, State=#state{config = Config}
     {noreply, State#state{config = Config_1}};
 
 handle_info(Info, State) ->
+    lager:info("got message : ~p that i don't understand.", [Info]),
     {noreply, State}.
 
 %% --------------------------------------------------------------------

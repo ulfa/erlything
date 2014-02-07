@@ -76,7 +76,7 @@ handle_call(Request, From, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_cast({send_message, Message}, State=#state{listener = Listener}) when is_pid(Listener)->
-    lager:debug("sending message : ~p to listener pid : ~p", [Message, Listener]),
+    lager:info("sending message : ~p to listener pid : ~p", [Message, Listener]),
     Listener ! Message,
     {noreply, State};
 

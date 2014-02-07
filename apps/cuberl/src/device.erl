@@ -138,26 +138,22 @@ code_change(OldVsn, State, Extra) ->
 set_live_data(Device_type, C_data, Data, Data) ->
     lager:debug("nothing changed for device_type : ~p data: ~p", [proplists:get_value(device_type, C_data), Data]);
 set_live_data(1, C_data, Old_l_data, Data) ->
-    data_changed(act_temp, C_data, Data, Old_l_data),
-
-    cuberl_sender:send_message(?MESSAGE([{type, live_data}, {device_type, values:value(device_type, 1)},{data, Data}]));
+    data_changed(act_temp, C_data, Data, Old_l_data);
 set_live_data(3, C_data, Old_l_data, Data) ->
-    data_changed(act_temp, C_data, Data, Old_l_data),
-    cuberl_sender:send_message(?MESSAGE([{type, live_data}, {device_type, values:value(device_type, 3)},{data, Data}]));
+    data_changed(act_temp, C_data, Data, Old_l_data);
 set_live_data(4, C_data, Old_l_data, Data) ->
-    data_changed(window, C_data, Data, Old_l_data),
-    cuberl_sender:send_message(?MESSAGE([{type, live_data}, {device_type, values:value(device_type, 4)},{data, Data}]));
+    data_changed(window, C_data, Data, Old_l_data);
 set_live_data(5, C_data, Old_l_data, Data) ->
-    cuberl_sender:send_message(?MESSAGE([{type, live_data}, {device_type, values:value(device_type, 5)},{data, Data}])).
+    data_changed(act_temp, C_data, Data, Old_l_data).
 
 set_config_data(1, New_data, C_data) ->
-    cuberl_sender:send_message(?MESSAGE([{type, config_data}, {device_type, values:value(device_type, 1)}, {data, New_data}]));
+    cuberl_sender:send_message(?MESSAGE_CONFIG([{type, config_data}, {device_type, values:value(device_type, 1)}, {data, New_data}]));
 set_config_data(3, New_data, C_data) ->
-    cuberl_sender:send_message(?MESSAGE([{type, config_data}, {device_type, values:value(device_type, 3)}, {data, New_data}]));
+    cuberl_sender:send_message(?MESSAGE_CONFIG([{type, config_data}, {device_type, values:value(device_type, 3)}, {data, New_data}]));
 set_config_data(4, New_data, C_data) ->
-    cuberl_sender:send_message(?MESSAGE([{type, config_data}, {device_type, values:value(device_type, 4)}, {data, New_data}]));
+    cuberl_sender:send_message(?MESSAGE_CONFIG([{type, config_data}, {device_type, values:value(device_type, 4)}, {data, New_data}]));
 set_config_data(5, New_data, C_data) ->
-    cuberl_sender:send_message(?MESSAGE([{type, config_data}, {device_type, values:value(device_type, 5)}, {data, New_data}]));
+    cuberl_sender:send_message(?MESSAGE_CONFIG([{type, config_data}, {device_type, values:value(device_type, 5)}, {data, New_data}]));
 set_config_data(Device_type, New_data, C_data) ->
     lager:warning("don't understand config data : ~p", [New_data]).
 
@@ -167,20 +163,24 @@ int_to_atom(Int) ->
 data_changed(Something, C_data, New_data, New_data) ->
     lager:warning("No changes on live data for unknown: ~p with data : ~p", [Something, New_data]);
 data_changed(act_temp, C_data, New_data, Data) ->
-    Device_type = get(device_type, C_data), 
-    Room_id = get(room_id, C_data), 
-    Room_name = get(room_name, Room_id),
+    Meta = get_meta(C_data),
     Temp = get(act_temp, New_data),
-    cuberl_sender:send_message(?MESSAGE([{act_temp_state, Temp}, {room_id, Room_id}, {room_name, Room_name}, {device_type, Device_type}]));
+    cuberl_sender:send_message(?MESSAGE_LIVE([{act_temp_state, Temp} | Meta]));
 data_changed(window, C_data, New_data, Data) ->
+    Meta = get_meta(C_data),
+    Window_state = get(window, New_data),
+    cuberl_sender:send_message(?MESSAGE_LIVE([{window_state, Window_state}| Meta]));
+data_changed(battery, C_data, New_data, Data) ->
+    Meta = get_meta(C_data),
+    Battery_state = proplists:get_value(battery, New_data),
+    cuberl_sender:send_message(?MESSAGE_LIVE([{battery_state, unknown_yet} | Meta])).
+
+get_meta(C_data) ->
     Device_type = get(device_type, C_data), 
+    Device_name = values:value(device_type, Device_type),
     Room_id = get(room_id, C_data), 
     Room_name = get(room_name, Room_id),
-    Window_state = get(window, New_data),
-    cuberl_sender:send_message(?MESSAGE([{window_state, Window_state}, {room_id, Room_id}, {room_name, Room_name}, {device_type, Device_type}]));
-data_changed(battery, C_data, New_data, Data) ->
-    cuberl_sender:send_message(?MESSAGE([{type, battery_state}, {device_type, 3}, {data, New_data}])).
-
+    [{room_id, Room_id}, {room_name, Room_name}, {device_type, Device_type}, {device_name, Device_name}].
 
 get(room_name, Room_id) ->
     room:get_name(Room_id);

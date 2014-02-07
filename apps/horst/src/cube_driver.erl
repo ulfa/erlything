@@ -33,22 +33,31 @@ stop(Config) ->
     application:stop(cuberl),
     application:unload(cuberl). 
 
-handle_msg({external_event, cuberl,  {fatal, Reason}}, Config, Module_config) ->
+
+handle_msg({external_interrupt, cuberl,  {fatal, Reason}}, Config, Module_config) ->
     lager:info("~p got an fatal message with values: ~p. I will stop the cube.", [?MODULE, Reason]),
     node_config:set_active(proplists:get_value(name, Config) , false), 
     Config;
 
-handle_msg({external_event, cuberl,  Body}, Config, Module_config) ->
+handle_msg({external_interrupt, cuberl, live_data, Body}, Config, Module_config) ->
+    lager:info("~p got a message with values: ~p", [?MODULE, Body]),
+    send_message(Body),
+    Config;
+handle_msg({external_interrupt, cuberl,  Body}, Config, Module_config) ->
     lager:info("~p got a message with values: ~p", [?MODULE, Body]),
     send_message(Body),
     Config;
 
-handle_msg({external_event, Application,  Body}, Config, Module_config) ->
+handle_msg({external_interrupt, Application,  Body}, Config, Module_config) ->
     lager:warning("~p got a message with incorrect values: ~p", [?MODULE, {Application, Body}]),
     Config;
 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
     lager:warning("~p got a message with incorrect values: ~p", [?MODULE, [Node ,Sensor, Id, Time, Body]]),
+    Config;
+
+handle_msg(Unknown_message, Config, Module_config) ->
+    lager:warning("~p got a message with incorrect values: ~p",[?MODULE, Unknown_message]),
     Config.
 
 send_message(Body) ->
