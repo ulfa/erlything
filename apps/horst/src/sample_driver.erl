@@ -18,7 +18,7 @@
 -export([call_sensor/2]).
 
 call_sensor(Config, Module_config) ->
-    Msg = sensor:create_message(node(), ?MODULE, [{test_message}]),
+    Msg = sensor:create_message(node(), ?MODULE, [{temp, 10.0}]),
     sensor:send_message(Msg),
     Config.
 %% --------------------------------------------------------------------

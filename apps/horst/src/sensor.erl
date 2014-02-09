@@ -28,6 +28,8 @@ create_message(Node, Module, Body) ->
 create_message(Node, Module, Id, Body) ->
 	create_message(Node, Module, Id, date:get_date_seconds(), Body).
 
+create_message(Node, Module, Id, Time, Body) when is_list(Module) ->
+	create_message(Node, list_to_atom(Module), Id, Time, Body);
 create_message(Node, Module, Id, Time, Body) ->
     [atom_to_binary(Node, utf8), atom_to_binary(Module, utf8), list_to_binary(Id), list_to_binary(integer_to_list(Time)), Body].
 
