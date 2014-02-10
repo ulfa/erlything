@@ -14,13 +14,11 @@
 -export([init/1, stop/1]).
 -export([handle_msg/3]).
 -export([test_me/0, test_me_1/0, test_me_2/0, test_me_3/0, test_me_4/0,test_exception/0]).
+-export([test_schimmel/0, test_schimmel_data/0]).
 
 init(Config) ->
     lager:info("funrunner_driver:init('~p')", [Config]),
     Config.
-
-handle_msg([Node ,Sensor, Id, Time, {save, Name, [], Command, Comment}], Config, Module_config) ->
-    save_fun(Name, [], Command, Comment, Config, Module_config);
 
 handle_msg([Node ,Sensor, Id, Time, {save, Name, Message, Command, Comment}], Config, Module_config) ->
     save_fun(Name, Message, Command, Comment, Config, Module_config);
@@ -29,14 +27,17 @@ handle_msg([Node ,Sensor, Id, Time,{run,{Node_1, Driver_1, Id_1, Time_1, Body}}]
     Msg = {Node_1, Driver_1, Id_1, Body},
     lager:info("run fun for message : ~p ", [Msg]),
     Funs = proplists:get_value(funs, Module_config, []),
-    {Name, Fun} = get_fun(Funs, {Node_1, Driver_1, Id_1}),
-    try
-        Result = run_fun(Fun, Name, Body),
-        lager:info("Result of fun Message : ~p is : ~p", [Name, Result]),
-        create_message_and_send(Module_config, {run_result, Name, {ok,Result}})
-    catch 
-        _:Error -> create_message_and_send(Module_config, {error, "running fun with name : " ++ Name ++ " ", Error}),
-                    handle_error(Config, Module_config, Name, "running fun with name : " ++ Name ++ " ", Error)
+    case get_fun(Funs, {Node_1, Driver_1, Id_1}) of
+        {Name, Fun}  ->
+        try
+            Result = run_fun(Fun, Name, Body),
+            lager:info("Result of fun Message : ~p is : ~p", [Name, Result]),
+            create_message_and_send(Module_config, {run_result, Name, {ok,Result}})
+        catch   
+            _:Error -> create_message_and_send(Module_config, {error, "running fun with name : " ++ Name ++ " ", Error}),
+                        handle_error(Config, Module_config, Name, "running fun with name : " ++ Name ++ " ", Error)
+        end;
+        [] -> lager:info("got no fun for message : ~p ", [Msg])
     end,
     Config;
 
@@ -74,6 +75,9 @@ handle_msg([Node ,Sensor, Id, Time, {error, Text, Others}], Config, Module_confi
 %%    Module_config_1 = lists:keyreplace(errors, 1, Module_config, {errors, [{Text, Others}]}),
 %%    lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}).
     Config;
+
+handle_msg([Node ,Driver, Id, Time, Body], Config, Module_config) ->
+    handle_msg([Node ,Driver, Id, Time, {run, Node, Driver, Id, Time, Body}], Config, Module_config);
 
 handle_msg([Node ,Sensor, Id, Time, Other]=Msg, Config, Module_config) ->
     lager:warning("~p got an unkown message : ~p", [?MODULE, Msg]),  
@@ -188,6 +192,13 @@ test_me_4() ->
     Message=sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {save, "msg_test", {<<"horst@ua-TA880GB">>, <<"sample_driver">>, <<"default">>}, "fun(Name, [Args]) -> M=sensor:create_message(node(), Name, {\"Licht\",\"11111 2\",\"1\"}), sensor:send_message(M)  end.", "Anschalten Licht"}),
     sensor:send_message(Message).
 
+test_schimmel() ->
+    Message=sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {save, "schimmel", {<<"horst@raspberrypi">>,<<"dht22_driver">>,<<"default">>}, "fun(Name, [{temp, Temp}, {hum, Hum}]) -> lager:info(\"got message with temp : ~p and hum : ~p\", [Temp, Hum]) end.", "Schimmel App"}),
+    sensor:send_message(Message).
+
+test_schimmel_data() ->
+    Message=sensor:create_message('horst@raspberrypi', 'dht22_driver', [{temp, 10.0},{hum, 50}]),
+    sensor:send_message(Message).
 
 test_exception() ->
     try  

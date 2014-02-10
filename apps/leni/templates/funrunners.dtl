@@ -20,7 +20,7 @@
 					</thead>
 				{% if list_of_funs %}
 				<tbody>
-					{% for fun,  command , comment in list_of_funs %}
+					{% for fun,  msg, command , comment in list_of_funs %}
 					<tr>			
 						<td><a href="/funrunner?node={{node}}&fun_name={{fun}}">{{ fun }}</a></td>		
 						<td>{{ command }}</td>
