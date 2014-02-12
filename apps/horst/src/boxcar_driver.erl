@@ -25,6 +25,9 @@
 
 handle_msg([Node ,Sensor, Id, Time, [{account, Account}, {title, Title}, {message, Message}, {sound, Sound}]], Config, Module_config) ->
     send_message(Account, Title, Message, Sound),
+    Config;
+handle_msg(Unknown_message, Config, Module_config) ->
+    lager:warning("~p got a message with incorrect values: ~p",[?MODULE, Unknown_message]),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions

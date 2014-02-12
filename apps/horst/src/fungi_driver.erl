@@ -25,12 +25,16 @@
 %% 
 %% Here we handle the messages from the dht22 sensor
 %%
-handle_msg([Node ,Sensor, Id, Time, [{temp, Temp}, {hum, Hum}]], Config, Module_config) ->
-    Room = get_config(room, Module_config),
+handle_msg([Node ,Sensor, Id, Time, [{temp, Temp}, {hum, Hum}]] = Msg, Config, Module_config) ->
+    lager:info("~p got a message with values: ~p", [?MODULE, Msg]),
+    Room = get_config(binary_to_list(Node), Module_config),
     Hum_max = get_config(hum_max, Module_config),
+    Window_state = get_data(window, Module_config),
+    handle_hum(Room, Hum, Hum_max, Window_state, Config, Module_config),
     Config;
 
-handle_msg([Node ,'cube_driver', Id, Time, Body], Config, Module_config) ->
+handle_msg([Node ,'cube_driver', Id, Time, Body] = Msg, Config, Module_config) ->
+    lager:info("~p got a message with values: ~p", [?MODULE, Msg]),
     handle_msg(Body, Config, Module_config);
 
 handle_msg(Unknown_message, Config, Module_config) ->
@@ -43,13 +47,15 @@ handle_msg(Unknown_message, Config, Module_config) ->
 %% When the hum > max and window is closed then open the window
 %%
 handle_hum(Room, Hum, Hum_max, Window_state, Config, Module_config) when Hum >= Hum_max ->
-    send_msg_to_human(Room, ?WINDOW_OPEN, Config, Module_config),
+    lager:info("~p send a message 'open window in room : ~p", [?MODULE, Room]),
+    send_msg_to_human(Room, Window_state, ?WINDOW_OPEN, Config, Module_config),
     Config;
 %%
 %% When the hum < max and window is open then close the window
 %%
 handle_hum(Room, Hum, Hum_max, Window_state, Config, Module_config) ->
-    send_msg_to_human(Room, ?WINDOW_CLOSE, Config, Module_config),
+    lager:info("~p send a message 'close window in room : ~p", [?MODULE, Room]),
+    send_msg_to_human(Room, Window_state, ?WINDOW_CLOSE, Config, Module_config),    
     Config.
 %%
 %% Here we handle the message from the cuberl. (window state)
@@ -64,7 +70,12 @@ handle_msg_intern([{}],Config, Module_config) ->
 %%
 %% Here we send a message to the boxcar
 %%
-send_msg_to_human(Room, Window_state, Config, Module_config) ->
+send_msg_to_human(Room, Window_state, Window_state, Config, Module_config) ->
+    lager:info("~p sends nothing because the window is already in state : ~p", [?MODULE, Window_state]),
+    Config;
+send_msg_to_human(Room, Window_state, Window_state_new, Config, Module_config) ->
+    Msg = sensor:create_message(node(), ?MODULE, [{account, "NmEAW2euRjuUGesV58n"},{title, Window_state_new ++ " the window in room : " ++ Room }, {message, "see title"}, {sound, "digital-alarm"}]),
+    sensor:send_message(Msg),  
     Config.
 %%
 %% If the temp in the observed room is < 16 degrees then is increase the temp
