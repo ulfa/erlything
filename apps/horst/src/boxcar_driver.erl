@@ -18,8 +18,6 @@
 %% Include files
 %% --------------------------------------------------------------------
 -include("../include/horst.hrl").
-
-
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
@@ -39,7 +37,7 @@ send_message(Account, Title, Message, Sound) ->
         mochiweb_util:urlencode([{"user_credentials", Account}, {"notification[title]",Title},{"notification[long_message]", Message}, {"notification[sound]", Sound}])
         },
         [{ssl, [{verify, 0}]}],
-        [{verbose,verbose}]
+        []
         ).
 %% --------------------------------------------------------------------
 %%% Test functions
