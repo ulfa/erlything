@@ -33,7 +33,7 @@ handle_msg(Unknown_message, Config, Module_config) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 send_message(Account, Title, Message, Sound) ->
-    httpc:request(post, 
+    case httpc:request(post, 
         {?URI,
         [],
         ?CONTENT_TYPE,
@@ -41,7 +41,10 @@ send_message(Account, Title, Message, Sound) ->
         },
         [{ssl, [{verify, 0}]}],
         []
-        ).
+        ) of 
+    {ok, Result} -> lager:info("~p did a post to boxcar with result : ~p", [?MODULE, Result]);
+    {error, Reason} -> lager:error("~p did a post to boxcar with error : ~p", [?MODULE, Reason])
+    end.
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

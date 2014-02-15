@@ -137,7 +137,6 @@ handle_info({tcp_closed, undefined}, State) ->
     cuberl_sender:send_message(?MESSAGE_ERROR("Socket is undefined, please check your cube!")),
     {noreply, State};
 
-
 handle_info(timeout, State) ->	
     Port = get_env(port),
     Ip = get_env(ip),

@@ -51,7 +51,7 @@ get_model(RF_address) when is_atom(RF_address) ->
 %% Description: Starts the server
 %%--------------------------------------------------------------------
 start_link(Config) ->
-    gen_server:start_link({local, int_to_atom(proplists:get_value(rf_address, Config))}, ?MODULE, Config, []).
+    gen_server:start_link({local, int_to_atom(get(rf_address, Config))}, ?MODULE, Config, []).
 
 %% --------------------------------------------------------------------
 %% Function: init/1
@@ -94,12 +94,12 @@ handle_call(Request, From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_cast({set_l_data, L_data}, State=#state{c_data = C_data, l_data = Old_l_data}) ->
-    set_live_data(get(device_type, C_data), C_data, Old_l_data, L_data),
+handle_cast({set_l_data, L_data}, State=#state{c_data = C_data, l_data = Old_l_data, config = Config}) ->
+    set_live_data(get(device_type, C_data), C_data, Old_l_data, L_data, Config),
     {noreply, State#state{l_data = L_data}};
 
-handle_cast({set_c_data, C_data_new}, State=#state{c_data = C_data}) ->
-    set_config_data(get(device_type, C_data_new), C_data_new, C_data),
+handle_cast({set_c_data, C_data_new}, State=#state{c_data = C_data, config = Config}) ->
+    set_config_data(get(device_type, C_data_new), C_data_new, C_data, Config),
     {noreply, State#state{c_data = C_data_new}};
 
 handle_cast(Msg, State) ->
@@ -134,53 +134,55 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+set_live_data(undefined, [], [], Data, Config) ->
+    lager:error("why does this happen? : ~p", [Data]);
+set_live_data(Device_type, C_data, Data, Data, Config) ->
+    lager:debug("nothing changed for device_type : ~p data: ~p", [get(device_type, C_data), Data]);
+set_live_data(1, C_data, Old_l_data, Data, Config) ->
+    data_changed(act_temp, C_data, Data, Old_l_data, Config);
+set_live_data(3, C_data, Old_l_data, Data, Config) ->
+    data_changed(act_temp, C_data, Data, Old_l_data, Config);
+set_live_data(4, C_data, Old_l_data, Data, Config) ->
+    data_changed(window, C_data, Data, Old_l_data, Config);
+set_live_data(5, C_data, Old_l_data, Data, Config) ->
+    data_changed(act_temp, C_data, Data, Old_l_data, Config).
 
-set_live_data(Device_type, C_data, Data, Data) ->
-    lager:debug("nothing changed for device_type : ~p data: ~p", [proplists:get_value(device_type, C_data), Data]);
-set_live_data(1, C_data, Old_l_data, Data) ->
-    data_changed(act_temp, C_data, Data, Old_l_data);
-set_live_data(3, C_data, Old_l_data, Data) ->
-    data_changed(act_temp, C_data, Data, Old_l_data);
-set_live_data(4, C_data, Old_l_data, Data) ->
-    data_changed(window, C_data, Data, Old_l_data);
-set_live_data(5, C_data, Old_l_data, Data) ->
-    data_changed(act_temp, C_data, Data, Old_l_data).
-
-set_config_data(1, New_data, C_data) ->
+set_config_data(1, New_data, C_data, Config) ->
     cuberl_sender:send_message(?MESSAGE_CONFIG([{type, config_data}, {device_type, values:value(device_type, 1)}, {data, New_data}]));
-set_config_data(3, New_data, C_data) ->
+set_config_data(3, New_data, C_data, Config) ->
     cuberl_sender:send_message(?MESSAGE_CONFIG([{type, config_data}, {device_type, values:value(device_type, 3)}, {data, New_data}]));
-set_config_data(4, New_data, C_data) ->
+set_config_data(4, New_data, C_data, Config) ->
     cuberl_sender:send_message(?MESSAGE_CONFIG([{type, config_data}, {device_type, values:value(device_type, 4)}, {data, New_data}]));
-set_config_data(5, New_data, C_data) ->
+set_config_data(5, New_data, C_dat, Configa) ->
     cuberl_sender:send_message(?MESSAGE_CONFIG([{type, config_data}, {device_type, values:value(device_type, 5)}, {data, New_data}]));
-set_config_data(Device_type, New_data, C_data) ->
+set_config_data(Device_type, New_data, C_data, Config) ->
     lager:warning("don't understand config data : ~p", [New_data]).
 
 int_to_atom(Int) ->
 	list_to_atom(integer_to_list(Int)).
 
-data_changed(Something, C_data, New_data, New_data) ->
+data_changed(Something, C_data, New_data, New_data, Config) ->
     lager:warning("No changes on live data for unknown: ~p with data : ~p", [Something, New_data]);
-data_changed(act_temp, C_data, New_data, Data) ->
-    Meta = get_meta(C_data),
+data_changed(act_temp, C_data, New_data, Data, Config) ->
+    Meta = get_meta(C_data, Config),
     Temp = get(act_temp, New_data),
-    cuberl_sender:send_message(?MESSAGE_LIVE([{act_temp_state, Temp} | Meta]));
-data_changed(window, C_data, New_data, Data) ->
-    Meta = get_meta(C_data),
+    cuberl_sender:send_message(?MESSAGE_LIVE({act_temp_state, [{act_temp_state, Temp} | Meta]}));
+data_changed(window, C_data, New_data, Data, Config) ->
+    Meta = get_meta(C_data, Config),
     Window_state = get(window, New_data),
-    cuberl_sender:send_message(?MESSAGE_LIVE([{window_state, Window_state}| Meta]));
-data_changed(battery, C_data, New_data, Data) ->
-    Meta = get_meta(C_data),
+    cuberl_sender:send_message(?MESSAGE_LIVE({window_state, [{window_state, Window_state}| Meta]}));
+data_changed(battery, C_data, New_data, Data, Config) ->
+    Meta = get_meta(C_data, Config),
     Battery_state = proplists:get_value(battery, New_data),
-    cuberl_sender:send_message(?MESSAGE_LIVE([{battery_state, unknown_yet} | Meta])).
+    cuberl_sender:send_message(?MESSAGE_LIVE({battery_state,[{battery_state, unknown_yet} | Meta]})).
 
-get_meta(C_data) ->
+get_meta(C_data, Config) ->
     Device_type = get(device_type, C_data), 
     Device_name = values:value(device_type, Device_type),
     Room_id = get(room_id, C_data), 
     Room_name = get(room_name, Room_id),
-    [{room_id, Room_id}, {room_name, Room_name}, {device_type, Device_type}, {device_name, Device_name}].
+    RF_address = get(rf_address, Config),
+    [{room_id, Room_id}, {room_name, Room_name}, {device_type, Device_type}, {device_name, Device_name}, {rf_address, RF_address}].
 
 get(room_name, Room_id) ->
     room:get_name(Room_id);
@@ -204,6 +206,6 @@ list_equal_test() ->
 send_config_data_test() ->
     A = lists:keysort(1,[{a, "1"}, {b, "2"}, {c, "3"}]),
     B = lists:keysort(1,[{b, "2"}, {a, "1"}, {c, "3"}]),
-    set_config_data(3, A, B).
+    set_config_data(3, A, B, []).
 
 -endif.

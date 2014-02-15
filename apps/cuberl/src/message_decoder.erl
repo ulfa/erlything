@@ -55,14 +55,25 @@ decode(<<"M:", Unknown:6/binary, Rest/binary>> = Message) ->
 	Devices = decode_devices(Devices_encoded),
 	[{rooms, Rooms}, {devices, Devices}];
 decode(<<"C:",RF_address:6/binary, "," ,Rest/binary>> = Message) ->
-	lager:info("C - Message : ~p", [Message]),	
+	lager:debug("C - Message : ~p", [Message]),	
 	Messages = binary:split(Message, <<"\r\n">>, [global]), 
-	[decode_c_m(<<"C:", RF_address/binary, ",", (base64:decode(Body))/binary>>) || <<"C:",RF_address:6/binary, "," , Body/binary>> <- Messages];
+	[decode_c_m(<<"C:", RF_address/binary, ",", (decode_base64(Body))/binary>>) || <<"C:",RF_address:6/binary, "," , Body/binary>> <- Messages];
 decode(<<"L:", Rest/binary>> = Message) ->
 	lager:debug("L - Message : ~p", [Message]),
 	decode_l(base64:decode(Rest), []);
 decode(Message) ->
 	lager:info("unknown Message : ~p", [Message]).
+
+decode_base64(Body) ->
+	try 
+		base64:decode(Body)
+	catch 
+		_:Error -> lager:error("~p can't base64:decode(~p)", [?MODULE, Body]),
+		%% This is a workaround which works for me :-(
+		Body1 = <<Body/binary, <<"A==">>/binary>>,
+		base64:decode(Body1)
+	end.
+
 
 %%VgIBAgpXb2huemltbWVyCyORAgELI5FLRVEwNTU4NjU1EFRoZXJtb3N0YXQgbGlua3MCAQlCUktFUTA1MjUxMDMRVGhlcm1vc3RhdCByZWNodHMCAQ==\r\n
 %% Before we analyze this list, we have to decode it, because it is base64 encoded.
@@ -256,7 +267,7 @@ decode_c_m(<<C:2/binary,
 			 _Comma:1/binary, 
 			 Length/integer, 
 			 Message:Length/binary>>) ->
-	lager:info("~p", [Length]),
+	lager:debug("~p", [Length]),
 	decode_c_m1(Message).
 
 
@@ -313,7 +324,7 @@ decode(connection_ip, Bin) ->
 decode(cycle, Bin) ->
 	{cycle, bin_to_dez(Bin)};
 decode(system_date, Bin) ->
-	lager:info("Date : ~p", [Bin]),
+	lager:debug("Date : ~p", [Bin]),
 	S = binary_to_list(Bin),
 	Year = string:sub_string(S, 1, 2),
 	Month = string:sub_string(S, 3, 4),
@@ -472,5 +483,13 @@ decode_c_message_6_test() ->
 	M = <<"C:08e1f2,0gjh8gEDGP9LRVEwNjQ3ODc5KyE9CQcYAzAM/wBESFUIRSBFIEUgRSBFIEUgRSBFIEUgRSBFIERIVQhFIEUgRSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIERIVGxEzFUURSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUg">>,
 
 	decode(M).
-	
+
+decode_c_message_7_test() ->
+	M = <<"C:0c1f2d,EQwfLQQDFA9LRVEwNzU1Njgw">>,
+	decode(M).
+
+decode_c_message_8_test() ->
+	M = <<"C:08e1f2,0gjh8gEDGP9LRVEwNjQ3ODc5KyE9CQcYAzAM/wBESFUIRSBFIEUgRSBFIEUgRSBFIEUgRSBFIERIVQhFIEUgRSBFIEUgRSBFIEUgRSBFIEUgREhUbETMVRRFIEUgRSBFIEUgRSBFIEUgRSBESFRsRMxVFEUgRSBFIEUgRSBFIEUgRSBFIERIVGxEzFUURSBFIEUgRSBFIEUgRSBFIA==">>,
+	decode(M).
+
 -endif.

@@ -27,6 +27,7 @@ handle_message(<<"L:", Rest/binary>> = Message) ->
 	Msg = message_decoder:decode(Message),
 	[device:set_l_data(RF_address, L_data) || {rf_address, RF_address, L_data} <- Msg];
 handle_message(<<"C:", Rest/binary>> = Message) ->
+	lager:debug("handle c message : ~p", [Message]),
 	Msg = message_decoder:decode(Message),
 	[device:set_c_data(RF_address, C_data) || {rf_address, RF_address, C_data} <- Msg];
 handle_message(Message) ->
