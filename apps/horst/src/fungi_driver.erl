@@ -29,20 +29,21 @@ handle_msg([Node ,Sensor, Id, Time, [{temp, 0.0}, {hum, 0.0}]] = Msg, Config, Mo
     Config;
 handle_msg([Node ,Sensor, Id, Time, [{temp, Temp}, {hum, Hum}]] = Msg, Config, Module_config) ->
     lager:info("~p got a message with values: ~p", [?MODULE, Msg]),
-    {Room, Room_id} = get_room(binary_to_list(Node), Module_config),
+    {Room_name, Room_id} = get_room(binary_to_list(Node), Module_config),
     Hum_max = get_config(hum_max, Module_config),
-    Window_state = get_data(window, Module_config),
+    Window_state = get_window_state(Room_name, Module_config),
     Temp_max = get_config(temp_max, Module_config),
     Temp_min = get_config(temp_min, Module_config),
-    handle_hum(Room, Hum, Hum_max, Window_state, Config, Module_config),
-    handle_temp(Room, Temp, Temp_min, Temp_max, Window_state, Config, Module_config),
+    handle_hum(Room_name, Hum, Hum_max, Window_state, Config, Module_config),
+    handle_temp(Room_name, Temp, Temp_min, Temp_max, Window_state, Config, Module_config),
     Config;
 %%
 %% Here we handle the window state from the cuberl. 
 %%
 handle_msg([Node ,<<"cube_driver">>, Id, Time, {window_state, Body}] = Msg, Config, Module_config) ->
     lager:info("~p got a message with values: ~p", [?MODULE, Msg]),
-    Window_state = get_data(window, Module_config),
+    Room_name = get_value(room_name, Body),
+    Window_state = get_window_state(Room_name, Module_config),
     Window_state_new = get_value(window_state, Body),
     Room_id = get_value(room_id, Body),
     Room_name = get_value(room_name, Body),
@@ -92,10 +93,10 @@ handle_window(Window_state_new, Window_state_new, Room_id, Room_name,Config, Mod
     Config;
 
 handle_window(Window_state, ?WINDOW_CLOSE, Room_id, Room_name,Config, Module_config) ->
-    set_data(window, ?WINDOW_CLOSE, Config, Module_config);
+    set_window_state(Room_name, ?WINDOW_CLOSE, Config, Module_config);
 
 handle_window(Window_state, ?WINDOW_OPEN, Room_id, Room_name,Config, Module_config) ->
-    set_data(window, ?WINDOW_OPEN, Config, Module_config).
+    set_window_state(Room_name, ?WINDOW_OPEN, Config, Module_config).
 %%
 %% Here we handle the message from the cuberl. (temp state)
 %%
@@ -130,6 +131,19 @@ get_room(Key, Module_config) ->
     Rooms = get_value(rooms, Config),
     {Room_name, Room_id} = get_value(Key,Rooms).
 
+get_window_state(Window, Module_config) ->
+    Data = get_value(data, Module_config),
+    Windows = get_value(windows, Data),
+    get_value(Window, Windows).
+
+set_window_state(Window, State, Config, Module_config) ->
+    Data = get_value(data, Module_config),
+    Windows = get_value(windows, Data),
+    Windows_1 = lists:keystore(Window, 1, Windows, {Window, State}),
+    Data_1 = lists:keyreplace(windows, 1, Data, {windows, Windows_1}),
+    Module_config_1 = lists:keyreplace(data, 1, Module_config, {data, Data_1}),
+    lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}).
+
 set_data(Key, Value, Config, Module_config) ->
     Data = get_value(data, Module_config),
     New_data = lists:keyreplace(Key, 1, Data, {Key, Value}), 
@@ -150,7 +164,7 @@ get_value_test() ->
 set_data_test() ->
     Config = 
      [{driver, {fungi_driver,handle_msg},
-        [{data,[{window,close}, {lastaction, {time, action}}]},
+        [{data,[{window,close}]},
          {config,
             [{rooms, [{"horst@raspberrypi",{"Büro", 3}},
                       {"horst@erwin", {"Wohnzimmer", 2}}]},                
@@ -160,7 +174,7 @@ set_data_test() ->
 
     Config_result = 
      [{driver, {fungi_driver,handle_msg},
-        [{data,[{window,open}, {lastaction, {time, action}}]},
+        [{data,[{window,open}]},
          {config,
             [{rooms, [{"horst@raspberrypi",{"Büro", 3}},
                       {"horst@erwin", {"Wohnzimmer", 2}}]},                
@@ -181,5 +195,32 @@ get_room_test() ->
                 {temp_max,"21.0"}]}],
     ?assertEqual({"Wohnzimmer", 2}, get_room("horst@erwin", Config)).
 
+get_window_state_for_room_test() ->
+    Data = [{data, [{windows, [{"horst@erwin", open}]}]}],
+    ?assertEqual(open,get_window_state("horst@erwin", Data)).
+
+set_window_state_test() ->
+   Config = 
+     [{driver, {fungi_driver,handle_msg},
+        [{data,[{windows,[]}]},
+         {config,
+            [{rooms, [{"horst@raspberrypi",{"Büro", 3}},
+                      {"horst@erwin", {"Wohnzimmer", 2}}]},                
+            {hum_max,"60.0"},
+            {temp_min,"16.0"},
+            {temp_max,"21.0"}]}]}],
+
+   Config_1 = 
+     [{driver, {fungi_driver,handle_msg},
+        [{data,[{windows,[{"horst@erwin", open}]}]},
+         {config,
+            [{rooms, [{"horst@raspberrypi",{"Büro", 3}},
+                      {"horst@erwin", {"Wohnzimmer", 2}}]},                
+            {hum_max,"60.0"},
+            {temp_min,"16.0"},
+            {temp_max,"21.0"}]}]}],
+
+    {driver, {_Module, _Func}, Module_config} = lists:keyfind(driver, 1, Config),
+    ?assertEqual(Config_1, set_window_state("horst@erwin", open, Config, Module_config)).
 
 -endif.
