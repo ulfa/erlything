@@ -144,7 +144,7 @@ handle_info(timeout, State) ->
         {ok, Socket} -> {ok, ListenSocket} = gen_tcp:listen(Port, []),
                         start_timer(get_env(timer)),
 	                    {noreply, #state{socket = Socket, listenSocket = ListenSocket}};
-        {error, Reason} -> cuberl_sender:send_message({external_interrupt, cuberl, {fatal, Reason}}),
+        {error, Reason} -> cuberl_sender:send_message({external_interrupt, cuberl, error, {fatal, Reason}}),
                            lager:error("can't connect to the cube, because of : ~p", [Reason]),
                            cuberl_sender:send_message(?MESSAGE_ERROR("can't connect to the cube, because of", Reason)),
                            {noreply, State}
