@@ -6,6 +6,7 @@ REPOSRC = ../../repository
 TARGET = ~/projects/erlang
 
 
+
 all: app
 
 tar: app 
@@ -48,4 +49,4 @@ docs:
 	@$(REBAR) doc skip_deps=true
 
 rcswitch:
-	$(MAKE) -C apps/horst/priv/driver/remote
+	$(MAKE) -C apps/horst/priv/driver/remote send
