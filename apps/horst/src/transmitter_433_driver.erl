@@ -17,7 +17,8 @@
 %% --------------------------------------------------------------------
 -export([handle_msg/3]).
 
-handle_msg([Node ,Sensor, _Id, Time, {Switch, Number, Status}], Config, Module_config) ->
+handle_msg([Node ,Sensor, _Id, Time, {Switch, Number, Status}] = Msg, Config, Module_config) ->
+	lager:info("~p got a message with values: ~p. ", [?MODULE, Msg]),
 	case is_valid_device(Number, Module_config) of 
 		false -> lager:info("Device : ~p is not a valid device for this node", [Number]),
 				 Config;
@@ -29,8 +30,8 @@ handle_msg([Node ,Sensor, _Id, Time, {Switch, Number, Status}], Config, Module_c
 			 Config
 	end;
 
-handle_msg([Node ,Sensor, _Id, Time, Body], Config, Module_config) ->
-	lager:warning("transmitter_433_driver got the wrong message : ~p", [[Node ,Sensor, _Id, Time, Body]]),
+handle_msg([Node ,Sensor, _Id, Time, Body] = Msg, Config, Module_config) ->
+	lager:warning("~p got the wrong message : ~p", [?MODULE, Msg]),
 	Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
@@ -42,7 +43,7 @@ call_driver(Switch, Status) ->
 	lager:debug("switch state from : ~p to : ~p", [Switch, Status]),
     Driver = filename:join([code:priv_dir(horst), "driver", "remote", "send "]),
     Command=Driver ++ Switch ++ " " ++ Status,
-    lager:debug("Command : ~p", [Command]),
+    lager:info("Command : ~p", [Command]),
     os:cmd(Command),
     os:cmd(Command).
 %% --------------------------------------------------------------------
