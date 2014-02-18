@@ -29,7 +29,7 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([create_message/5, create_message/4, create_message/3, send_message/2]).
+-export([create_message/5, create_message/4, create_message/3, send_message/1]).
 -export([encode/1]).
 %% --------------------------------------------------------------------
 %% record definitions
@@ -46,10 +46,12 @@ create_message(Node, Module, Id, Body) ->
 create_message(Node, Sensor, Id, Time, Body) ->
     [atom_to_binary(Node, utf8), atom_to_binary(Sensor, utf8), list_to_binary(Id), list_to_binary(integer_to_list(Time)), Body].
 
+send_message(Message) ->
+  send_message(nodes(), Message).
 send_message(Nodes, Message) ->
   send_message(Nodes, 'actor_group', Message).    
 send_message(Nodes, Target, Message) ->
-  rpc:abcast(Nodes, Target, Message).    
+  rpc:abcast([node()|Nodes], Target, Message).    
 
 encode([]) ->
 	[];
