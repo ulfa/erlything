@@ -6,11 +6,18 @@
     <div class="well">    
     <form class="form-horizontal" method="post">
         <input type="hidden" name="node" value="{{node}}">
-    
+
+
         <div class="control-group">
             <label class="control-label" for="inputFunName">Name</label>
             <div class="controls">
                 <input type="text" id="inputFunName" name="name" placeholder="Fun Name">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="inputMessgae">Message</label>
+            <div class="controls">
+                <input class="span8" type="text" id="inputMessage" name="message" placeholder="Message">
             </div>
         </div>
         <div class="control-group">
@@ -30,6 +37,7 @@
         <div class="control-group">
         <div class="controls">
           <button type="submit" class="btn btn-primary">Save</button>
+          <button type="cancel" class="btn">Cancel</button>
         </div>
         </div>
           

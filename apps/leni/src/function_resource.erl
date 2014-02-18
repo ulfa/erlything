@@ -232,8 +232,8 @@ to_html(ReqData, Context) ->
     Node = wrq:get_qs_value("node",ReqData),    
     Name = wrq:get_qs_value("name",ReqData),    
     Fun_name = wrq:get_qs_value("fun_name",ReqData),
-    {N, C, Co} = get_fun(Node, Name, Fun_name), 
-    {ok, Content} = function_dtl:render([{node, Node},{fname, N}, {command, C}, {comment, Co}]),
+    {N, M, C, Co} = get_fun(Node, Name, Fun_name), 
+    {ok, Content} = function_dtl:render([{node, Node},{fname, N}, {message, M},{command, C}, {comment, Co}]),
     {Content, ReqData, Context}.
 
 to_json(ReqData, Context) ->
@@ -250,7 +250,7 @@ get_fun(Node, Name, Fun_name) when is_list(Node)->
 
 get_command(Funs, Name) ->
     case lists:keysearch(Name, 1, Funs) of
-        {value, {N, F, C, Co}} -> {N, C, Co};
+        {value, {N, M, F, C, Co}} -> {N, M, C, Co};
         false -> []
     end.
 %% --------------------------------------------------------------------
