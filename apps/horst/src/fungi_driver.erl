@@ -137,10 +137,25 @@ get_window_state(Window, Module_config) ->
     get_value(Window, Windows).
 
 set_window_state(Window, State, Config, Module_config) ->
+    set_data_in_list(windows, Window, State, Config, Module_config).
+%%    Data = get_value(data, Module_config),
+%%    Windows = get_value(windows, Data),
+%%    Windows_1 = lists:keystore(Window, 1, Windows, {Window, State}),
+%%    Data_1 = lists:keyreplace(windows, 1, Data, {windows, Windows_1}),
+%%    Module_config_1 = lists:keyreplace(data, 1, Module_config, {data, Data_1}),
+%%    lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}).
+
+set_act_temp(Room_name, Temp, Config, Module_config) ->
+    set_data_in_list(act_temps, Room_name, Temp, Config, Module_config).
+
+set_act_hum(Room_name, Hum, Config, Module_config) ->
+    set_data_in_list(act_hums, Room_name, Hum, Config, Module_config).
+
+set_data_in_list(List_name, Key, Value, Config, Module_config) ->
     Data = get_value(data, Module_config),
-    Windows = get_value(windows, Data),
-    Windows_1 = lists:keystore(Window, 1, Windows, {Window, State}),
-    Data_1 = lists:keyreplace(windows, 1, Data, {windows, Windows_1}),
+    List = get_value(List_name, Data),
+    List_1 = lists:keystore(Key, 1, List, {Key, Value}),
+    Data_1 = lists:keyreplace(List_name, 1, Data, {List_name, List_1}),
     Module_config_1 = lists:keyreplace(data, 1, Module_config, {data, Data_1}),
     lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}).
 
@@ -221,6 +236,6 @@ set_window_state_test() ->
             {temp_max,"21.0"}]}]}],
 
     {driver, {_Module, _Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    ?assertEqual(Config_1, set_window_state("horst@erwin", open, Config, Module_config)).
+    ?assertEqual(Config_1, set_data_in_list(windows, "horst@erwin", open, Config, Module_config)).
 
 -endif.
