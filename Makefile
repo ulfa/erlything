@@ -46,3 +46,6 @@ ct:
 
 docs:
 	@$(REBAR) doc skip_deps=true
+
+rcswitch:
+	$(MAKE) -C apps/horst/priv/driver/remote
