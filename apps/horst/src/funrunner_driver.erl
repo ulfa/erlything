@@ -74,7 +74,11 @@ handle_msg([Node ,Sensor, Id, Time, {error, Text, Others}], Config, Module_confi
     Config;
 
 handle_msg([Node ,Driver, Id, Time, Body] = Msg, Config, Module_config) ->
-    handle_msg([Node ,Driver, Id, Time, {run, {Node, Driver, Id, Time, Body}}], Config, Module_config);
+    Funs = proplists:get_value(funs, Module_config, []),
+    case get_fun(Funs, {Node, Driver, Id}) of   
+       {Name, Fun} -> handle_msg([Node ,Driver, Id, Time, {run, {Node, Driver, Id, Time, Body}}], Config, Module_config);
+       [] -> lager:info("no fun found for : ~p", [Msg])
+    end;
 
 handle_msg(Msg, Config, Module_config) ->
     lager:warning("~p got an unkown message : ~p", [?MODULE, Msg]),  
