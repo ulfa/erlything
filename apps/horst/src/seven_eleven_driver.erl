@@ -16,9 +16,17 @@
 %% --------------------------------------------------------------------
 -export([handle_msg/3]).
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, "ring_bell"] = Msg, Config, Module_config) ->
+    play_sound(),
+    Config;
+
+handle_msg([Node ,Sensor, Id, Time, "Rising"], Config, Module_config) ->
 	play_sound(),
-	Config.
+	Config;
+
+handle_msg(Unknown_message, Config, Module_config) ->
+    lager:warning("~p got a message which i don'understand: ~p",[?MODULE, Unknown_message]),
+    Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
