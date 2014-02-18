@@ -1,4 +1,4 @@
-PROJECT = horst
+PROJECT = erlything
 DIALYZER = dialyzer
 REBAR = rebar
 REPO = ../../../../repository
