@@ -1,9 +1,10 @@
 # Overview
 
-This is a runtime plattform  for sensors and actors. 
+erlyThing is a decentral, distributed message based thing plattform. 
 
 ## Features
 
+* decentral system.
 * distributed system which communicate over messages
 * internal monitoring system:
 	* webbased application explorer
@@ -15,17 +16,19 @@ This is a runtime plattform  for sensors and actors.
 * starting and stopping of things during runtime
 * configuration of messages which a thing understands
 * dynamic handling of config files (things.config and messages.config)
-* Integration of 3rd party applications is simple.(look at the examples)
+* Integration of 3rd party applications is simple.(see cuberl) 
+* Generic way of handling rules (see funrunner)
+* very easy DSL (Prototype)
 
 # Installation and starting
 
 To install the application on your machine, please do the following steps :
 
-Before you can install this appliction on your machine, you have to install an [erlang R15] (https://www.erlang-solutions.com/downloads/download-erlang-otp) runtime. 
-After installing the runtime, you have to install [rebar] (https://github.com/basho/rebar) on your machine. rebar is the build tool for erlang.
+Before you can install this appliction on your machine, you have to install an [erlang R15](https://www.erlang-solutions.com/downloads/download-erlang-otp) runtime. 
+After installing the runtime, you have to install [rebar](https://github.com/basho/rebar) on your machine. rebar is the build tool for erlang.
 
-* [erlang R1503] (https://www.erlang-solutions.com/downloads/download-erlang-otp)
-* [rebar] (https://github.com/basho/rebar) the build tool for erlang
+* [erlang R1503](https://www.erlang-solutions.com/downloads/download-erlang-otp)
+* [rebar](https://github.com/basho/rebar) the build tool for erlang
 
 
 ```bash
@@ -35,6 +38,15 @@ $ make
 $ ./dev_leni.sh
 ```
 
+# Installation on a raspberry pi
+
+After you did the steps as described in the previous section you also have to do :
+
+```bash
+make rcswitch send
+```
+
+
 ## Dependencies
 
 
@@ -43,16 +55,17 @@ $ ./dev_leni.sh
 * [lager](https://github.com/basho/lager) a logging framework
 * [gpio](https://github.com/Feuerlabs/gpio) sysfs GPIO port driver and erlang module
 * [erlcron](https://github.com/erlware/erlcron.git) Erlang cronish system
-* [wiringpi] (https://projects.drogon.net/raspberry-pi/wiringpi/) a GPIO access library written in C for the BCM2835
-* [Adafruit_DHT] (https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code/tree/master/Adafruit_DHT_Driver)
-* [rc-switch] (https://code.google.com/p/rc-switch/) library to operate with 315/433 MHZ remote control devices
-* [streamer] (http://manpages.ubuntu.com/manpages/gutsy/man1/streamer.1.html) record audio and/or video 
+* [wiringpi](https://projects.drogon.net/raspberry-pi/wiringpi/) a GPIO access library written in C for the BCM2835
+* [Adafruit_DHT](https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code/tree/master/Adafruit_DHT_Driver)
+* [rc-switch](https://code.google.com/p/rc-switch/) library to operate with 315/433 MHZ remote control devices
+* [streamer](http://manpages.ubuntu.com/manpages/gutsy/man1/streamer.1.html) record audio and/or video 
 
 # Supported Sensors
 
-* [DHT22] (http://www.amazon.de/Sensors-Temperature-SEN-10167-Feuchte-und-Temperatur-Sensor/dp/B005A9KJ4I) temperature-humidity sensor
-* [hc_sr501] (http://www.elecfreaks.com/wiki/index.php?title=PIR_Motion_Sensor_Module:DYP-ME003) PIR motion sensor
-* [TK0460] (http://www.aliexpress.com/snapshot/247141960.html) 433Mhz RF Transmitter And Receiver 
+* [DHT22](http://www.amazon.de/Sensors-Temperature-SEN-10167-Feuchte-und-Temperatur-Sensor/dp/B005A9KJ4I) temperature-humidity sensor
+* [hc_sr501](http://www.elecfreaks.com/wiki/index.php?title=PIR_Motion_Sensor_Module:DYP-ME003) PIR motion sensor
+* [TK0460](http://www.aliexpress.com/snapshot/247141960.html) 433Mhz RF Transmitter
+* [Max! Cube](http://www.elv.de/max-cube-lan-gateway.html) a heating system
 
 I will add more in the future...
 
@@ -80,17 +93,18 @@ This configuration file contains the things, which you want to use in your env.
 	{description, "Temp sensor in my office"}
 	]}.
 ```
-Type        | Value                       |Description
-------------|-----------------------------|--------------------------------------------------------------
-thing       | Name of the thing           | must be unique in a node
-ets	      | true/false | should we use an ets or the thing state (for more see the documentation)
-icon        | "/images/" and the name of the image.| The image must be placed in the apps/horst/priv/images/.  
-type        | sensor / actor              | type of thing (actor or sensor)
-driver      | {Module, Function}, []      | the list contains driver specific paramter
-activ       | true / false                | the thing will only be started if activ = true
-timer       | int                         | if the driver needs timmer triggering, you must spec it here
-database    | []                          | database parameter
-descripition| String                      | a description
+|Type        | Value                       |Description
+|------------|-----------------------------|--------------------------------------------------------------
+|thing       | Name of the thing           | must be unique in a node
+|id			| The id of a thing			  | If the id is missing, the system will take "default". 
+|ets	      | true/false | should we use an ets or the thing state (for more see the documentation)
+|icon        | "/images/" and the name of the image.| The image must be placed in the apps/horst/priv/images/.  
+|type        | sensor / actor              | type of thing (actor or sensor)
+|driver      | {Module, Function}, []      | the list contains driver specific paramter
+|activ       | true / false                | the thing will only be started if activ = true
+|timer       | int                         | if the driver needs timmer triggering, you must spec it here
+|database    | []                          | database parameter
+|descripition| String                      | a description
 
 ### Messages.config
 
@@ -117,4 +131,11 @@ These things are used in my internal project and they work for me.
 * dht22_driver the sensor thing which triggers the dht22 sensor
 * dht22_display_driver stores 20 values of the dht22 
 * transmitter_433_driver sends a signal via the transmitter to a switch
+* boxcar_driver is an actor which sends messages to a [boxcar client](https://boxcar.io)
+* cube_driver integrates the [Max! Cube](http://www.elv.de/max-cube-lan-gateway.html) 
+* funge_driver is an application which informs you if you run in trouble with fungi
+* os_driver takes data of your system like cpu temp and load and sends them to the os_display_driver
+* funrunner is generic way to create rules for consuming and sending messages 
+* sample_driver is an example 
+* reloader_driver is for development. Everytime you make an update of modules the reloader will load them into the system.
 
