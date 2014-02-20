@@ -304,9 +304,8 @@ driver_init(Module, false, Config) ->
     lager:debug("don't init driver : ~p", [Module]),
     check_init(Module);
 driver_init(Module, true, Config) ->
-    lager:debug("call init for driver : ~p", [Module]),
-    {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    Module:init(Module_config).
+    lager:debug("call init for driver : ~p", [Module]),    
+    Module:init(Config).
 
 start_timer(0) ->
 	lager:info("timer for thing  is set to 0");
