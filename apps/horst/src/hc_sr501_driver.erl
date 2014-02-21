@@ -22,7 +22,8 @@
 init(Config) ->
 	lager:info("~p:init('~p')", [?MODULE, Config]),
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-	gpio:set_interrupt(proplists:get_value(pin, Module_config) , proplists:get_value(int_type, Module_config)).
+    [Pin, Int_type] = config:get_values([pin, int_type], Module_config),
+	gpio:set_interrupt(Pin, Int_type).
 
 handle_msg({gpio_interrupt, 0, Pin, Status}, Config, Modul_config) ->
 	Msg = create_message(Status, sensor:get_id(Config)),

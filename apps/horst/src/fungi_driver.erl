@@ -30,10 +30,11 @@ handle_msg([Node ,Sensor, Id, Time, [{temp, 0.0}, {hum, 0.0}]] = Msg, Config, Mo
 handle_msg([Node ,Sensor, Id, Time, [{temp, Temp}, {hum, Hum}]] = Msg, Config, Module_config) ->
     lager:info("~p got a message with values: ~p", [?MODULE, Msg]),
     {Room_name, Room_id} = get_room(binary_to_list(Node), Module_config),
+    %%[Hum_max, Temp_max, Temp_min] = config:get_values([hum_max, temp_max, temp_min], Module_config), 
     Hum_max = get_config(hum_max, Module_config),
-    Window_state = get_window_state(Room_name, Module_config),
     Temp_max = get_config(temp_max, Module_config),
     Temp_min = get_config(temp_min, Module_config),
+    Window_state = get_window_state(Room_name, Module_config),
     handle_hum(Room_name, Hum, Hum_max, Window_state, Config, Module_config),
     handle_temp(Room_name, Temp, Temp_min, Temp_max, Window_state, Config, Module_config),
     Config;
@@ -42,11 +43,12 @@ handle_msg([Node ,Sensor, Id, Time, [{temp, Temp}, {hum, Hum}]] = Msg, Config, M
 %%
 handle_msg([Node ,<<"cube_driver">>, Id, Time, {window_state, Body}] = Msg, Config, Module_config) ->
     lager:info("~p got a message with values: ~p", [?MODULE, Msg]),
+    [Room_name, Window_state_new, Room_id, Room_name] = config:get_values([room_name, window_state, room_id, room_name], Body), 
     Room_name = get_value(room_name, Body),
-    Window_state = get_window_state(Room_name, Module_config),
     Window_state_new = get_value(window_state, Body),
     Room_id = get_value(room_id, Body),
     Room_name = get_value(room_name, Body),
+    Window_state = get_window_state(Room_name, Module_config),
     handle_window(Window_state, Window_state_new, Room_id, Room_name, Config, Module_config);
 %%
 %% This function handles unknwon messages.
@@ -108,7 +110,7 @@ handle_msg_intern([{}],Config, Module_config) ->
 send_msg_to_human(Room, Window_state, Window_state, Config, Module_config) ->
     lager:info("~p sends nothing because the window is already in state : ~p", [?MODULE, Window_state]),
     Config;
-send_msg_to_human(Room, Window_state, Window_state_new, Config, Module_config) ->
+send_msg_to_human(Room, Window_state, Window_state_new, Config, Module_config) ->    
     Msg = sensor:create_message(node(), ?MODULE, [{account, get_config(boxcar, Module_config)},{title, Window_state_new ++ " the window in room : " ++ Room }, {message, "see title"}, {sound, "digital-alarm"}]),
     sensor:send_message(Msg),  
     Config.
@@ -138,12 +140,6 @@ get_window_state(Window, Module_config) ->
 
 set_window_state(Window, State, Config, Module_config) ->
     set_data_in_list(windows, Window, State, Config, Module_config).
-%%    Data = get_value(data, Module_config),
-%%    Windows = get_value(windows, Data),
-%%    Windows_1 = lists:keystore(Window, 1, Windows, {Window, State}),
-%%    Data_1 = lists:keyreplace(windows, 1, Data, {windows, Windows_1}),
-%%    Module_config_1 = lists:keyreplace(data, 1, Module_config, {data, Data_1}),
-%%    lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}).
 
 set_act_temp(Room_name, Temp, Config, Module_config) ->
     set_data_in_list(act_temps, Room_name, Temp, Config, Module_config).

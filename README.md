@@ -35,8 +35,11 @@ After installing the runtime, you have to install [rebar](https://github.com/bas
 $ git clone https://github.com/ulfa/erlything 
 $ cd erlything
 $ make
-$ ./dev_leni.sh
+$ ./dev.sh
 ```
+
+When the system is up and running you can check it with : [moni](http://localhost:8000) and if you want to see your 
+deployed things you can use : [leni](http://localhost:8080)
 
 # Installation on a raspberry pi
 
