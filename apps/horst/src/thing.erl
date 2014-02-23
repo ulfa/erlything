@@ -283,8 +283,49 @@ code_change(OldVsn, State, Extra) ->
 is_message_well_known({Node, Sensor, Id}, Allowed_msgs) ->
     case  sets:is_element({Node, Sensor, Id}, Allowed_msgs) of 
         true -> true;
-        false -> are_all_msgs_allowed(sets:to_list(Allowed_msgs))
+        false -> is_msgs_allowed({Node, Sensor, Id}, sets:to_list(Allowed_msgs))
     end.
+
+is_msgs_allowed({Node, Sensor, Id}, [Check|Checks]) ->
+    case is_msgs_allowed({Node, Sensor, Id}, Check) of 
+        true -> true;
+        false -> is_msgs_allowed({Node, Sensor, Id}, Checks)
+    end;
+is_msgs_allowed({Node, Sensor, Id}, {all, all, all}) ->
+    true;
+is_msgs_allowed({Node, Sensor, Id}, {all, Sensor, all}) ->
+    true;
+is_msgs_allowed({Node, Sensor, Id}, {all, Sensor1, all}) ->
+    false;
+
+is_msgs_allowed({Node, Sensor, Id}, {all, all, Id}) ->
+    true;
+is_msgs_allowed({Node, Sensor, Id}, {all, all, Id1}) ->
+    false;
+
+is_msgs_allowed({Node, Sensor, Id}, {Node, all, all}) ->
+    true;
+is_msgs_allowed({Node, Sensor, Id}, {Node1, all, all}) ->
+    false;
+
+is_msgs_allowed({Node, Sensor, Id}, {Node, Sensor, all}) ->
+    true;
+is_msgs_allowed({Node, Sensor, Id}, {Node1, Sensor1, all}) ->
+    false;
+
+is_msgs_allowed({Node, Sensor, Id}, {Node, all, Id}) ->
+    true;
+is_msgs_allowed({Node, Sensor, Id}, {Node1, all, Id1}) ->
+    false;
+
+is_msgs_allowed({Node, Sensor, Id}, {all, Sensor, Id}) ->
+    true;
+is_msgs_allowed({Node, Sensor, Id}, {all, Sensor1, Id1}) ->
+    false;
+
+is_msgs_allowed({Node, Sensor, Id}, Allowed_msgs) ->
+    false.
+
 
 are_all_msgs_allowed([{all, all, all}]) ->
     true;
@@ -344,6 +385,10 @@ is_message_well_known_test() ->
     Allowed_msgs_3 = sets:from_list([{all, all, <<"0">>}]),
     ?assertEqual(true, is_message_well_known({<<"horst@raspberrypi">>,<<"hc_sr501_driver">>,<<"0">>}, Allowed_msgs_1)),
     ?assertEqual(true, is_message_well_known({<<"test@raspberrypi">>,<<"hc_sr501_driver">>,<<"0">>}, Allowed_msgs_2)),
-    ?assertEqual(false, is_message_well_known({<<"test@raspberrypi">>,<<"hc_sr501_driver">>,<<"0">>}, Allowed_msgs_3)).
+    ?assertEqual(true, is_message_well_known({<<"test@raspberrypi">>,<<"hc_sr501_driver">>,<<"0">>}, Allowed_msgs_3)).
 
+is_msgs_allowed_test() ->
+    Allowed_msgs_1 = [{all, <<"hc_sr501_driver">>, all}],
+    ?assertEqual(true, is_msgs_allowed({<<"horst@raspberrypi">>,<<"hc_sr501_driver">>,<<"0">>}, Allowed_msgs_1)),
+    ?assertEqual(false, is_msgs_allowed({<<"horst@raspberrypi">>,<<"cube_driver">>,<<"0">>}, Allowed_msgs_1)).
 -endif.
