@@ -18,7 +18,7 @@
 
 init(Config) ->
     lager:info("funrunner_driver:init('~p')", [Config]),
-    Config.
+    {ok, Config}.
 
 handle_msg([Node ,Sensor, Id, Time, {save, Name, Message, Command, Comment}], Config, Module_config) ->
     save_fun(Name, Message, Command, Comment, Config, Module_config);
@@ -86,7 +86,7 @@ handle_msg(Msg, Config, Module_config) ->
 
 stop(Config) ->
     lager:info("~p:stop('~p')", [?MODULE, Config]),  
-    Config.
+    {ok, Config}.
 
 
 %% --------------------------------------------------------------------

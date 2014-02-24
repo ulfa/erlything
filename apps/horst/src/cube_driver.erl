@@ -24,14 +24,16 @@ init(Config) ->
               ok;
         {error, {already_started, App}} ->
             ok
-    end.
+    end,
+    {ok, Config}.
     
 
 stop(Config) ->
     lager:info("~p:stop('~p')", [?MODULE, Config]),
     cuberl:disconnect(),
     application:stop(cuberl),
-    application:unload(cuberl). 
+    application:unload(cuberl),
+    {ok, Config}.
 
 handle_msg({external_interrupt, cuberl, error, {fatal, Reason}}, Config, Module_config) ->
     lager:info("~p got an fatal message with values: ~p. I will stop the cube.", [?MODULE, Reason]),

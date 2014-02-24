@@ -34,22 +34,22 @@ get_level_values(Level, Keys, List_of_tuples) ->
     List_of_tuples_1 = get_level(Level, List_of_tuples),
     get_values(Keys, List_of_tuples_1).
 
-get_level([], List_of_tuples) ->
+get_level([], List_of_tuples) when is_list(List_of_tuples)  ->
     List_of_tuples;
-get_level([Key|Keys], List_of_tuples) ->
+get_level([Key|Keys], List_of_tuples) when is_list(List_of_tuples)  ->
     get_level(Keys, get_value(Key, List_of_tuples)).
 
-get_values(Keys, List_of_tuples) ->
+get_values(Keys, List_of_tuples) when is_list(List_of_tuples)  ->
     get_values(Keys, List_of_tuples, []). 
 
 get_values([], List_of_tuples, Acc) ->
     lists:reverse(Acc);
-get_values([Key|Keys], List_of_tuples, Acc) ->
+get_values([Key|Keys], List_of_tuples, Acc) when is_list(List_of_tuples) ->
     get_values(Keys, List_of_tuples, [get_value(Key, List_of_tuples)|Acc]).
 
-get_value(Key, List_of_tuples) ->
+get_value(Key, List_of_tuples) when is_list(List_of_tuples)  ->
     proplists:get_value(Key, List_of_tuples).
-get_value(Key, List_of_tuples, Default) ->
+get_value(Key, List_of_tuples, Default) when is_list(List_of_tuples)  ->
     proplists:get_value(Key, List_of_tuples, Default).
 %% --------------------------------------------------------------------
 %%% Test functions

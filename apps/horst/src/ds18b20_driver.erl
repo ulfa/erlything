@@ -20,7 +20,8 @@
 init(Config) ->
     lager:info("ds18b20_driver:init('~p')", [Config]),  
     os:cmd("modprobe w1-gpio"),
-    os:cmd("modprobe w1-therm").
+    os:cmd("modprobe w1-therm"),
+    {ok, Config}.
 
 call_sensor(Config, Module_config) ->
     Temp_line = call_driver(),

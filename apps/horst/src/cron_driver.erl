@@ -22,13 +22,15 @@ init(Config) ->
         	  ok;
         {error, {already_started, erlcron}} ->
             ok
-    end.
+    end,
+    {ok, Config}.
     
 stop(Config) ->
 	lager:info("stopping Module : ~p ", [?MODULE]),
 	Crontab = proplists:get_value(crontab, Config, []), 
 	stop_jobs(Crontab),
-	application:stop(erlcron).
+	application:stop(erlcron),
+    {ok, Config}.
 	 
 call_sensor(Config, Module_config) ->
     lager:warning("cron_driver can't handle any message"),

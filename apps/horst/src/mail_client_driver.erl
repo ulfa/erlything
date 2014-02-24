@@ -16,7 +16,8 @@
 
 init(Config) ->
 	lager:info("mail_client_driver:init('~p')", [Config]),	
-	application:start(gen_smtpc).
+	application:start(gen_smtpc),
+	{ok, Config}.
 
 
 handle_msg([Node ,Sensor, Id, Time, [{to, To}, {subject, Subject}, {content, Content}]], Config, Module_config) ->
@@ -47,7 +48,8 @@ send_email(Sender, Password, To, Subject, Content, Options) ->
 
 stop(Config) ->
     application:stop(gen_smtpc),
-    application:unload(gen_smtpc).  
+    application:unload(gen_smtpc),
+    {ok, Config}.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------

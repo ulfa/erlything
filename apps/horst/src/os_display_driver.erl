@@ -24,7 +24,7 @@ init(Config) ->
 	[{rules, Rules}] = ets:lookup(Table_Id, rules),	
 	Rules_1 = dsl:create_rules(?MODULE, Rules), 
 	thing:save_data_to_ets(Config, funs, Rules_1),	
-	Config.
+	{ok, Config}.
 
 %% OS_data = [{temp,38.47}{avg1,0.0390625}{avg5,0.109375}{avg15,0.12890625}]
 %% {node,[{temp,38.47}{avg1,0.0390625}{avg5,0.109375}{avg15,0.12890625}]}

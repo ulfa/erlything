@@ -22,14 +22,14 @@
 init(Config) ->
     lager:info("~p:init('~p')", [?MODULE, Config]),
     application:start(os_mon),
-    Config.
+    {ok, Config}.
 
 stop(Config) ->
     lager:info("~p:stop('~p')", [?MODULE, Config]),
     lager:info("stop is called"),
     application:stop(os_mon),
     application:unload(os_mon), 
-    Config.    
+    {ok, Config}.    
 
 call_sensor(Config, Module_config) ->
     Data = call_driver(),

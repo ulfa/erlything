@@ -20,12 +20,14 @@
 
 init(Config) ->
     lager:info("~p:init('~p')", [?MODULE, Config]),
-    application:start(reloader).
+    application:start(reloader),
+    {ok, Config}.
 
 stop(Config) ->
     lager:info("~p:stop('~p')", [?MODULE, Config]),
     application:stop(reloader),
-    application:unload(reloader).  
+    application:unload(reloader),
+    {ok, Config}.
 
 call_sensor(Config, Module_config) ->   
     Changed_Modules = re_reloader:reload(),

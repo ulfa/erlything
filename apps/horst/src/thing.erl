@@ -264,7 +264,7 @@ handle_info(Info, State) ->
     Exports = proplists:get_value(exports, Module:module_info(), []),
     case proplists:get_value(stop, Exports) of 
         undefined -> lager:warning("there is no stop function in module : ~p", [Module]);
-        1 -> Module:stop(Config);
+        1 -> driver_stop(Module, Config);
         Any -> lager:waring("the stop function has too many arguments")
     end,
     ok.
@@ -326,12 +326,6 @@ is_msgs_allowed({Node, Sensor, Id}, {all, Sensor1, Id1}) ->
 is_msgs_allowed({Node, Sensor, Id}, Allowed_msgs) ->
     false.
 
-
-are_all_msgs_allowed([{all, all, all}]) ->
-    true;
-are_all_msgs_allowed(Allowed_msgs) ->
-    false.
-
 handle_msg([Node ,Sensor, Id, Time, Body], Config, true) ->
     lager:debug("got message : ~p : ~p", [Time, Body]),
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
@@ -343,10 +337,17 @@ handle_msg([Node ,Sensor, Id, Time, Body], Config, false) ->
 
 driver_init(Module, false, Config) ->
     lager:debug("don't init driver : ~p", [Module]),
-    check_init(Module);
+    check_init(Module),
+    Config;
 driver_init(Module, true, Config) ->
     lager:debug("call init for driver : ~p", [Module]),    
-    Module:init(Config).
+    {ok, Config_1} = Module:init(Config),
+    Config_1.
+
+driver_stop(Module, Config) ->
+    lager:debug("call stop for driver : ~p", [Module]),    
+    {ok, Config_1} = Module:stop(Config),
+    Config_1.
 
 start_timer(0) ->
 	lager:info("timer for thing  is set to 0");
