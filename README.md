@@ -114,7 +114,7 @@ This configuration file contains the things, which you want to use in your env.
 This configuartion file contains the drivers and the messages which they understand
 
 ```erlang
-{dht22_display_driver, [{<<"horst@raspberrypi">>,<<"dht22_driver">>, <<"0">>}]}.
+{{dht22_display_driver, id}, [{<<"horst@raspberrypi">>,<<"dht22_driver">>, <<"0">>}]}.
 ```
 
 The driver dht22_display_driver which is implemented in module dht22_display_driver.erl is

@@ -14,7 +14,7 @@
 -export([init/1, stop/1]).
 -export([handle_msg/3]).
 -export([test_me/0, test_me_1/0, test_me_2/0, test_me_3/0, test_me_4/0,test_exception/0]).
--export([test_schimmel/0, test_schimmel_data/0]).
+-export([test_schimmel/0,test_schimmel1/0, test_schimmel_data/0]).
 
 init(Config) ->
     lager:info("funrunner_driver:init('~p')", [Config]),
@@ -77,7 +77,8 @@ handle_msg([Node ,Driver, Id, Time, Body] = Msg, Config, Module_config) ->
     Funs = proplists:get_value(funs, Module_config, []),
     case get_fun(Funs, {Node, Driver, Id}) of   
        {Name, Fun} -> handle_msg([Node ,Driver, Id, Time, {run, {Node, Driver, Id, Time, Body}}], Config, Module_config);
-       [] -> lager:info("no fun found for : ~p", [Msg])
+       [] -> lager:info("no fun found for : ~p", [Msg]),
+             Config
     end;
 
 handle_msg(Msg, Config, Module_config) ->
@@ -140,7 +141,6 @@ run_fun(Fun, Name, Args) when is_function(Fun) and is_list(Args) ->
     lager:info("1.... : ~p", [Args]),
     Fun(Name, Args);  
 run_fun(Fun, Name, Args) when is_function(Fun) ->
-    lager:info("2.... : ~p", [Args]),
     Fun(Name, [Args]).      
 
 get_fun(Funs, {Node, Driver, Id} = Msg) ->  
@@ -198,6 +198,10 @@ test_me_4() ->
 
 test_schimmel() ->
     Message=sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {save, "schimmel", {<<"horst@raspberrypi">>,<<"dht22_driver">>,<<"default">>}, "fun(Name, [{temp, Temp}, {hum, Hum}]) -> io:format(\"~p~p~n\", [Temp, Hum]) end.", "Schimmel App"}),
+    sensor:send_message(Message).
+
+test_schimmel1() ->
+    Message=sensor:create_message(node(), 'testmodule', sensor:get_id([]), {save, "schimmel", {<<"horst@raspberrypi">>,<<"dht22_driver">>,<<"default">>}, "fun(Name, [{temp, Temp}, {hum, Hum}]) -> io:format(\"~p~p~n\", [Temp, Hum]) end.", "Schimmel App"}),
     sensor:send_message(Message).
 
 test_schimmel_data() ->
