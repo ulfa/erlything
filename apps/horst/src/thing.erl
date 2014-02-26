@@ -248,8 +248,12 @@ handle_info({'ETS-TRANSFER', TableId, Pid, _Data}, State=#state{config = Config}
     end,
     {noreply, State#state{config = Config_1}};
 
-handle_info(Info, State=#state{config=Config}) ->
-    lager:warning("~p got message : ~p ~p that i don't understand.", [?MODULE, Info, Config]),
+ 
+handle_info({send_after, Messages}, State) ->
+    sensor:send_messages(Messages); 
+    
+handle_info(Info, State) ->
+    lager:error("~p got message : ~p that i don't understand.", [?MODULE, Info]),
     {noreply, State}.
 
 %% --------------------------------------------------------------------
@@ -375,7 +379,7 @@ check_init(Module) ->
         Any -> lager:waring("the init function has too many arguments"),
                 false
     end.
-    
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
