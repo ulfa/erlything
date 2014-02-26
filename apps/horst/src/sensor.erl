@@ -15,13 +15,15 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([create_message/5, create_message/4, create_message/3, send_message/2, send_message/1]).
+-export([create_message/5, create_message/4, create_message/3, create_message/2, send_message/2, send_message/1,send_messages/1, send_after/2]).
 -export([get_id/1]).
 -export([generate_messages/1, generate_messages/2]).
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
 
+create_message(Module, Body) ->
+	create_message(node(), Module, Body).
 create_message(Node, Module, Body) ->
 	create_message(Node, Module, get_id([]), date:get_date_seconds(), Body).
 
@@ -33,12 +35,22 @@ create_message(Node, Module, Id, Time, Body) when is_list(Module) ->
 create_message(Node, Module, Id, Time, Body) ->
     [atom_to_binary(Node, utf8), atom_to_binary(Module, utf8), list_to_binary(Id), list_to_binary(integer_to_list(Time)), Body].
 
+send_messages([]) ->
+	ok;
+send_messages([Message|Messages]) when is_list(Messages) ->
+	send_message(Message),
+	send_messages(Messages).
+
 send_message(Message) ->
 	send_message(nodes(), Message).
 send_message(Nodes, Message) ->
 	send_message(Nodes, 'actor_group', Message).    
 send_message(Nodes, Target, Message) ->
-	rpc:abcast([node()|Nodes], Target, Message).    
+	rpc:abcast([node()|Nodes], Target, Message),
+	ok.
+
+send_after(Time, Messages) ->
+	erlang:send_after(Time, self(), {send_after, Messages}).    
 
 %% ToDo I have to move this into the config_handler!
 get_id([]) ->

@@ -9,3 +9,5 @@
 -define(THING(Name, Config), {Name, {thing, start_link, [Config]}, transient, 5000, worker, [thing]}).
 
 -define(TABLE, table_id).
+
+-define(SYSTEM, 'system').

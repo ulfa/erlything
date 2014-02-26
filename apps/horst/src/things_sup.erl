@@ -28,7 +28,6 @@
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-
 init([]) ->
 	{_Node, Config} = node_config:get_things_config(),
     {ok, {{one_for_one, 5, 10}, config_handler:create_thing_spec(Config)}}.
