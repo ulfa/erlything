@@ -10,9 +10,15 @@
         <div class="control-group">
             <label class="control-label" for="inputFunName">Name</label>
             <div class="controls">
-                <input type="text" class="span8" id="inputFunName" name="inputFunName" placeholder="Fun Name" value="{{fname}}">
+                <input type="text" class="span8" id="inputFunName" name="funName" placeholder="Fun Name" value="{{fname}}">
             </div>
         </div>
+        <div class="control-group">
+            <label class="control-label" for="inputMessgae">Message</label>
+            <div class="controls">
+                <input class="span8" type="text" id="inputMessage" name="message" placeholder="{<<&quot;node&quot;>>, <<&quot;driver&quot;>>, <<&quot;id&quot;>>}" >
+            </div>
+        </div>        
         <div class="control-group">
             <label class="control-label" for="inputFun">Fun</label>
             <div class="controls">
@@ -23,21 +29,21 @@
         <div class="control-group">
             <label class="control-label" for="inputComment">Comment</label>
             <div class="controls">
-                <textarea class="span8" id="inputFunComment" name="inputFunComment" rows="3" >{{comment}}</textarea>
+                <textarea class="span8" id="inputFunComment" name="funComment" rows="3" >{{comment}}</textarea>
             </div>
         </div>
 
         <div class="control-group">
             <label class="control-label" for="inputArgs">Arguments</label>
             <div class="controls">
-                <input type="text" class="span8" id="inputArgs" name="inputArgs" placeholder="{Value, Type}">
+                <input type="text" class="span8" id="inputArgs" name="args" placeholder="{Value, Type}">
             </div>
         </div>
 
         <div class="control-group">
             <div class="controls">
-                <button type="submit" class="btn">Save</button>
-                <button type="submit" class="btn btn-primary">Run</button>
+                <button type="submit" class="btn" name="button" value="save">Save</button>
+                <button type="submit" class="btn btn-primary" name="button" value="run">Run</button>
             </div>
         </div>
     </form>

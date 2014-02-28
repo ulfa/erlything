@@ -30,7 +30,7 @@ handle_msg([Node ,Sensor, Id, Time, {run,{Node_1, Driver_1, Id_1, Time_1, Body}}
     {Name, Fun} = get_fun(Funs, {Node_1, Driver_1, Id_1}),      
     try
         Result = run_fun(Fun, Name, Body),
-        lager:info("Result of fun Message : ~p is : ~p", [Name, Result]),
+        lager:info("Result of fun : ~p is : ~p", [Name, Result]),
         create_message_and_send(Module_config, {run_result, Name, {ok,Result}})
     catch   
         _:Error -> create_message_and_send(Module_config, {error, "running fun with name : " ++ Name ++ " ", Error}),
@@ -138,7 +138,6 @@ convert(Value, int)  ->
     list_to_integer(Value).
 
 run_fun(Fun, Name, Args) when is_function(Fun) and is_list(Args) ->
-    lager:info("1.... : ~p", [Args]),
     Fun(Name, Args);  
 run_fun(Fun, Name, Args) when is_function(Fun) ->
     Fun(Name, [Args]).      

@@ -129,13 +129,26 @@ create_path(ReqData, Context) ->
 % If it succeeds, it should return true.
 %
 process_post(ReqData, Context) ->
-    lager:info("...... this is a test ....~p",[wrq:req_body(ReqData)]),
+    lager:info("1...... this is a test ....~p",[wrq:req_body(ReqData)]),
     Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
-    {"inputFunName", Fun_name} = lists:keyfind("inputFunName",1, Body),
-    {"inputArgs", Args} = lists:keyfind("inputArgs",1, Body),
-    Msg = sender_util:create_message(node(), ?MODULE, "default", date:get_date_seconds(), {run, Fun_name, Args }), 
-    sender_util:send_message([node()|nodes()], Msg), 
+    lager:info("2...... this is a test ....~p",[Body]),
+    Button = get_value("button", Body),
+    handle_post(Button, Body),
     {true, ReqData, Context}.
+
+handle_post("save", Body) ->
+    Fun_name = get_value("funName", Body),
+    Message = get_value("message", Body),
+    Fun = get_value("inputFun",Body),
+    Fun_comment = get_value("funComment", Body),
+    
+    ok;
+handle_post("run", Body) ->
+    Fun_name = get_value("funName", Body),
+    Args = get_value("args", Body),
+    Msg = sender_util:create_message(node(), ?MODULE, "default", date:get_date_seconds(), {run, Fun_name, Args }),
+    sender_util:send_message([node()|nodes()], Msg), 
+    ok.
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 
 % where Mediatype is a string of content-type format and the Handler is an atom naming 
@@ -253,6 +266,9 @@ get_command(Funs, Name) ->
         {value, {N, M, F, C, Co}} -> {N, M, C, Co};
         false -> []
     end.
+
+get_value(Key, List) ->
+    proplists:get_value(Key, List). 
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

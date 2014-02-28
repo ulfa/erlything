@@ -17,7 +17,7 @@
         <div class="control-group">
             <label class="control-label" for="inputMessgae">Message</label>
             <div class="controls">
-                <input class="span8" type="text" id="inputMessage" name="message" placeholder="Message">
+                <input class="span8" type="text" id="inputMessage" name="message" placeholder="{<<&quot;node&quot;>>, <<&quot;driver&quot;>>, <<&quot;id&quot;>>}">
             </div>
         </div>
         <div class="control-group">
