@@ -43,7 +43,7 @@ handle_msg([Node ,Sensor, Id, Time, {run, Name, Args}], Config, Module_config) w
     Funs = proplists:get_value(funs, Module_config, []),
     Fun = get_fun(Funs, Name),
     try 
-        Arguments  = string_to_args("[" ++ Args ++ "]."),
+        Arguments  = string_to_args("[" ++ Args ++ "]."),        
         Result = run_fun(Fun, Name, args_to_types(Arguments)),
         lager:info("Result for fun with name : ~p is : ~p", [Name, Result]),
         create_message_and_send(Module_config, Name,{run_result, Name, {ok,Result}})
@@ -132,12 +132,13 @@ string_to_args(Args) ->
 args_to_types(Args) ->
     [convert(Value, Type) || {Value, Type} <- Args].
 
-convert(Value, int) when is_integer(Value) ->
+convert(Value, int) when is_integer(Value) ->    
     Value;
 convert(Value, int)  ->
     list_to_integer(Value).
 
 run_fun(Fun, Name, Args) when is_function(Fun) and is_list(Args) ->
+    lager:info("~p ~p ~w" , [Fun, Name, Args]),
     Fun(Name, Args);  
 run_fun(Fun, Name, Args) when is_function(Fun) ->
     Fun(Name, [Args]).      
@@ -166,7 +167,7 @@ get_command(Funs, Name) ->
 %%% Test functions
 %% --------------------------------------------------------------------
 test_me() ->
-    Message = sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {save, "arg_test", [], "fun([X]) -> X + 1 end.", "Das ist ein Argument Test"}), 
+    Message = sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {save, "arg_test", [], "fun(Name,[X]) -> X + 1 end.", "Das ist ein Argument Test"}), 
     sensor:send_message(nodes(), Message),
     Message1 = sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {list}), 
     sensor:send_message(nodes(), Message1),
@@ -217,7 +218,8 @@ test_exception() ->
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
 string_to_args_test() ->
-    ?assertEqual([{1,i}, {2,s}],string_to_args("[{1,i}, {2,s}].")).
+    ?assertEqual([{1,i}, {2,s}],string_to_args("[{1,i}, {2,s}].")),
+    ?assertEqual([{10, int}],string_to_args("[{10,int}].")).
 
 args_to_types_test() ->
     ?assertEqual([1],args_to_types([{1,int}])).

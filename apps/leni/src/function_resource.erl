@@ -131,7 +131,7 @@ create_path(ReqData, Context) ->
 process_post(ReqData, Context) ->
     lager:info("1...... this is a test ....~p",[wrq:req_body(ReqData)]),
     Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
-    lager:info("2...... this is a test ....~p",[Body]),
+    
     Button = get_value("button", Body),
     handle_post(Button, Body),
     {true, ReqData, Context}.
@@ -147,8 +147,8 @@ handle_post("run", Body) ->
     Fun_name = get_value("funName", Body),
     Args = get_value("args", Body),
     Msg = sender_util:create_message(node(), ?MODULE, "default", date:get_date_seconds(), {run, Fun_name, Args }),
-    sender_util:send_message([node()|nodes()], Msg), 
-    ok.
+    lager:info("2...... this is a test ....~p",[Msg]),
+    sender_util:send_message(Msg).
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 
 % where Mediatype is a string of content-type format and the Handler is an atom naming 

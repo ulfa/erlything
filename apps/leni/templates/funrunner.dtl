@@ -7,6 +7,7 @@
 
 
 <div class="well">
+<h3>Function</h3>
 <table class="table">
     <thead>
         <tr>
@@ -26,5 +27,46 @@
     </tbody>
 </table>
 </div>
+
+<div class="well">
+<h3>Result</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Name</th>
+            <th>Result</th>            
+        </tr>   
+    </thead>
+    <tbody>
+        <tr>        
+            <td>2014-02-28 09:49:14</td>    
+            <td>schimmel</a></td>      
+            <td>ok</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
+<div class="well">
+<h3>Error</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Text</th>
+            <th>Error</th>
+        </tr>   
+    </thead>
+    <tbody>
+        <tr>        
+            <td>2014-02-28 09:49:14</td>    
+            <td>running fun with name : arg_test and args : ~p {1, int}</td>
+            <td>function_clause</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
 
 {% endblock %}
