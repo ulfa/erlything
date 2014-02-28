@@ -15,6 +15,7 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
+-export([send/2]).
 -export([create_message/5, create_message/4, create_message/3, create_message/2, send_message/2, send_message/1,send_messages/1, send_after/2]).
 -export([get_id/1]).
 -export([generate_messages/1, generate_messages/2]).
@@ -40,6 +41,9 @@ send_messages([]) ->
 send_messages([Message|Messages]) when is_list(Messages) ->
 	send_message(Message),
 	send_messages(Messages).
+
+send(Module, Body) ->
+	send_message(create_message(Module, Body)).
 
 send_message(Message) ->
 	send_message(nodes(), Message).
