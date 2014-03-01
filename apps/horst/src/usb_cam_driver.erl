@@ -14,7 +14,11 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([handle_msg/3]).
+-export([init/1, handle_msg/3]).
+
+init(Config) ->
+	os:cmd("mount -a -o nolock"), 
+	Config.
 
 handle_msg([Node ,Sensor, Id, Time, "RISING"], Config, Module_config) ->
 	Path = proplists:get_value(path, Module_config, []),
