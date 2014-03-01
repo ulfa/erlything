@@ -13,8 +13,8 @@
 %% --------------------------------------------------------------------
 -export([init/1, stop/1]).
 -export([handle_msg/3]).
--export([test_me/0, test_me_1/0, test_me_2/0, test_me_3/0, test_me_4/0,test_exception/0]).
--export([test_schimmel/0,test_schimmel1/0, test_schimmel_data/0]).
+-export([test_me/0 ,test_exception/0]).
+-export([test_schimmel1/0, test_schimmel_data/0]).
 
 init(Config) ->
     lager:info("funrunner_driver:init('~p')", [Config]),
@@ -26,7 +26,7 @@ handle_msg([Node ,Sensor, Id, Time, {save, Name, Message, Command, Comment}], Co
 handle_msg([Node ,Sensor, Id, Time, {run,{Node_1, Driver_1, Id_1, Time_1, Body}}], Config, Module_config) ->
     Msg = {Node_1, Driver_1, Id_1, Body},
     lager:info("run fun for message : ~p ", [Msg]),
-    Funs = proplists:get_value(funs, Module_config, []),
+    Funs = config:get_value(funs, Module_config, []),
     {Name, Fun} = get_fun(Funs, {Node_1, Driver_1, Id_1}),      
     try
         Result = run_fun(Fun, Name, Body),
@@ -40,7 +40,7 @@ handle_msg([Node ,Sensor, Id, Time, {run,{Node_1, Driver_1, Id_1, Time_1, Body}}
 
 handle_msg([Node ,Sensor, Id, Time, {run, Name, Args}], Config, Module_config) when is_list(Name) ->
     lager:info("run fun with name : ~p and arguments : ~p", [Name, Args]),
-    Funs = proplists:get_value(funs, Module_config, []),
+    Funs = config:get_value(funs, Module_config, []),
     Fun = get_fun(Funs, Name),
     try 
         Arguments  = string_to_args("[" ++ Args ++ "]."),        
@@ -55,14 +55,14 @@ handle_msg([Node ,Sensor, Id, Time, {run, Name, Args}], Config, Module_config) w
 
 handle_msg([Node ,Sensor, Id, Time, {list, Name}], Config, Module_config) ->
     lager:info("list the fun with name : ~p", [Name]),
-    Funs = proplists:get_value(funs, Module_config, []),
+    Funs = config:get_value(funs, Module_config, []),
     Result = get_command(Funs, Name),
     create_message_and_send(Module_config, {list_result, Name, {ok, Result}}),
     Config;
 
 handle_msg([Node ,Sensor, Id, Time, {list}], Config, Module_config) ->
     lager:info("list all funs "),
-    Funs = proplists:get_value(funs, Module_config, []),
+    Funs = config:get_value(funs, Module_config, []),
     Result = get_commands(Funs),
     create_message_and_send(Module_config, {list_result, {ok, Result}}),
     Config;
@@ -74,7 +74,7 @@ handle_msg([Node ,Sensor, Id, Time, {error, Text, Others}], Config, Module_confi
     Config;
 
 handle_msg([Node ,Driver, Id, Time, Body] = Msg, Config, Module_config) ->
-    Funs = proplists:get_value(funs, Module_config, []),
+    Funs = config:get_value(funs, Module_config, []),
     case get_fun(Funs, {Node, Driver, Id}) of   
        {Name, Fun} -> handle_msg([Node ,Driver, Id, Time, {run, {Node, Driver, Id, Time, Body}}], Config, Module_config);
        [] -> lager:info("no fun found for : ~p", [Msg]),
@@ -95,7 +95,7 @@ stop(Config) ->
 %% --------------------------------------------------------------------
 save_fun(Name, Message, Command, Comment, Config, Module_config) ->
     lager:info("save fun under name : ~p with message : ~p ,command : ~p and comment : ~p ", [Name, Message, Command, Comment]),
-    Funs = proplists:get_value(funs, Module_config, []),
+    Funs = config:get_value(funs, Module_config, []),
     try 
         {ok, Fun} = command_to_fun(Command),
         create_message_and_send(Module_config, {save_result, Name, ok}),
@@ -173,32 +173,6 @@ test_me() ->
     sensor:send_message(nodes(), Message1),
     Message2 = sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {run, "arg_test", "{1, int}"}), 
     sensor:send_message(nodes(), Message2).
-
-test_me_1() ->
-    Message=sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {save, "send_test", [], "fun([Args]) -> M=sensor:create_message(node(), 'funrunner', {'funrunner test'}), sensor:send_message(nodes(), M)  end.", "Das ist ein Argument Test"}),
-    sensor:send_message(nodes(), Message),
-    Message1=sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {list}), 
-    sensor:send_message(nodes(), Message1),
-    Message2=sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {run, "send_test", []}), 
-    sensor:send_message(nodes(), Message2).
-
-test_me_2() ->
-    Message=sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {save, {<<"horst@ua-TA880GB">>, <<"sample_driver">>, <<"default">>}, "fun([Args]) -> M=sensor:create_message(node(), 'funrunner', {'funrunner test'}), sensor:send_message(nodes(), M), {ok}  end.", "Das ist ein Argument Test"}),
-    sensor:send_message(Message).
-
-test_me_3() ->
-    Message=sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {run, {<<"horst@ua-TA880GB">>,<<"sample_driver">>,<<"default">>,<<"63559059448">>,{temp, 10.0}}}), 
-    sensor:send_message(Message).
-
-%%{"Licht","11111 2","1"}
-
-test_me_4() ->
-    Message=sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {save, "msg_test", {<<"horst@ua-TA880GB">>, <<"sample_driver">>, <<"default">>}, "fun(Name, [Args]) -> M=sensor:create_message(node(), Name, {\"Licht\",\"11111 2\",\"1\"}), sensor:send_message(M)  end.", "Anschalten Licht"}),
-    sensor:send_message(Message).
-
-test_schimmel() ->
-    Message=sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {save, "schimmel", {<<"horst@raspberrypi">>,<<"dht22_driver">>,<<"default">>}, "fun(Name, [{temp, Temp}, {hum, Hum}]) -> io:format(\"~p~p~n\", [Temp, Hum]) end.", "Schimmel App"}),
-    sensor:send_message(Message).
 
 test_schimmel1() ->
     Message=sensor:create_message(node(), 'testmodule', sensor:get_id([]), {save, "schimmel", {<<"horst@raspberrypi">>,<<"dht22_driver">>,<<"default">>}, "fun(Name, [{temp, Temp}, {hum, Hum}]) -> io:format(\"~p~p~n\", [Temp, Hum]) end.", "Schimmel App"}),
