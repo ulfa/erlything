@@ -26,9 +26,12 @@ handle_msg([Node ,Sensor, Id, Time, {Name, Device, Status}], Config, Module_conf
 	ets:insert(Table_Id, [{data, add(Data, {Device, Name, Status, Time})}]),
 	Config;
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
-	lager:warning("switch_measurement_driver got the wrong message : ~p", [[Node ,Sensor, Id, Time, Body]]),
-	Config.
+%%
+%% This function handles unknwon messages.
+%%
+handle_msg(Unknown_message, Config, Module_config) ->
+    lager:warning("~p got an unkown message with values: ~p",[?MODULE, Unknown_message]),
+    Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------

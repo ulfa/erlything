@@ -11,6 +11,7 @@
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
+-include("../include/horst.hrl").
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
@@ -20,9 +21,9 @@ init(Config) ->
 	os:cmd("mount -a -o nolock"), 
 	Config.
 
-handle_msg([Node ,Sensor, Id, Time, "RISING"], Config, Module_config) ->
-	Path = proplists:get_value(path, Module_config, []),
-	Last_shot = proplists:get_value(last_shot, Module_config, 0),
+handle_msg([Node ,Sensor, Id, Time, ?ON], Config, Module_config) ->
+	Path = config:get_value(path, Module_config, []),
+	Last_shot = config:get_value(last_shot, Module_config, 0),
 	Actual_time = date:get_date_seconds(),
 	case check_time(Last_shot, Actual_time) of 
 		true -> call_driver(Path, Actual_time),
@@ -32,9 +33,12 @@ handle_msg([Node ,Sensor, Id, Time, "RISING"], Config, Module_config) ->
 				 Config
 	end;
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
-	lager:warning("usb_cam_driver got the wrong message : ~p", [[Node ,Sensor, Id, Time, Body]]),
-	Config.
+%%
+%% This function handles unknwon messages.
+%%
+handle_msg(Unknown_message, Config, Module_config) ->
+    lager:warning("~p got an unkown message with values: ~p",[?MODULE, Unknown_message]),
+    Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
@@ -51,6 +55,4 @@ check_time(Last_shot, Actual_time) ->
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
-handle_msg_test() ->
-	true.
 -endif.

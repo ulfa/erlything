@@ -24,9 +24,12 @@ handle_msg([Node ,Sensor, Id, Time, {temp, Temp}], Config, Module_config) ->
 	ets:insert(Table_Id, [{data, add(Data, {Time, Temp})}]),
 	Config;
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
-	lager:warning("~p got the wrong message : ~p", [?MODULE, [Node ,Sensor, Id, Time, Body]]),
-	Config.
+%%
+%% This function handles unknwon messages.
+%%
+handle_msg(Unknown_message, Config, Module_config) ->
+    lager:warning("~p got an unkown message with values: ~p",[?MODULE, Unknown_message]),
+    Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------

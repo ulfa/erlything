@@ -11,3 +11,11 @@
 -define(TABLE, table_id).
 
 -define(SYSTEM, 'system').
+
+-define(ON, "on").
+-define(OFF, "off").
+-define(RISING, "on").
+-define(FALLING, "off").
+
+
+

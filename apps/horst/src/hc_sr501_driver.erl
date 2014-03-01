@@ -11,6 +11,7 @@
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
+-include("../include/horst.hrl").
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
@@ -29,17 +30,24 @@ init(Config) ->
 handle_msg({gpio_interrupt, 0, Pin, Status}, Config, Modul_config) ->
 	Msg = create_message(Status, sensor:get_id(Config)),
 	sensor:send_message(Msg),
-	lager:info("send message : ~p", [Msg]),
+	lager:debug("send message : ~p", [Msg]),
 	Module_config_1 = lists:keyreplace(last_changed, 1, Modul_config, {last_changed, date:get_date_seconds()}),
-	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}).
+	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1});
+
+%%
+%% This function handles unknwon messages.
+%%
+handle_msg(Unknown_message, Config, Module_config) ->
+    lager:warning("~p got an unkown message with values: ~p",[?MODULE, Unknown_message]),
+    Config.
 
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
 create_message(1, Id) ->
-	sensor:create_message(node(), ?MODULE, Id, date:get_date_seconds(), "RISING");
+	sensor:create_message(node(), ?MODULE, Id, date:get_date_seconds(), ?RISING);
 create_message(0, Id) ->
-	sensor:create_message(node(), ?MODULE, Id, date:get_date_seconds(), "FALLING").
+	sensor:create_message(node(), ?MODULE, Id, date:get_date_seconds(), ?FALLING).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

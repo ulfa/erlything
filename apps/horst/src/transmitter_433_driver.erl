@@ -30,9 +30,12 @@ handle_msg([Node ,Sensor, _Id, Time, {Switch, Number, Status}] = Msg, Config, Mo
 			 Config
 	end;
 
-handle_msg([Node ,Sensor, _Id, Time, Body] = Msg, Config, Module_config) ->
-	lager:warning("~p got the wrong message : ~p", [?MODULE, Msg]),
-	Config.
+%%
+%% This function handles unknwon messages.
+%%
+handle_msg(Unknown_message, Config, Module_config) ->
+    lager:warning("~p got an unkown message with values: ~p",[?MODULE, Unknown_message]),
+    Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
