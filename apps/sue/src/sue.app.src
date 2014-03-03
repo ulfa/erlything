@@ -1,0 +1,27 @@
+{application, sue,
+ [
+  {description, "i have to insert some meanful descriptions"},
+  {vsn, "0.2.0"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  lager
+                 ]},
+  {mod, { sue_app, []}},
+  {env, [{multi_ip, {239,255,255,250}},
+  		 {multi_port, 1900},
+		 {timer, 5000},
+		 {node_repo, node_repo},
+		 {node_repo_msg, save}		 
+  		]},
+   {lager, [
+    {handlers, [
+      {lager_console_backend, [debug, true]},
+      {lager_file_backend, [
+        {"error.log", error, 10485760, "$D0", 5},
+        {"console.log", info, 10485760, "$D0", 5}
+      ]}
+    ]}
+  ]}
+ ]}.
