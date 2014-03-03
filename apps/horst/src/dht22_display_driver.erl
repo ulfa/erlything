@@ -29,9 +29,12 @@ handle_msg([Node ,Sensor, Id, Time, [{temp, Temp},{hum, Hum}]], Config, Module_c
 	ets:insert(Table_Id, [{data, add(Data, {Time, [{temp, Temp},{hum, Hum}]})}]),
 	Config;
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
-	lager:warning("dht22_display_driver got the wrong message : ~p", [[Node ,Sensor, Id, Time, Body]]),
-	Config.
+%%
+%% This function handles unknwon messages.
+%%
+handle_msg(Unknown_message, Config, Module_config) ->
+    lager:warning("~p got an unkown message with values: ~p",[?MODULE, Unknown_message]),
+    Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------

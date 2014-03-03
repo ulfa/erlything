@@ -24,8 +24,11 @@ handle_msg([Node ,Sensor, Id, Time, "Rising"], Config, Module_config) ->
 	play_sound(),
 	Config;
 
+%%
+%% This function handles unknwon messages.
+%%
 handle_msg(Unknown_message, Config, Module_config) ->
-    lager:warning("~p got a message which i don'understand: ~p",[?MODULE, Unknown_message]),
+    lager:warning("~p got an unkown message with values: ~p",[?MODULE, Unknown_message]),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
