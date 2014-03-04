@@ -1,0 +1,17 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}Max Cube{% endblock %}
+
+{% block body %}
+
+<center>
+
+    <h1>Page not found</h1>
+
+    <div>
+        <form method="post">
+            <button type="submit" class="btn btn-large">Back home</button>
+        </form>
+    </div>
+</center>
+{% endblock %}

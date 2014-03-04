@@ -55,7 +55,8 @@ init([]) ->
                  {port, 8080},                 
                  {dispatch, Dispatch},
                  {dispatch_group, leni},
-                 {name, leni}],               
+                 {name, leni},
+                 {error_handler, leni_webmachine_error_handler}],               
     Web = {wm_instance_2, {webmachine_mochiweb, start, [WebConfig]}, permanent, 5000, worker, dynamic},
     Processes = [Web],
     {ok, { {one_for_one, 10, 10}, Processes} }.
