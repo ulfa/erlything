@@ -245,6 +245,7 @@ get_path(Node, Name) ->
 	end.
 
 get_photos([]) ->
+	lager:error("can't find path"),
 	[];
 get_photos(Path) ->
 	lists:reverse(lists:keysort(1, filelib:fold_files(Path, ".+.jpeg$", true, fun(F, L) -> [{filename:basename(F), date:seconds_to_date(filename:rootname(filename:basename(F)))} |L] end, []))).
