@@ -1,0 +1,16 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}File upload{% endblock %}
+
+{% block body %}
+<div class="well">
+ <form action="upload" method="post" enctype="multipart/form-data">    
+        <div class="control-group">
+                <div class="controls">
+                    <input type="file" name='filedata' />
+                    <input type="submit" class="btn btn-primary" value="Upload">
+                </div> 
+        </div>        
+</form>
+</div>
+{% endblock %}

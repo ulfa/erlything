@@ -1,0 +1,9 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}File upload completed{% endblock %}
+
+{% block body %}
+
+File upload for : {{filename}} completed. Uploaded {{filesize}} KB.
+
+{% endblock %}
