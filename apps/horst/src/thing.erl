@@ -40,7 +40,6 @@
 %% ====================================================================
 %% External functions
 %% ====================================================================
-%% only to demonstration for the ets stuff
 get_name(Pid) when is_pid(Pid) ->
     gen_server:call(Pid, {get_name}).
 get_start_time(Name) when is_list(Name) ->
@@ -250,7 +249,9 @@ handle_info({'ETS-TRANSFER', TableId, Pid, _Data}, State=#state{config = Config}
 
  
 handle_info({send_after, Messages}, State) ->
-    sensor:send_messages(Messages); 
+    lager:info("now we send the message : ~p ", [Messages]),
+    sensor:send_messages(Messages),
+    {noreply, State};
     
 handle_info(Info, State) ->
     lager:error("~p got message : ~p that i don't understand.", [?MODULE, Info]),

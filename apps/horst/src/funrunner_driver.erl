@@ -14,7 +14,7 @@
 -export([init/1, stop/1]).
 -export([handle_msg/3]).
 -export([test_me/0 ,test_exception/0]).
--export([test_schimmel1/0, test_schimmel_data/0]).
+-export([test_schimmel1/0, test_schimmel_data/0, test_send_after/0, test_start_send_after/0]).
 
 init(Config) ->
     lager:info("funrunner_driver:init('~p')", [Config]),
@@ -139,9 +139,9 @@ convert(Value, int)  ->
 
 run_fun(Fun, Name, Args) when is_function(Fun) and is_list(Args) ->
     lager:info("~p ~p ~w" , [Fun, Name, Args]),
-    Fun(Name, Args);  
+    Fun(self(), Name, Args);  
 run_fun(Fun, Name, Args) when is_function(Fun) ->
-    Fun(Name, [Args]).      
+    Fun(self(),Name, [Args]).      
 
 get_fun(Funs, {Node, Driver, Id} = Msg) ->  
     case lists:keysearch(Msg, 2, Funs) of
@@ -161,13 +161,12 @@ get_command(Funs, Name) ->
     case lists:keysearch(Name, 1, Funs) of
         {value, {N, F, C, Co}} -> {N, C, Co};
         false -> []
-    end.
-    
+    end.    
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
 test_me() ->
-    Message = sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {save, "arg_test", [], "fun(Name,[X]) -> X + 1 end.", "Das ist ein Argument Test"}), 
+    Message = sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {save, "arg_test", [], "fun(Pid, Name,[X]) -> X + 1 end.", "Das ist ein Argument Test"}), 
     sensor:send_message(nodes(), Message),
     Message1 = sensor:create_message('node@localhost', 'testmodule', sensor:get_id([]), {list}), 
     sensor:send_message(nodes(), Message1),
@@ -175,11 +174,24 @@ test_me() ->
     sensor:send_message(nodes(), Message2).
 
 test_schimmel1() ->
-    Message=sensor:create_message(node(), 'testmodule', sensor:get_id([]), {save, "schimmel", {<<"horst@raspberrypi">>,<<"dht22_driver">>,<<"default">>}, "fun(Name, [{temp, Temp}, {hum, Hum}]) -> io:format(\"~p~p~n\", [Temp, Hum]) end.", "Schimmel App"}),
+    Message=sensor:create_message(node(), 'testmodule', sensor:get_id([]), {save, "schimmel", {<<"horst@raspberrypi">>,<<"dht22_driver">>,<<"default">>}, "fun(Pid, Name, [{temp, Temp}, {hum, Hum}]) -> io:format(\"~p~p~n\", [Temp, Hum]) end.", "Schimmel App"}),
     sensor:send_message(Message).
 
 test_schimmel_data() ->
     Message=sensor:create_message('horst@raspberrypi', 'dht22_driver', [{temp, 10.0},{hum, 50}]),
+    sensor:send_message(Message).
+
+test_send_after() ->
+    Message=sensor:create_message(node(), 'testmodule', sensor:get_id([]), 
+        {save, "send_after", {<<"horst@macbook-pro">>,<<"testmodule">>,<<"default">>}, 
+        "fun(Pid, Name, Body) ->                      
+            sensor:send_after(Pid, 20000,[{Name, 'Das ist ein send_after test'}]),
+            ok 
+         end.", "This is a send_after example"}),
+    sensor:send_message(Message).
+
+test_start_send_after() ->
+    Message=sensor:create_message('horst@macbook-pro', 'testmodule', "start send_after test"),
     sensor:send_message(Message).
 
 test_exception() ->

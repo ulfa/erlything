@@ -16,13 +16,14 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([send/2]).
--export([create_message/5, create_message/4, create_message/3, create_message/2, send_message/2, send_message/1,send_messages/1, send_after/2]).
+-export([create_message/5, create_message/4, create_message/3, create_message/2, send_message/2, send_message/1,send_messages/1, send_after/3]).
 -export([get_id/1]).
 -export([generate_messages/1, generate_messages/2]).
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
-
+create_message(Module, Body) when is_list(Module) ->
+	create_message(list_to_atom(Module), Body);
 create_message(Module, Body) ->
 	create_message(node(), Module, Body).
 create_message(Node, Module, Body) ->
@@ -38,8 +39,8 @@ create_message(Node, Module, Id, Time, Body) ->
 
 send_messages([]) ->
 	ok;
-send_messages([Message|Messages]) when is_list(Messages) ->
-	send_message(Message),
+send_messages([{Name, Message}|Messages]) when is_list(Messages) ->
+	send(Name, Message),
 	send_messages(Messages).
 
 send(Module, Body) ->
@@ -53,8 +54,8 @@ send_message(Nodes, Target, Message) ->
 	rpc:abcast([node()|Nodes], Target, Message),
 	ok.
 
-send_after(Time, Messages) ->
-	erlang:send_after(Time, self(), {send_after, Messages}).    
+send_after(Pid, Time, Messages) when is_list(Messages) ->
+	erlang:send_after(Time, Pid, {send_after, Messages}).    
 
 %% ToDo I have to move this into the config_handler!
 get_id([]) ->
