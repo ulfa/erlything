@@ -11,7 +11,7 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([init/1, stop/1, call_sensor/2]).
+-export([init/1, stop/1, handle_msg/3]).
 -export([send_message/1]).
 
 init(Config) ->
@@ -31,16 +31,26 @@ stop(Config) ->
 	stop_jobs(Crontab),
 	application:stop(erlcron),
     {ok, Config}.
-	 
-call_sensor(Config, Module_config) ->
+
+handle_msg([Node ,Sensor, Id, Time, {once, {Hour, Minutes, pm}}], Config, Module_config) ->
+    Config;	 
+
+handle_msg([Node ,Sensor, Id, Time, {once, Seconds}], Config, Module_config) ->
+    Config;  
+
+handle_msg([Node ,Sensor, Id, Time, {{daily, {every, {Seconds, sec}, {between, {From_hour, pm}, {To_hour, To_minutes, pm}}}}}], Config, Module_config) ->
+    Config;  
+
+handle_msg([Node ,Sensor, Id, Time, {daily, {Hour, Minutes, pm}}], Config, Module_config) ->
+    Config;  
+
+handle_msg(Message, Config, Module_config) ->
     lager:warning("cron_driver can't handle any message"),
     Config.
 
-
 send_message(Message) ->
 	lager:info("cron_driver will send the following message : ~p", [Message]),
-	Msg = sensor:create_message(node(), ?MODULE, Message) ,
-	sensor:send_message(nodes(), Msg). 
+	sensor:send(?MODULE, Message). 
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
