@@ -16,6 +16,7 @@
 -define(OFF, "off").
 -define(RISING, "on").
 -define(FALLING, "off").
+-define(THING_CONFIG, "things.config").
 
 
 

@@ -15,6 +15,7 @@
 -export([set_debug/0, set_info/0]).
 -export([get_things/0, get_things/1]).
 -export([get_pic/1, get_log/1]).
+-export([set_active/2]).
 ensure_started(App) ->
     case application:start(App) of
         ok ->
@@ -63,6 +64,9 @@ set_debug() ->
 
 set_info() ->
 	lager:set_loglevel(lager_console_backend, info).
+
+set_active(Thing, Status) ->
+    node_config:set_active(Thing, Status). 
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

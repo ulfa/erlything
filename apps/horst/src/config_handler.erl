@@ -37,8 +37,9 @@ set_active(Config, Name, Status) when is_list(Config) ->
 	Thing_Config = get_thing_config(Config, Name),
 	Thing_Config_1 = set_active(Thing_Config, Status),
 	Config_new = lists:keyreplace(Name, 2, Config, Thing_Config_1),
-	write_config(horst, "things.config", Config_new),
+	write_config(horst, ?THING_CONFIG, Config_new),
 	Config_new.
+
 
 set_active({thing, Name, Config}, Status) ->
 	{thing, Name, lists:keyreplace(activ, 1, Config, {activ, Status})}.

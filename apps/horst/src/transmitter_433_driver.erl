@@ -16,6 +16,27 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([handle_msg/3]).
+-export([get_status/3]).
+
+%% --------------------------------------------------------------------
+%% API
+%% --------------------------------------------------------------------
+%% Return the status of the device named Name
+%% {"Ventilator","11111 1","0"} -> OFF
+get_status(Node, Thing, Name) ->
+    Module_config = rpc:call(Node, thing, get_module_config, [Thing]),
+    case lists:keyfind(Name, 1, Module_config) of
+        {Name, Code, Status}  -> Status;
+        false -> undefined
+    end.
+
+get_code(Node, Thing, Name) ->
+    Module_config = rpc:call(Node, thing, get_module_config, [Thing]),
+    case lists:keyfind(Name, 1, Module_config) of
+        {Name, Code, Status}  -> Code;
+        false -> undefined
+    end.
+
 
 handle_msg([Node ,Sensor, _Id, Time, {Switch, Number, Status}] = Msg, Config, Module_config) ->
 	lager:info("~p got a message with values: ~p. ", [?MODULE, Msg]),
@@ -29,7 +50,6 @@ handle_msg([Node ,Sensor, _Id, Time, {Switch, Number, Status}] = Msg, Config, Mo
 			 ets:insert(Table_Id, Data1),
 			 Config
 	end;
-
 %%
 %% This function handles unknwon messages.
 %%
