@@ -17,6 +17,9 @@
 -define(RISING, "on").
 -define(FALLING, "off").
 -define(THING_CONFIG, "things.config").
+-define(STARTED, "started").
+-define(STOPPED, "stopped").
+
 
 
 

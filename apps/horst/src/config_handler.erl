@@ -27,8 +27,10 @@ get_messages_for_module(Messages, Module, Id) ->
 	end. 
 
 get_config(Application, Config_file) ->
-	{ok, [Config]} = file:consult(filename:join([code:priv_dir(Application),"config", Config_file])),
-	Config.
+	case file:consult(filename:join([code:priv_dir(Application),"config", Config_file])) of
+		{ok, [Config]} -> Config;
+		{error, Reason} -> {error, Reason}
+	end. 
 
 is_active_set({thing, _Name, Config}) ->
 	proplists:get_value(activ, Config, false).

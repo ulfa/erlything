@@ -33,7 +33,7 @@
 -export([start_link/1]).
 -export([start/0]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
--export([get_state/1, get_module_config/1, get_start_time/1, get_name/1, get_icon/1]).
+-export([get_state/1, set_state/2, get_module_config/1, get_start_time/1, get_name/1, get_icon/1]).
 -export([save_data_to_ets/2, save_data_to_ets/3, get_table_id/1, get_model/1]).
 -export([stop/1]).
 
@@ -80,7 +80,10 @@ get_model(Name) when is_list(Name) ->
     get_model(list_to_atom(Name));
 get_model(Name) ->
     gen_server:call(Name, {get_model}).
-
+set_state(Thing, State) when is_list(Thing) ->
+    set_state(list_to_atom(Thing), State);
+set_state(Thing, State) ->
+    gen_server:call(Thing, {set_state, State}).
 stop(Name) when is_list(Name) ->
     stop(list_to_atom(Name));
 stop(Name) ->
@@ -145,6 +148,9 @@ handle_call({get_description}, From, State=#state{config = Config}) ->
     {reply, proplists:get_value(description, Config) , State};
 handle_call({get_state}, From, State) ->
     {reply, State, State};
+handle_call({set_state, New_state}, From, State) ->
+    {reply, State, New_state};
+
 handle_call({get_module_config}, From, State=#state{config = Config}) ->
     case proplists:get_value(ets, Config, false) of 
         true -> Table_Id = proplists:get_value(table_id, Config),

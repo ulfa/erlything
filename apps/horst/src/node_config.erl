@@ -164,14 +164,18 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 update_config(true, Config_file, State) ->
     lager:info("Config file : ~p must be updated!", [Config_file]),
+    sensor:send(?SYSTEM, io_lib:format("Config file : ~p was changed, it must be updated",[Config_file])),
     update_state(Config_file, config_handler:get_config(?APPLICATION, Config_file), State);
     
 update_config(false, Config_file, State) ->
     State.
-
+update_state(?MESSAGES_CONFIG, {error, Reason} , State)  ->
+    sensor:send(?SYSTEM, {?MESSAGES_CONFIG, "DAMAGED! Please, repair", Reason});
 update_state(?MESSAGES_CONFIG, Config, State) ->
     [Pid ! {update_config, ?MESSAGES_CONFIG} ||Pid <- things_sup:get_things_pids()],
     State#state{messages=Config};
+update_state(?THINGS_CONFIG, {error, Reason}, State)  ->
+    sensor:send(?SYSTEM, {?THINGS_CONFIG, "DAMAGED! Please, repair", Reason});
 update_state(?THINGS_CONFIG, Config, State) ->
     things_sup:update_list_of_things(Config),
     State#state{things=Config}.
