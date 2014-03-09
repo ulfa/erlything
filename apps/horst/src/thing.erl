@@ -211,12 +211,12 @@ handle_cast(Msg, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_info(timeout, State=#state{config = Config}) ->
-	{driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
+	{driver, {Driver, Func}, Module_config} = lists:keyfind(driver, 1, Config),
     Config_1 = ets_usage(proplists:get_value(ets, Config, false), Config, Module_config),
-    Allowed_msgs = node_config:get_messages_for_module(Module, config_handler:get_id(Config)),     
-    driver_init(Module, proplists:get_value(init, Module_config, false), Config_1),
-	start_timer(proplists:get_value(timer, Config_1, 0)),
-    {noreply, State#state{allowed_msgs = Allowed_msgs, start_time=now(), config = Config_1}};
+    Allowed_msgs = node_config:get_messages_for_module(Driver, config_handler:get_id(Config)),     
+    Config_2 = driver_init(Driver, proplists:get_value(init, Module_config, false), Config_1),
+	start_timer(proplists:get_value(timer, Config_2, 0)),
+    {noreply, State#state{allowed_msgs = Allowed_msgs, start_time=now(), config = Config_2}};
 
 handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
     lager:debug("Message=~p ", [[Node ,Sensor, Id, Time, Body]]),
@@ -254,13 +254,18 @@ handle_info({'ETS-TRANSFER', TableId, Pid, _Data}, State=#state{config = Config}
         {value, Table} -> lists:keyreplace(table_id, 1, Config, {table_id, TableId})  
     end,
     {noreply, State#state{config = Config_1}};
-
  
 handle_info({send_after, Messages}, State) ->
     lager:info("now we send the message : ~p ", [Messages]),
     sensor:send_messages(Messages),
     {noreply, State};
     
+handle_info({Port, {data, Payload}}, State=#state{config = Config}) when is_port(Port) ->
+    lager:info("got a message from a port with payload: ~p ", [Payload]),
+    {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
+    Config_1 = Module:Func({data, Payload}, Config, Module_config),        
+    {noreply, State#state{config = Config_1}};
+
 handle_info(Info, State) ->
     lager:error("~p got message : ~p that i don't understand.", [?MODULE, Info]),
     {noreply, State}.
