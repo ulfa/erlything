@@ -25,15 +25,8 @@
 -export([init/1, stop/1, handle_msg/3]).
 
 init(Config) -> 
-    Module_config = config:get_module_config(Config),
-    Data = config:get_value(data, Module_config, []) ,
     Port = open_port({spawn, "gatttool -b 34:B1:F7:D5:58:5B --interactive"}, [binary, eof]),
-    Data_1 = lists:keystore(port, 1, Data, {port, Port}),
-    lager:info("...... 1 ~p", [Data_1]),
-    Module_config_1 = lists:keystore(data, 1, Module_config, {data, Data_1}),
-    lager:info("...... 2 ~p", [Module_config_1]),
-    Config_1 = lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}), 
-    lager:info("...... 3 ~p", [Config_1]),
+    Config_1 = config:set_value_data(port, Port, Config),
     {ok, Config_1}.
 
 stop(Config) ->

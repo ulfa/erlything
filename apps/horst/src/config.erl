@@ -16,6 +16,7 @@
 %% --------------------------------------------------------------------
 -export([get_module_config/1, set_module_config/2]).
 -export([get_value/2, get_value/3, get_values/2]).
+-export([set_value_data/3]).
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
@@ -27,8 +28,16 @@ get_module_config(Config) ->
     {driver, {_Module, _Func}, Module_config} = lists:keyfind(driver, 1, Config),
     Module_config.
 
+set_value_data(Key, Value, Config) -> 
+    MC = get_module_config(Config),
+    D = get_value(data, MC, []),    
+    D1 = lists:keystore(Key, 1, D, {Key, Value}),
+    MC_1 = lists:keystore(data, 1, MC, {data, D1}),
+    set_module_config(Config, MC_1).
+
 set_module_config(Config, Module_config) ->
-    [].
+    {driver, {Module, Func}, _Module_config} = lists:keyfind(driver, 1, Config),
+    lists:keyreplace(driver, 1, Config, {driver, {Module, Func}, Module_config}).
 
 get_level_values(Level, Keys, List_of_tuples) ->
     List_of_tuples_1 = get_level(Level, List_of_tuples),
@@ -89,6 +98,21 @@ get_module_config_test() ->
 
     ?assertEqual(Result, get_module_config(Config)).
 
-set_module_config_test() ->
-    ok.
+set_value_data_test() ->
+    Config = 
+     [{id, "0"},
+      {activ, false},
+     {driver, {sensortag_driver,handle_msg},
+        [{data,[]}]}],
+
+    Result = 
+     [{id, "0"},
+      {activ, false},
+     {driver, {sensortag_driver,handle_msg},
+        [{data,[{port, "test"}]}]}],
+
+    ?assertEqual(Result, set_value_data(port, "test", Config)).
+
+
+    
 -endif.
