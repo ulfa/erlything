@@ -33,20 +33,40 @@ stop(Config) ->
     {ok, Config}.
 
 %%<<"[   ][34:B1:F7:D5:58:5B][LE]> ">>
-%%<<"[CON][34:B1:F7:D5:58:5B][LE]> ">>
-handle_msg({data, Payload}, Config, Module_config) ->
+handle_msg({data, <<"[   ][34:B1:F7:D5:58:5B][LE]> ">>} = Payload, Config, Module_config) ->
     lager:info("1... payload : ~p", [Payload]),
-    Data = config:get_value(data, Module_config),
-    Port = config:get_value(port, Data),
-    lager:info("2... port : ~p", [Port]),
+    [Port] = config:get_level_values([data],[port], Module_config),
+    lager:info("...... Port : ~p", [Port]),
+    port_command(Port, "connect\r") ,
+    Config;
+
+handle_msg({data, <<"\r\e[16@[CON][34:B1:F7:D5:58:5B][LE]>\e[C">>} = Payload, Config, Module_config) ->
+    lager:info("2... payload : ~p", [Payload]),
+    [Port] = config:get_level_values([data],[port], Module_config),
+    port_command(Port, "char-read-hnd 0x25\r"),
+    Config;
+
+handle_msg({data, <<"\nCharacteristic value/descriptor: 00 00 00 00 \n[CON][34:B1:F7:D5:58:5B][LE]> ">>} = Payload, Config, Module_config) ->
+    lager:info("3... payload : ~p", [Payload]),
+    [Port] = config:get_level_values([data],[port], Module_config),
+    port_command(Port, "char-write-cmd 0x29 01\r"),
+    port_command(Port, "char-read-hnd 0x25\r"),
+    Config;
+
+handle_msg({data, <<"\nCharacteristic value/descriptor: a9 ff b0 0a \n[CON][34:B1:F7:D5:58:5B][LE]> ">>} = Payload, Config, Module_config) ->
+    lager:info("3... payload : ~p", [Payload]),
+    Config;
+
+handle_msg({Port, eof}, Config, Module_config) ->
+    lager:info("1... Port : ~p", [Port]),
+    Config;
+
+handle_msg({data, Payload}, Config, Module_config) ->
+    lager:info("any payload : ~p", [Payload]),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-
-
-
-
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

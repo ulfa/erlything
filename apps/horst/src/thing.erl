@@ -261,7 +261,7 @@ handle_info({send_after, Messages}, State) ->
     {noreply, State};
     
 handle_info({Port, {data, Payload}}, State=#state{config = Config}) when is_port(Port) ->
-    lager:info("got a message from a port with payload: ~p ", [Payload]),
+    %%lager:info("got a message from a port with payload: ~p ", [Payload]),
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
     Config_1 = Module:Func({data, Payload}, Config, Module_config),        
     {noreply, State#state{config = Config_1}};

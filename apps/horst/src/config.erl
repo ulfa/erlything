@@ -15,7 +15,7 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([get_module_config/1, set_module_config/2]).
--export([get_value/2, get_value/3, get_values/2]).
+-export([get_value/2, get_value/3, get_values/2, get_level_values/3]).
 -export([set_value_data/3]).
 %% --------------------------------------------------------------------
 %% record definitions
