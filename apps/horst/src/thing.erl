@@ -266,6 +266,15 @@ handle_info({Port, {data, Payload}}, State=#state{config = Config}) when is_port
     Config_1 = Module:Func({data, Payload}, Config, Module_config),        
     {noreply, State#state{config = Config_1}};
 
+handle_info({Port, eof}, State=#state{config = Config}) when is_port(Port) ->
+    {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
+    Config_1 = Module:Func({Port, eof}, Config, Module_config),        
+    {noreply, State#state{config = Config_1}};  
+
+handle_info({'EXIT',Port,normal}, State) ->
+    {noreply, State};  
+
+
 handle_info(Info, State) ->
     lager:error("~p got message : ~p that i don't understand.", [?MODULE, Info]),
     {noreply, State}.

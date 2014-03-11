@@ -58,8 +58,11 @@ handle_msg({data, <<"\nCharacteristic value/descriptor: a9 ff b0 0a \n[CON][34:B
     Config;
 
 handle_msg({Port, eof}, Config, Module_config) ->
-    lager:info("1... Port : ~p", [Port]),
-    Config;
+    lager:info("we got an eof, so we close the port"),
+    [Port] = config:get_level_values([data],[port], Module_config),
+    port_close(Port),
+    Config_1 = config:set_value_data(port, [], Config),    
+    Config_1;
 
 handle_msg({data, Payload}, Config, Module_config) ->
     lager:info("any payload : ~p", [Payload]),
