@@ -1,0 +1,10 @@
+c_src/*.o
+priv/*.so
+erl_crash.dump
+log/*
+ebin/*
+.eunit/
+rel/sue/*
+deps
+src/*~
+include/*~

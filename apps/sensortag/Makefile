@@ -36,6 +36,8 @@ clean:
 	rm -f test/*.beam
 	rm -f erl_crash.dump
 	rm -f log/*
+	rm c_src/*.o
+	rm priv/*.so
 
 tests: clean app eunit ct
 
