@@ -33,28 +33,28 @@ stop(Config) ->
     {ok, Config}.
 
 %%<<"[   ][34:B1:F7:D5:58:5B][LE]> ">>
-handle_msg({data, <<"[   ][34:B1:F7:D5:58:5B][LE]> ">>} = Payload, Config, Module_config) ->
+handle_msg({data, <<"[   ][",Mac:17/binary,"][LE]> ">>} = Payload, Config, Module_config) ->
     lager:info("1... payload : ~p", [Payload]),
     [Port] = config:get_level_values([data],[port], Module_config),
     lager:info("...... Port : ~p", [Port]),
     port_command(Port, "connect\r") ,
     Config;
 
-handle_msg({data, <<"\r\e[16@[CON][34:B1:F7:D5:58:5B][LE]>\e[C">>} = Payload, Config, Module_config) ->
+handle_msg({data, <<"\r\e[16@[CON][", Mac:17/binary,"][LE]>\e[C">>} = Payload, Config, Module_config) ->
     lager:info("2... payload : ~p", [Payload]),
     [Port] = config:get_level_values([data],[port], Module_config),
     port_command(Port, "char-read-hnd 0x25\r"),
     Config;
 
-handle_msg({data, <<"\nCharacteristic value/descriptor: 00 00 00 00 \n[CON][34:B1:F7:D5:58:5B][LE]> ">>} = Payload, Config, Module_config) ->
+handle_msg({data, <<"\nCharacteristic value/descriptor: 00 00 00 00 \n[CON][",Mac:17/binary,"][LE]> ">>} = Payload, Config, Module_config) ->
     lager:info("3... payload : ~p", [Payload]),
     [Port] = config:get_level_values([data],[port], Module_config),
     port_command(Port, "char-write-cmd 0x29 01\r"),
     port_command(Port, "char-read-hnd 0x25\r"),
     Config;
 
-handle_msg({data, <<"\nCharacteristic value/descriptor: a9 ff b0 0a \n[CON][34:B1:F7:D5:58:5B][LE]> ">>} = Payload, Config, Module_config) ->
-    lager:info("3... payload : ~p", [Payload]),
+handle_msg({data, <<"\nCharacteristic value/descriptor: a9 ff b0 0a \n[CON][",Mac:17/binary,"][LE]> ">>} = Payload, Config, Module_config) ->
+    lager:info("4... payload : ~p", [Payload]),
     Config;
 
 handle_msg(eof, Config, Module_config) ->
@@ -97,5 +97,5 @@ read_port(Port) ->
 %%% Test functions
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
--ifdef(TEST).
+-ifdef(TEST).    
 -endif.

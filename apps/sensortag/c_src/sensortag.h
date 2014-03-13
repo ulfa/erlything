@@ -1,0 +1,1 @@
+char * scan_for_device();
