@@ -12,11 +12,13 @@
 			  </tr>  
 			</thead>
 			<tbody>  
-				{% for sysinfo, value, comments in sysinfos %}		
+				{% for sysinfo, value, comments in sysinfos %}						
+				{% ifnotequal sysinfo "alloc_info" %}
 				<tr>
 					<td><a href="#" data-toggle="tooltip" title="{{comments}}">{{sysinfo}}</a></td>
 					<td>{{value}}</td>	
 				</tr>
+				{% endifnotequal %}
 				{% endfor %}
 			</tbody>
 		</table>
