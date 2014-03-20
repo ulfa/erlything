@@ -26,6 +26,7 @@ ensure_started(App) ->
 	
 start() ->
 	ensure_started(crypto),
+    ensure_started(asn1),
 	ensure_started(public_key),
 	ensure_started(ssl),
 	ensure_started(sue),
