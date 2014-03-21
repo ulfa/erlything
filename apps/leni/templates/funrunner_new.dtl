@@ -7,7 +7,6 @@
     <form class="form-horizontal" method="post">
         <input type="hidden" name="node" value="{{node}}">
 
-
         <div class="control-group">
             <label class="control-label" for="inputFunName">Name</label>
             <div class="controls">
@@ -15,15 +14,17 @@
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="inputMessgae">Message</label>
-            <div class="controls">
-                <input class="span8" type="text" id="inputMessage" name="message" placeholder="{<<&quot;node&quot;>>, <<&quot;driver&quot;>>, <<&quot;id&quot;>>}">
+            <span class="control-label">Message</span>
+            <div class="controls form-inline">            
+                <input type="text" class="input-medium" id="inputNode" placeholder="Node">
+                <input type="text" class="input-medium" id="inputDriver" placeholder="Driver">
+                <input type="text" class="input-medium" id="inputId" placeholder="Id">
             </div>
         </div>
         <div class="control-group">
             <label class="control-label" for="inputFun">Fun</label>
             <div class="controls">
-                <textarea class="span8" id="inputFun" name="fun" rows="6" placeholder="fun(X) -> X + 1 end."></textarea>
+                <textarea class="span8" id="inputFun" name="fun" rows="6" placeholder="fun([X]) -> X + 1 end."></textarea>
             </div>
         </div>
 

@@ -10,33 +10,37 @@
         <div class="control-group">
             <label class="control-label" for="inputFunName">Name</label>
             <div class="controls">
-                <input type="text" class="span8" id="inputFunName" name="funName" placeholder="Fun Name" value="{{fname}}">
+                <input type="text" class="span8" id="fName" name="fName" placeholder="Fun Name" value="{{fname}}">
             </div>
         </div>
+
         <div class="control-group">
-            <label class="control-label" for="inputMessgae">Message</label>
-            <div class="controls">
-                <input class="span8" type="text" id="inputMessage" name="message" placeholder="{<<&quot;node&quot;>>, <<&quot;driver&quot;>>, <<&quot;id&quot;>>}" >
+            <span class="control-label">Message</span>
+            <div class="controls form-inline">            
+                <input type="text" class="input-medium" id="inputNode" name="fNode"  placeholder="Node" value="{{fnode}}">
+                <input type="text" class="input-medium" id="inputDriver" name="fDriver" placeholder="Driver" value="{{fdriver}}">
+                <input type="text" class="input-medium" id="inputId" name="fId" placeholder="Id" value="{{fid}}">
             </div>
-        </div>        
+        </div>
+
         <div class="control-group">
             <label class="control-label" for="inputFun">Fun</label>
             <div class="controls">
-                <textarea class="span8" id="inputFun" name="inputFun" rows="6" placeholder="fun(X) -> X + 1 end.">{{command}}</textarea>
+                <textarea class="span8" id="inputFun" name="fFun" rows="6" placeholder="fun(X) -> X + 1 end.">{{command}}</textarea>
             </div>
         </div>
 
         <div class="control-group">
             <label class="control-label" for="inputComment">Comment</label>
             <div class="controls">
-                <textarea class="span8" id="inputFunComment" name="funComment" rows="3" >{{comment}}</textarea>
+                <textarea class="span8" id="inputFunComment" name="fComment" rows="3" >{{comment}}</textarea>
             </div>
         </div>
 
         <div class="control-group">
             <label class="control-label" for="inputArgs">Arguments</label>
             <div class="controls">
-                <input type="text" class="span8" id="inputArgs" name="args" placeholder="{Value, Type}">
+                <input type="text" class="span8" id="inputArgs" name="fArgs" placeholder="{Value, Type}">
             </div>
         </div>
 

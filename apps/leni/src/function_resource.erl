@@ -137,12 +137,17 @@ process_post(ReqData, Context) ->
     {true, ReqData, Context}.
 
 handle_post("save", Body) ->
-    Fun_name = get_value("funName", Body),
-    Message = get_value("message", Body),
-    Fun = get_value("inputFun",Body),
-    Fun_comment = get_value("funComment", Body),
+    F_name = get_value("fName", Body),
+    F_fun = get_value("fFun",Body),
+    F_node =  get_value("fNode",Body),
+    F_driver = get_value("fDriver",Body),
+    F_id = get_value("fId",Body),
+    F_comment = get_value("fComment", Body),
+    F_message = {list_to_binary(F_node), list_to_binary(F_driver), list_to_binary(F_id)},
+    Send_body = {save, F_name, F_message, F_fun, F_comment},
+    lager:info("send the body : ~p",[Send_body]),
+    sensor:send(?MODULE, Send_body); 
     
-    ok;
 handle_post("run", Body) ->
     Fun_name = get_value("funName", Body),
     Args = get_value("args", Body),
@@ -245,8 +250,8 @@ to_html(ReqData, Context) ->
     Node = wrq:get_qs_value("node",ReqData),    
     Name = wrq:get_qs_value("name",ReqData),    
     Fun_name = wrq:get_qs_value("fun_name",ReqData),
-    {N, M, C, Co} = get_fun(Node, Name, Fun_name), 
-    {ok, Content} = function_dtl:render([{node, Node},{fname, N}, {message, M},{command, C}, {comment, Co}]),
+    {N, {F_node, F_driver, F_id}, C, Co} = get_fun(Node, Name, Fun_name), 
+    {ok, Content} = function_dtl:render([{node, Node},{fname, N}, {fnode, F_node}, {fdriver, F_driver}, {fid, F_id},{command, C}, {comment, Co}]),
     {Content, ReqData, Context}.
 
 to_json(ReqData, Context) ->
