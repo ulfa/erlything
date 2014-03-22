@@ -149,9 +149,9 @@ handle_post("save", Body) ->
     sensor:send(?MODULE, Send_body); 
     
 handle_post("run", Body) ->
-    Fun_name = get_value("funName", Body),
-    Args = get_value("args", Body),
-    Msg = sender_util:create_message(node(), ?MODULE, "default", date:get_date_seconds(), {run, Fun_name, Args }),
+    F_name = get_value("fName", Body),
+    F_args = get_value("fArgs", Body),
+    Msg = sender_util:create_message(node(), ?MODULE, "default", date:get_date_seconds(), {run, F_name, F_args }),
     lager:info("2...... this is a test ....~p",[Msg]),
     sender_util:send_message(Msg).
 %
