@@ -6,8 +6,8 @@
 <div class="well">
  <form action="upload" method="post" enctype="multipart/form-data">    
         <div class="control-group">
-                <div class="controls">
-                    <input type="file" name='filedata' />
+                <div class="controls">                            
+                    <input  type="file" name='filedata' />
                     <input type="submit" class="btn btn-primary" value="Upload">
                 </div> 
         </div>        
