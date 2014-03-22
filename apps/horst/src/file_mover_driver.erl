@@ -20,7 +20,7 @@
 init(Config) ->
     Module_config = config:get_module_config(Config),
     Destination = config:get_value(destination, Module_config), 
-    create_destination(Destination),
+    mount(Destination),
     {ok, Config}.
 
 call_sensor(Config, Module_config) ->
@@ -31,22 +31,21 @@ call_sensor(Config, Module_config) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 move_files(Destination, []) ->
-    lager:info("move file! "),
     ok;
 move_files(Destination, [File|List_of_files]) ->
     lager:info("move file : ~p to dest : ~p", [File, Destination]),
-    {ok, BytesCopied} = file:copy(File, file:join(Destination, filename:basename(File))),
+    Basefile = filename:basename(File),
+    {ok, BytesCopied} = file:copy(File, filename:join(Destination, Basefile)),
     ok = file:delete(File), 
+    sensor:send(?MODULE, [{moved_file, Basefile}]), 
     move_files(Destination, List_of_files).
 
 find_files(Path, Filter) ->
     filelib:wildcard(filename:join(Path, Filter)). 
 
-create_destination(Destination) ->
-    case filelib:is_dir(Destination) of 
-        true -> ok;
-        false -> file:make_dir(Destination)
-    end.  
+mount(Destination) ->
+    os:cmd("mount -a -o nolock").
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
