@@ -31,13 +31,20 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0]).
 -export([start/0]).
--export([init_table/3]).
+-export([init_table/3, backup/1, restore/1, delete/1]).
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
 init_table(Pid, Name, Data) ->
 	gen_server:call(?MODULE, {init_table, Pid, Name, Data}).
+backup(Table) ->
+    gen_server:call(?MODULE, {backup_table, Table}).
+restore(Table) ->
+    gen_server:call(?MODULE, {restore_table, Table}).
+delete(Table) ->
+    gen_server:call(?MODULE, {delete_table, Table}).
+
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
@@ -94,6 +101,22 @@ handle_call({init_table, Pid, Name, Data}, From, State) ->
     		Name
     end,
     {reply, Table_Name, State};
+
+handle_call({backup_table, Table}, From, State) ->
+    Path = application:get_env(horst, backup_path),
+    ok = check_path(Path),
+    Reply = ets:tab2file(filename:join(filename:absname(Path), Table)),
+    {reply, Reply, State};
+
+handle_call({restore_table, Table}, From, State) ->
+    Path = application:get_env(horst, backup_path),
+    ok = check_path(Path),
+    Reply = ets:file2tab(Table, filename:join(filename:absname(Path) , [{verify,true}])), 
+    {reply, Reply, State};
+
+handle_call({delete_table, Table}, From, State) ->
+    ets:delete(Table),
+    {reply, ok, State};
 
 handle_call(Request, From, State) ->
     Reply = ok,
@@ -152,6 +175,11 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+check_path(Path) ->
+    case filelib:is_dir(Path) of 
+        false -> file:make_dir(Path);
+        true -> ok
+    end.
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

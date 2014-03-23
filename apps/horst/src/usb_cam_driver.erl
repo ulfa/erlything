@@ -19,7 +19,7 @@
 
 init(Config) ->
 	os:cmd("mount -a -o nolock"), 
-	Config.
+	{ok, Config}.
 
 handle_msg([Node ,Sensor, Id, Time, ?ON], Config, Module_config) ->
 	Path = config:get_value(path, Module_config, []),
