@@ -27,7 +27,7 @@ To install the application on your machine, please do the following steps :
 Before you can install this appliction on your machine, you have to install an [erlang R15](https://www.erlang-solutions.com/downloads/download-erlang-otp) runtime. 
 After installing the runtime, you have to install [rebar](https://github.com/basho/rebar) on your machine. rebar is the build tool for erlang.
 
-* [erlang R1503](https://www.erlang-solutions.com/downloads/download-erlang-otp)
+* [erlang R1503](https://www.erlang-solutions.com/downloads/download-erlang-otp) It also works with R16
 * [rebar](https://github.com/basho/rebar) the build tool for erlang
 
 
@@ -141,4 +141,7 @@ These things are used in my internal project and they work for me.
 * funrunner is generic way to create rules for consuming and sending messages 
 * sample_driver is an example 
 * reloader_driver is for development. Everytime you make an update of modules the reloader will load them into the system.
+* boxcar_driver sends messages to your boxcar account
+* cuberl is an application which integrates the Max! Cube from eq-3
+* fungi_driver is an application which warns you if one of your rooms is fungi  endangered.
 
