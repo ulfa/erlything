@@ -15,10 +15,16 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([call_sensor/2]).
+-export([call_sensor/2, init/1, stop/1]).
+
+init(Config) ->
+    {ok, Config}.
+
+stop(Config) ->
+    {ok, Config}.
 
 call_sensor(Config, Module_config) ->
-    Msg = sensor:create_message(node(), ?MODULE, [{temp, 10.0}]),
+    Msg = sensor:create_message(node(), ?MODULE, [{sample, "test"}]),
     sensor:send_message(Msg),
     Config.
 %% --------------------------------------------------------------------
