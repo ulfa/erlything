@@ -4,27 +4,39 @@ erlyThing is a decentral, distributed message based thing plattform.
 
 ## Features
 
-* decentral system.
+* decentral system. you can place one raspberry in every room and they will find each by them self and they will build one system.
 * distributed system which communicate over messages
-* internal monitoring system:
-	* webbased application explorer
-	* webbased process explorer
-	* list of all nodes in a network (alive or dead)
-	* systen information of a node
-
-* Logging. Every node writes their own logs. You can have a look throw the logging ui,
 * starting and stopping of things during runtime
 * configuration of messages which a thing understands
 * dynamic handling of config files (things.config and messages.config)
 * Integration of 3rd party applications is simple.(see cuberl) 
 * Generic way of handling rules (see funrunner)
 * very easy DSL (Prototype)
+* Logging. Every node writes their own logs. You can have a look throw the logging ui,
+* internal monitoring system:
+	* webbased application explorer
+	* webbased process explorer
+	* list of all nodes in a network (alive or dead)
+	* systen information of a node
+
+## Applications
+
+erlyThing consists of the following core applications:
+
+* sue app for finding nodes and a interface for etop, sys_info, memory and others
+* moni ui for sue based on web machine and erlydtl
+* horst the runtime for the things
+* leni ui for horst 
+
+extra application
+
+* cuberl is an integration app for the [Max! Cube](http://www.elv.de/max-cube-lan-gateway.html) product.
 
 # Installation and starting
 
-To install the application on your machine, please do the following steps :
+To install erlyThing on your machine, do the following steps :
 
-Before you can install this appliction on your machine, you have to install an [erlang R15](https://www.erlang-solutions.com/downloads/download-erlang-otp) runtime. 
+Before you install erlyTHing on your machine, you have to install an [erlang R15](https://www.erlang-solutions.com/downloads/download-erlang-otp) runtime. 
 After installing the runtime, you have to install [rebar](https://github.com/basho/rebar) on your machine. rebar is the build tool for erlang.
 
 * [erlang R1503](https://www.erlang-solutions.com/downloads/download-erlang-otp) It also works with R16
@@ -38,7 +50,7 @@ $ make
 $ ./dev.sh
 ```
 
-When the system is up and running you can check it with : [moni](http://localhost:8000) and if you want to see your 
+When erlyThing is up and running you can check it with : [moni](http://localhost:8000) and if you want to see your 
 deployed things you can use : [leni](http://localhost:8080)
 
 # Installation on a raspberry pi
@@ -62,6 +74,7 @@ make rcswitch send
 * [Adafruit_DHT](https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code/tree/master/Adafruit_DHT_Driver)
 * [rc-switch](https://code.google.com/p/rc-switch/) library to operate with 315/433 MHZ remote control devices
 * [streamer](http://manpages.ubuntu.com/manpages/gutsy/man1/streamer.1.html) record audio and/or video 
+* and others
 
 # Supported Sensors
 
@@ -72,9 +85,9 @@ make rcswitch send
 
 I will add more in the future...
 
-## Configuration
+# Configuration
 
-### Things.config
+## Things.config
 
 What is a thing?
 
@@ -114,12 +127,14 @@ This configuration file contains the things, which you want to use in your env.
 This configuartion file contains the drivers and the messages which they understand
 
 ```erlang
-{{dht22_display_driver, id}, [{<<"horst@raspberrypi">>,<<"dht22_driver">>, <<"0">>}]}.
+{{dht22_display_driver, "default"}, [{<<"horst@raspberrypi">>,<<"dht22_driver">>, <<"default">>}]}.
 ```
 
-The driver dht22_display_driver which is implemented in module dht22_display_driver.erl is
-able to understand messages from node : horst@raspberrypi and generarted by module  dht22_driver.
-The "0" stands for an unique id which is not implemented yet.
+You can read the line as : 
+The thing with its implementation dht22_display_driver and id "default" will listen to messages which comes from the node "horst@raspberrypi",
+thing with an implementation module  dht22_driver and id (version) "default".
+
+Note: listen means that the thing will receive the message and if he can handle the message, it will process the message. 
 
 ### Things which are implemented (in a very early version)
 
