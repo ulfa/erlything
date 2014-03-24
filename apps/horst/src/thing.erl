@@ -41,7 +41,9 @@
 %% External functions
 %% ====================================================================
 get_name(Pid) when is_pid(Pid) ->
-    gen_server:call(Pid, {get_name}).
+    gen_server:call(Pid, {get_name});
+get_name(undefined) ->
+    undefined.
 get_start_time(Name) when is_list(Name) ->
     get_start_time(list_to_atom(Name));
 get_start_time(Name) ->

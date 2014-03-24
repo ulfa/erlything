@@ -103,15 +103,15 @@ handle_call({init_table, Pid, Name, Data}, From, State) ->
     {reply, Table_Name, State};
 
 handle_call({backup_table, Table}, From, State) ->
-    Path = application:get_env(horst, backup_path),
+    {ok, Path}= application:get_env(horst, backup_path),
     ok = check_path(Path),
-    Reply = ets:tab2file(filename:join(filename:absname(Path), Table)),
+    Reply = ets:tab2file(Table, filename:join(filename:absname(Path), atom_to_list(Table))),
     {reply, Reply, State};
 
 handle_call({restore_table, Table}, From, State) ->
-    Path = application:get_env(horst, backup_path),
+    {ok, Path}= application:get_env(horst, backup_path),
     ok = check_path(Path),
-    Reply = ets:file2tab(Table, filename:join(filename:absname(Path) , [{verify,true}])), 
+    Reply = ets:file2tab(filename:join(filename:absname(Path), atom_to_list(Table)) , [{verify,true}]), 
     {reply, Reply, State};
 
 handle_call({delete_table, Table}, From, State) ->
@@ -176,8 +176,8 @@ code_change(OldVsn, State, Extra) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 check_path(Path) ->
-    case filelib:is_dir(Path) of 
-        false -> file:make_dir(Path);
+    case filelib:is_dir(filename:absname(Path)) of 
+        false -> file:make_dir(filename:absname(Path));
         true -> ok
     end.
 %% --------------------------------------------------------------------
