@@ -4,7 +4,7 @@ erlyThing is a decentral, distributed message based thing plattform.
 
 ## Features
 
-* decentral system. you can place one raspberry in every room and they will find each by them self and they will build one system.
+* decentral system. 
 * distributed system which communicate over messages
 * starting and stopping of things during runtime
 * configuration of messages which a thing understands
