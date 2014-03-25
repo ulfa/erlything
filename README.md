@@ -51,7 +51,8 @@ $ ./dev.sh
 ```
 
 When erlyThing is up and running you can check it with : [moni](http://localhost:8000) and if you want to see your 
-deployed things you can use : [leni](http://localhost:8080)
+deployed things you can use : [leni](http://localhost:8080) In leni you can navigate to the System Logger and you will find 
+the message that the system is started. You will also receive messages when a thing is stopped and when the thing is started.
 
 # Installation on a raspberry pi
 
@@ -159,4 +160,5 @@ These things are used in my internal project and they work for me.
 * boxcar_driver sends messages to your boxcar account
 * cuberl is an application which integrates the Max! Cube from eq-3
 * fungi_driver is an application which warns you if one of your rooms is fungi  endangered.
+
 

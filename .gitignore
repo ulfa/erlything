@@ -10,3 +10,4 @@ src/*~
 include/*~
 log/*
 deps/*
+backup/*
