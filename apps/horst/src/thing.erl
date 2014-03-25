@@ -395,7 +395,7 @@ check_init(Module) ->
     Exports = proplists:get_value(exports, Module:module_info(), []),
     case proplists:get_value(init, Exports) of 
         undefined -> true;
-        1 -> lager:warning("there is a init function in the module '~p', but it is false or not available in the config"),
+        1 -> lager:warning("there is a init function in the module '~p', but it is false or not available in the config", [Module]),
              false;
         Any -> lager:waring("the init function has too many arguments"),
                 false
