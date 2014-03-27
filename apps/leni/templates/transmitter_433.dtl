@@ -4,28 +4,34 @@
 
 {% block body %}
 
-    <div class="well">
-    <h1>{{node}}</h1>        
+    <div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">{{node}}</h2>  
+    </div>
+    <div class="panel-body">
+
+    
         <ul class="nav" >
         {% for thing, number, state in list %}
         <li>
         <div class="row">
-        <div class="span1">
+        <div class="col-xs-1">
             {% if state == "1" %}
                 <img src="/images/light_on.png" class="img-rounded">
             {% else %}
                 <img src="/images/light_off.png" class="img-rounded">
             {% endif %}
         </div>
-        <div class="span1">
+        <div class="col-xs-1">
         <p>{{thing}}</p>
         </div>
-        <div class="span1">
+        
+        <div class="col-xs-1">
             <form name="switch_on" method="post">
             {% if state == "1" %}
-                <button type="submit" class="btn btn-large">On</button>
+                <button type="button" class="btn">On</button>
             {% else %}
-                <button type="submit" class="btn btn-large btn-primary">On</button>
+                <button type="button" class="btn btn-primary">On</button>
             {% endif %}                                
                 <input type="hidden" name="node" value="{{node}}"/>
                 <input type="hidden" name="name" value="{{name}}"/>                        
@@ -37,9 +43,9 @@
         <div class="span1">
             <form name="switch_off" method="post">
             {% if state == "1" %}
-                <button type="submit" class="btn btn-large btn-primary">Off</button>
+                <button type="button" class="btn btn-primary">Off</button>
             {% else %}
-                <button type="submit" class="btn btn-large">Off</button>
+                <button type="button"class="btn">Off</button>
             {% endif %}                                
                 <input type="hidden" name="node" value="{{node}}"/>
                 <input type="hidden" name="name" value="{{name}}"/>
@@ -48,15 +54,13 @@
                 <input type="hidden" name="status" value="0"/>
             </form>
         </div>
+        
         </li>
         {% endfor %}
-        </ul>
+        </ul>        
     </div>
+    <div class="panel-footer"></div>
 </div>
-
-
-
-<div class="btn-group">
 
 
 {% endblock %}

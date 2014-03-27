@@ -14,7 +14,6 @@
 		{% endif %}		
 	{%endfor%}
 	</ul>
-<div class="well">
 
 	<div class="tab-content">
 {%for node, things_config in things %}
@@ -26,11 +25,17 @@
     {% endif %}
 	
 	{%for thing, name, parameters in things_config%}
+	
+	<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">{{name}}</h2>  
+    </div>
+    <div class="panel-body">
+
 		<form method="post">
 			<input type="hidden" name="node" value="{{node}}"/>
             <input type="hidden" name="thing" value="{{name}}"/>
-     <div class="well">
-		<h2>{{name}}</h2>
+     
 		<table class="table">
 			<thead>
 				<tr>
@@ -57,9 +62,13 @@
 		</table>
 	</div>
 	</form>
+	<div class="panel-footer"></div>
+	</div>
+
 	{%endfor%}
-		</div>
+		</div>		
 {%endfor%}
+
 	</div>
 	</div>
 </div>

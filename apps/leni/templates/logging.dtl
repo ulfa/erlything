@@ -4,6 +4,6 @@
 
 {% block body %}
 <div class="container" >    
-    <textarea readonly class="span10" id="logging" rows="30" >{{content}}</textarea>
+    <textarea readonly class="col-sm-10 col-md-10" id="logging" rows="30" >{{content}}</textarea>
 </div>
 {% endblock %}
