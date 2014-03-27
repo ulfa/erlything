@@ -9,9 +9,9 @@
                 <li class="active"><a href="#table" data-toggle="tab">Table view</a></li>
                 <li><a href="#graphic" data-toggle="tab">Graphic view</a></li>
         </ul>
-<div class="tab-content">
-        <div id="table" class="tab-pane active">
-  <div class="panel panel-primary">
+        <div class="tab-content">
+          <div id="table" class="tab-pane active">
+          <div class="panel panel-primary">
     <div class="panel-heading">
         <h2 class="panel-title">{{node}} ds18b20</h2>  
     </div>
