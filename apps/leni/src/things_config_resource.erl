@@ -244,7 +244,7 @@ to_html(ReqData, Context) ->
 %% get_messages_config / get_things_config
 %%
 get_config(Nodes, Config) ->
-	{Result, BN} = rpc:multicall(Nodes, node_config, Config, [], 100),
+	{Result, BN} = rpc:multicall(Nodes, node_config, Config, [], 1000),
  	case [R || R <- Result, is_not_badrpc(R)] of 
  		[]-> [];
  		A -> convert_config(lists:flatten(A)) 
