@@ -50,8 +50,9 @@ set_things_config(Key, Value) ->
 
 %% --------------------------------------------------------------------
 %% record definitions
+%% valid: is the file ok or corrupt
 %% --------------------------------------------------------------------
--record(state, {things, messages, last_poll_datetime}).
+-record(state, {things, messages, last_poll_datetime, m_valid, t_valid}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -73,7 +74,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{things=[], messages=[], last_poll_datetime=get_poll_time()}, 0}.
+    {ok, #state{things=[], messages=[], last_poll_datetime=get_poll_time(), m_valid=true, t_valid=true}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -164,21 +165,27 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 update_config(true, Config_file, State) ->
     lager:info("Config file : ~p must be updated!", [Config_file]),
-    sensor:send(?SYSTEM, io_lib:format("Config file : ~p was changed, it must be updated",[Config_file])),
+    %%sensor:send(?SYSTEM, {info, io_lib:format("Config file : ~p was changed, it must be updated",[Config_file])}),
     update_state(Config_file, config_handler:get_config(?APPLICATION, Config_file), State);
-    
 update_config(false, Config_file, State) ->
     State.
-update_state(?MESSAGES_CONFIG, {error, Reason} , State)  ->
-    sensor:send(?SYSTEM, {?MESSAGES_CONFIG, "DAMAGED! Please, repair", Reason});
+
+update_state(?MESSAGES_CONFIG, {error, Reason} , State=#state{m_valid=true})  ->
+    sensor:send(?SYSTEM, {error, {?MESSAGES_CONFIG, "DAMAGED! Please, repair", Reason}}),
+    State=#state{m_valid=false};
+
 update_state(?MESSAGES_CONFIG, Config, State) ->
     [Pid ! {update_config, ?MESSAGES_CONFIG} ||Pid <- things_sup:get_things_pids()],
-    State#state{messages=Config};
-update_state(?THINGS_CONFIG, {error, Reason}, State)  ->
-    sensor:send(?SYSTEM, {?THINGS_CONFIG, "DAMAGED! Please, repair", Reason});
+    sensor:send(?SYSTEM, {info, {?MESSAGES_CONFIG, "updated succesfully"}}),
+    State#state{messages=Config, m_valid=true};
+
+update_state(?THINGS_CONFIG, {error, Reason}, State=#state{t_valid=true})  ->
+    sensor:send(?SYSTEM, {error, {?THINGS_CONFIG, "DAMAGED! Please, repair", Reason}}),
+    State#state{t_valid=false};    
 update_state(?THINGS_CONFIG, Config, State) ->
     things_sup:update_list_of_things(Config),
-    State#state{things=Config}.
+    sensor:send(?SYSTEM, {info, {?THINGS_CONFIG, "updated succesfully"}}),
+    State#state{things=Config, t_valid=true}.
 
 get_poll_time() ->
     {date(), time()}.
