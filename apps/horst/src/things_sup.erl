@@ -82,7 +82,7 @@ start_if_not_running(Config, Things) ->
 		false -> [Child_spec] = config_handler:create_thing_spec(Config),
 				 Result = supervisor:start_child(?MODULE, Child_spec),
 				 lager:info("~p started thing with result : ~p", [Thing, Result]), 
-				 sensor:send(?SYSTEM, [{thing, Thing}, {state, ?STARTED}]), 
+				 sensor:send(?SYSTEM, {info,{{thing, Thing}, ?STARTED}}), 
 				 ok
 	end. 
 
@@ -92,7 +92,7 @@ kill_if_running(Thing, Things) ->
 		true -> Result = supervisor:terminate_child(?MODULE, list_to_atom(Thing)),
 				supervisor:delete_child(?MODULE, list_to_atom(Thing)),
 				lager:info("terminated ~p with result : ~p", [Thing, Result]),
-				sensor:send(?SYSTEM, [{thing, Thing}, {state, ?STOPPED}]), 
+				sensor:send(?SYSTEM, {info,{{thing, Thing}, ?STOPPED}}), 
 				ok
 	end. 
 
