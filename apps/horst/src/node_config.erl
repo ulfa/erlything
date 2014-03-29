@@ -104,9 +104,6 @@ handle_call({set_messages_config, Key, Value}, From, State) ->
     {reply, "not implemented yet", State};
 
 handle_call({set_things_config, Key, Value}, From, State) ->
-    {reply, "not implemented yet", State};
-
-handle_call(Request, From, State) ->
     {reply, "not implemented yet", State}.
 
 %% --------------------------------------------------------------------

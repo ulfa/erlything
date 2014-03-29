@@ -32,10 +32,10 @@ start() ->
 	ensure_started(sue),
  	application:start(gpio),
     ensure_started(?MODULE),
-    sensor:send_message(sensor:create_message('system', "System is started!")). 
+    sensor:send('system', {info, {"System is started!",[]}}). 
 
 stop() ->
-    sensor:send_message(sensor:create_message('system', "System is going down!")),
+    sensor:send('system', {info, {"System is going down!",[]}}),
 	application:start(public_key),
 	application:stop(crypto),
 	application:stop(ssl),
