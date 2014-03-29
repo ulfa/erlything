@@ -112,6 +112,4 @@ is_thing_running_test() ->
 	?assertEqual(true, is_thing_running('Temperatur_Sensor', Things)),
 	?assertEqual(false, is_thing_running('unknown_Sensor', Things)),
 	?assertEqual(false, is_thing_running('Message_Logger', Things)).
-
-
 -endif.

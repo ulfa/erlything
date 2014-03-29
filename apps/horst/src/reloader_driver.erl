@@ -33,7 +33,6 @@ call_sensor(Config, Module_config) ->
     Changed_Modules = re_reloader:reload(),
     send_message(Config, Changed_Modules),
     Config.
-
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
@@ -41,9 +40,7 @@ send_message(Config, []) ->
     lager:debug("there are no modules which i could reload.");
 
 send_message(Config, Changed_Modules) ->
-    Msg = sensor:create_message(node(), ?MODULE, sensor:get_id(Config), Changed_Modules), 
-    sensor:send_message(Msg).
-
+    sensor:send(?MODULE, {data, {"reloaded the following modules",Changed_Modules}}).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
