@@ -14,32 +14,32 @@
         <div class="form-group">
             <label>Name</label>     
             <div class="controls">       
-                <input class="form-control col-md-8" type="text" name="name" placeholder="Fun Name">
+                <input class="form-control col-md-8" type="text" name="fname" placeholder="Fun Name">
             </div>
         </div>
         <div class="form-group">
             <label>Message</span>
             <div class="controls form-inline">            
-                <input type="text" class="form-control input-medium" placeholder="Node">
-                <input type="text" class="form-control input-medium" placeholder="Driver">
-                <input type="text" class="form-control input-medium" placeholder="Id">
+                <input type="text" class="form-control input-medium" name="fnode" placeholder="Node">
+                <input type="text" class="form-control input-medium" name="fdriver" placeholder="Driver">
+                <input type="text" class="form-control input-medium" name="fid" placeholder="Id">
             </div>
         </div>
         <div class="form-group">
             <label>Fun</label>
             <div class="controls">
-                <textarea class="form-control col-md-8" name="fun" rows="6" placeholder="fun([X]) -> X + 1 end."></textarea>
+                <textarea class="form-control col-md-8" name="ffun" rows="6" placeholder="fun([X]) -> X + 1 end."></textarea>
             </div>
         </div>
 
         <div class="form-group">
             <label>Comment</label>
             <div class="controls">
-                <textarea class="form-control col-md-8" name="comment" rows="3" >{{comment}}</textarea>
+                <textarea class="form-control col-md-8" name="fcomment" rows="3" >{{comment}}</textarea>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Save</button>
-        <button type="cancel" class="btn">Cancel</button>          
+        <button type="submit" name="button" value="save" class="btn btn-primary">Save</button>
+        <button type="submit" name="button" value="cancel" class="btn">Cancel</button>          
     </form>
     </div>
 </div>

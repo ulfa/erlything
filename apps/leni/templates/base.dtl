@@ -16,8 +16,7 @@
     <!--script src="/js/bootstrap.min.js" type="text/javascript"></script -->
     
 </head>
-    <body>              
-        <div class="container">             
+    <body>                        
             <nav class="navbar navbar-inverse" role="navigation">
                 <div class="container-fluid">                    
                         <div class="navbar-header">
@@ -40,11 +39,12 @@
                     </div>
                 </div>  
             </nav>
-        </div>
+        
         <div class="container"> 
             <div class="row">               
                 <div class="col-sm-2 col-md-2">                 
                     <nav class="navbar-default navbar-inside" role="navigation">
+                    
                     <ul class="nav">
                     {% block sidebar %}
                         {% for ref, link, name in links %}                              
@@ -52,6 +52,7 @@
                         {% endfor %}
                     {% endblock %}                  
                     </ul>
+                
                     </nav>
                 </div>
                 <div class="col-sm-10 col-md-10">
