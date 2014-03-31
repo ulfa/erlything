@@ -44,8 +44,8 @@
         <div class="container"> 
             <div class="row">               
                 <div class="col-sm-2 col-md-2">                 
-                    <nav class="navbar navbar-default" role="navigation">
-                    <ul class="nav nav-pills nav-stacked">
+                    <nav class="navbar-default navbar-inside" role="navigation">
+                    <ul class="nav">
                     {% block sidebar %}
                         {% for ref, link, name in links %}                              
                         <li><a rel="prerender" href="{{link}}">{{name}}</a></li>
