@@ -3,9 +3,9 @@
 {% block title %}new{% endblock %}
 
 {% block body %}
-<div class="panel panel-primary">
+<div class="panel panel-default">
     <div class="panel-heading">
-        <h2 class="panel-title">new</h2>  
+        <h2 class="panel-title">create new fun</h2>  
     </div>
     <div class="panel-body">
     <form role="form" method="post">

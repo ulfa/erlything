@@ -13,9 +13,9 @@
         </ul>
           <div class="tab-content">
           <div id="table" class="tab-pane active">
-            <div class="panel panel-primary">
+            <div class="panel panel-info">
               <div class="panel-heading">
-                <h2 class="panel-title">{{node}} ds18b20</h2>  
+                <h2 class="panel-title">DHT22 on {{node}}</h2>  
               </div>
               <div class="panel-body">
                 <table class="table">
