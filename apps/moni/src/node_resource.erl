@@ -216,7 +216,10 @@ finish_request(ReqData, Context) ->
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->
 	Node = wrq:path_info(id, ReqData),
-	{ok, Content} = node_dtl:render([{node, Node}, {links, create_links(Node)}]),
+	Result = get_sysinfo(Node),	
+	Sysinfo = insert_comments(Result, read_sysinfo(), []),
+	{Info, List} = etop(wrq:path_info(id, ReqData)),
+	{ok, Content} = node_dtl:render([{node, Node}, {nodes, get_nodes(node())}, {list, List},{sysinfos, Sysinfo}, {links, create_links(Node)}]),
 	{Content, ReqData, Context}.    
 to_json(ReqData, Context) ->		
 	Content = "json not ready yet",
@@ -232,6 +235,38 @@ create_links(Node) ->
 		?APPMON(Node),
 		?SYSINFO(Node)
 	].
+get_nodes(undefined) ->
+	get_nodes(node());	
+get_nodes(Node) when is_atom(Node) ->
+	get_nodes1(sue:get_children(Node), []).
+
+get_nodes1([], Acc) ->
+	Acc;
+get_nodes1([{Name, Details}|Nodes], Acc) ->
+	State = proplists:get_value(state, Details), 
+	IP = proplists:get_value(ip, Details), 
+	get_nodes1(Nodes, [{Name, State, IP}|Acc]).
+
+get_sysinfo(Node) when is_list(Node)->
+	get_sysinfo(erlang:list_to_atom(Node));
+get_sysinfo(Node) ->
+	sue:sys_info(Node).
+
+insert_comments(Input) ->
+	Comments = read_sysinfo(),
+	ok.
+
+read_sysinfo() ->
+	{ok, Infos}=file:consult(code:priv_dir(moni) ++ "/config" ++ "/sysinfo.conf"),
+	Infos.
+
+insert_comments([], Comments, Acc) ->
+	lists:reverse(Acc);
+insert_comments([{Key, Value}|T], Comments, Acc) ->
+	insert_comments(T, Comments, [{Key, Value, proplists:get_value(Key, Comments, "no info available")}|Acc]).
+
+etop(Node) when is_list(Node)->
+	sue:etop(list_to_atom(Node)).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

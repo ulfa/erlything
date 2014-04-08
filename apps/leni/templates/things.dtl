@@ -5,9 +5,13 @@
 {% block body %}
 
 <div class="tabbable">
-        <ul class="nav nav-tabs">
-                <li class="active"><a href="#actors" data-toggle="tab">Actors</a></li>
-                <li><a href="#sensors" data-toggle="tab">Sensors</a></li>
+	<ul class="nav nav-tabs">
+		<li class="active">
+			<a href="#actors" data-toggle="tab">Actors</a>
+		</li>
+			<li>
+				<a href="#sensors" data-toggle="tab">Sensors</a>
+			</li>
         </ul>
 
     <div class="tab-content">
@@ -48,12 +52,7 @@
 {% endfor %}
 </div>
 
-
-
-
 <div id="sensors" class="tab-pane">
-
-
 {%for node, list_of_things in sensor %}
 <div class="panel panel-default">
     <div class="panel-heading">

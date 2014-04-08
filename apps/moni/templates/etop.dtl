@@ -2,7 +2,11 @@
 {% block title %}etop: {{node}}{% endblock %}
 
 {% block body %}	
-			<div class="well scroller">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2 class="panel-title">eTop : {{node}}</h2>  
+    </div>
+    <div class="panel-body">
 				<table class="table table-hover table-condensed">
 					<thead>
 					<tr>
@@ -48,5 +52,5 @@
 					</tbody>					
 				</table>
 			</div>
-
+		</div>
 {% endblock %}

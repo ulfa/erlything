@@ -3,7 +3,11 @@
 <title>{% block title %}Info : {{node}}{% endblock %}</title>
 
 {% block body %}
-	<div class="well scroller">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2 class="panel-title">Sysinfo : {{node}}</h2>  
+    </div>
+    <div class="panel-body">
 		<table class="table">  
         	<thead>  
           	  <tr>  
@@ -23,4 +27,5 @@
 			</tbody>
 		</table>
 	</div>
+</div>
 {% endblock %}

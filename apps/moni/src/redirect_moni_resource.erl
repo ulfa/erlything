@@ -29,8 +29,8 @@
 %%% Internal functions
 %% --------------------------------------------------------------------
 init(Config) -> 
-	{{trace, "/tmp"}, Config}.
-	%%{ok, #context{}}.
+	%%{{trace, "/tmp"}, Config}.
+	{ok, #context{}}.
 %
 % Returning non-true values will result in 404 Not Found.
 % 
