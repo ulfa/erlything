@@ -4,7 +4,11 @@
 
 {% block body %}
 {% include "left_nav.dtl" %}
-
+<script type="text/javascript">
+	(document).ready(function() {
+    	$('#etop').dataTable();
+} );
+</script>
 <div id="page-wrapper">
 	<div class="row">
 		<div class="col-lg-12">	
@@ -18,25 +22,7 @@
 					eTop
 				</div>
 				<div class="panel-body">
-					<div class="table-responsive">
-						<div id="dataTables-etop_wrapper" class="dataTables_wrapper form-inline" role="grid">
-							<table class="table table-striped dataTable no-footer" id="dataTables-etop" aria-describedby="dataTables-etop_info">
-							<div class="row">
-								<div class="col-sm-6">
-									<div class="dataTables_length" id="dataTables-etop_length">
-										<label>
-											<select name="dataTables-etop_length" aria-controls="dataTables-etop" class="form-control input-sm">
-												<option value="10">10</option>
-												<option value="25">25</option>
-												<option value="50">50</option>
-												<option value="100">100</option>
-											</select> processes per page
-										</label>
-									</div>
-								</div>
-								<div class="col-sm-6">
-								</div>
-							</div>
+						<table id="etop">
 						<thead>
 							<tr>
 								<th>Pid</th>
@@ -60,23 +46,8 @@
 							{% endfor %}
 						</tr>	
 					{% endfor %}
-					</tbody>
+							</tbody>
 						</table>
-						<div class="row">
-							<div class="col-sm-6">
-								<div class="dataTables_info" id="dataTables-example_info" role="alert" aria-live="polite" aria-relevant="all">
-								</div>
-							</div>
-							<div class="col-sm-6">
-								<div class="dataTables_paginate paging_simple_numbers" id="dataTables-etop_paginate">
-									<ul class="pagination">
-										<li class="paginate_button previous disabled" aria-controls="dataTables-etop" tabindex="0" id="dataTables-etop_previous">
-										</li>
-									</ul>
-								</div>
-							</div>
-						</div>
-						</div>
 					</div>
 				</div>
 			</div>
