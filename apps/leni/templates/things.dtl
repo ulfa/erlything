@@ -47,7 +47,6 @@
 		</table>
 	{% endif %}
 	</div>
-    <div class="panel-footer"></div>
     </div>
 {% endfor %}
 </div>
@@ -82,7 +81,6 @@
 		</table>
 	{% endif %}
 	</div>
-    <div class="panel-footer"></div>
     </div>
 
 {% endfor %}
