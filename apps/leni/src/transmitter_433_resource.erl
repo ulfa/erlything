@@ -135,6 +135,7 @@ create_path(ReqData, Context) ->
 %
 process_post(ReqData, Context) ->
 	Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
+	lager:info(".... ~p", [Body]),
 	{"node", Node} = lists:keyfind("node",1, Body),
 	{"name", Name} = lists:keyfind("name",1, Body),
 	{"switch", Switch} = lists:keyfind("switch",1, Body),

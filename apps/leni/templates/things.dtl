@@ -18,7 +18,7 @@
         <div id="actors" class="tab-pane active">
 {%for node, list_of_things in actor %}
 
-<div class="panel panel-default">
+<div class="panel panel-primary">
     <div class="panel-heading">
         <h2 class="panel-title">{{node}}</h2>  
     </div>
@@ -54,7 +54,7 @@
 
 <div id="sensors" class="tab-pane">
 {%for node, list_of_things in sensor %}
-<div class="panel panel-default">
+<div class="panel panel-primary">
     <div class="panel-heading">
         <h2 class="panel-title">{{node}}</h2>  
     </div>

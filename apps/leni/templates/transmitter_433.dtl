@@ -1,59 +1,48 @@
 {% extends "base_without.dtl" %}
 {% block title %}Switches{% endblock %}
 {% block body %}
-    <div class="panel panel-primary">
+    <div class="panel panel-default">
         <div class="panel-heading">
             <h2 class="panel-title">{{node}}</h2>  
         </div>
         <div class="panel-body">
-            <ul class="nav" >
+            <ul class="list-unstyled ">
                 {% for thing, number, state in list %}
                 <li>
                 <div class="row">
-                <div class="col-xs-1">
-                {% if state == "1" %}
-                    <img src="/images/light_on.png" class="img-rounded">
-                {% else %}
-                    <img src="/images/light_off.png" class="img-rounded">
-                {% endif %}
-                </div>
-                <div class="col-xs-1">
-                    <p>{{thing}}</p>
-                </div>
+                    <div class="col-sm-1">
+                        {% if state == "1" %}
+                        <img src="/images/light_on.png" class="img-rounded">
+                        {% else %}
+                        <img src="/images/light_off.png" class="img-rounded">
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-1">
+                        <p>{{thing}}</p>
+                    </div>
+                    <div class="col-sm-2">
+                        <form name="switch_on" method="post">    
+                            <div class="btn-group">                    
+                                {% if state == "1" %}
+                                    <button type="submit" class="btn btn-default" name="status" value="1">On</button>
+                                    <button type="submit" class="btn btn-primary" name="status" value="0">Off</button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-primary" name="status" value="1">On</button>
+                                    <button type="submit" class="btn btn-default" name="status" value="0">Off</button>
+                                {% endif %}                                
+                                <input type="hidden" name="node" value="{{node}}"/>
+                                <input type="hidden" name="name" value="{{name}}"/>                        
+                                <input type="hidden" name="switch" value="{{thing}}"/>
+                                <input type="hidden" name="number" value="{{number}}"/>
+                            </div>
+                        </form>
         
-                <div class="col-xs-1">
-                    <form name="switch_on" method="post">
-                        {% if state == "1" %}
-                        <button type="submit" class="btn">On</button>
-                        {% else %}
-                        <button type="submit" class="btn btn-primary">On</button>
-                        {% endif %}                                
-                        <input type="hidden" name="node" value="{{node}}"/>
-                        <input type="hidden" name="name" value="{{name}}"/>                        
-                        <input type="hidden" name="switch" value="{{thing}}"/>
-                        <input type="hidden" name="number" value="{{number}}"/>
-                        <input type="hidden" name="status" value="1"/>                
-                    </form>
-                </div>
-                <div class="col-xs-1">
-                    <form name="switch_off" method="post">
-                        {% if state == "1" %}
-                            <button type="submit" class="btn btn-primary">Off</button>
-                        {% else %}
-                            <button type="submit"class="btn">Off</button>
-                        {% endif %}                                
-                        <input type="hidden" name="node" value="{{node}}"/>
-                        <input type="hidden" name="name" value="{{name}}"/>
-                        <input type="hidden" name="switch" value="{{thing}}"/>
-                        <input type="hidden" name="number" value="{{number}}"/>
-                        <input type="hidden" name="status" value="0"/>
-                    </form>
-                </div>
-                </div> 
-                </li>
+                    </div>          
+                </div>     
+                </li>            
                 {% endfor %}
-            </ul>        
+
+            </ul>
         </div>
-    <div class="panel-footer"></div>
 </div>
 {% endblock %}

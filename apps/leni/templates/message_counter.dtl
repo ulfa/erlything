@@ -7,7 +7,7 @@
 
 <div class="panel panel-info">
     <div class="panel-heading">
-        <h2 class="panel-title">Message count : {{counter}}</h2>  
+        <h2 class="panel-title">Message count : <span class="badge">{{counter}}</span></h2> 
     </div>
     <div class="panel-body">
 
@@ -34,7 +34,6 @@
 	</tbody>
 </table>
 </div>
-<div class="panel-footer"></div>
 </div>
 
 {% endblock %}
