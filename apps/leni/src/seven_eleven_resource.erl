@@ -132,8 +132,8 @@ create_path(ReqData, Context) ->
 % If it succeeds, it should return true.
 %
 process_post(ReqData, Context) ->
-	Msg = sender_util:create_message(node(), ?MODULE, "0", date:get_date_seconds(), "RISING"), 
-	sender_util:send_message(nodes(), Msg), 
+	Msg = sender_util:create_message(node(), ?MODULE, "0", date:get_date_seconds(), "on"), 
+	sender_util:send_message(Msg), 
 	{true, ReqData, Context}.
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 
