@@ -20,6 +20,7 @@
 -define(STARTED, "started").
 -define(STOPPED, "stopped").
 
+-define(MAX_QUEUE_LENGTH, 30).
 
 
 

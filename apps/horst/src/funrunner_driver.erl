@@ -9,6 +9,11 @@
 -module(funrunner_driver).
 
 %% --------------------------------------------------------------------
+%% Include files
+%% --------------------------------------------------------------------
+-include("../include/horst.hrl").
+
+%% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
 -export([init/1, stop/1]).
@@ -19,6 +24,10 @@
 init(Config) ->
     lager:info("funrunner_driver:init('~p')", [Config]),
     {ok, Config}.
+
+handle_msg([Node ,Sensor, Id, Time, {run_result, Name, {ok, Result}}], Config, Module_config) ->
+    lager:info("run_result from : ~p : ~p", [Name, Result]),
+    Config;
 
 handle_msg([Node ,Sensor, Id, Time, {save, Name, Message, Command, Comment}], Config, Module_config) ->
     save_fun(Name, Message, Command, Comment, Config, Module_config);
@@ -31,7 +40,7 @@ handle_msg([Node ,Sensor, Id, Time, {run,{Node_1, Driver_1, Id_1, Time_1, Body}}
     try
         Result = run_fun(Fun, Name, Body),
         lager:info("Result of fun : ~p is : ~p", [Name, Result]),
-        create_message_and_send(Module_config, {run_result, Name, {ok,Result}})
+        create_message_and_send(Module_config, {run_result, Name, {ok, Result}})
     catch   
         _:Error -> create_message_and_send(Module_config, {error, "running fun with name : " ++ Name ++ " ", Error}),
                     handle_error(Config, Module_config, Name, "running fun with name : " ++ Name ++ " ", Error)
@@ -100,7 +109,7 @@ save_fun(Name, Message, Command, Comment, Config, Module_config) ->
         {ok, Fun} = command_to_fun(Command),
         create_message_and_send(Module_config, {save_result, Name, ok}),
         Module_config_1 = lists:keyreplace(funs, 1 , Module_config, {funs, lists:keystore(Name, 1, Funs, {Name, Message, Fun, Command, Comment})}),    
-        lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1})
+        lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1})        
     catch
         _:Error -> create_message_and_send(Module_config, {error, "saving fun with name : " ++ Name ++ " command : " ++ Command, Error}),
                    handle_error(Config, Module_config, Name, "saving fun with name : " ++ Name ++ " command : " ++ Command, Error)
@@ -161,6 +170,14 @@ get_command(Funs, Name) ->
     case lists:keysearch(Name, 1, Funs) of
         {value, {N, F, C, Co}} -> {N, C, Co};
         false -> []
+    end.    
+
+add([], Value) ->
+    [Value];
+add(List, Value) ->
+    case length(List) =< ?MAX_QUEUE_LENGTH of
+        true -> [Value|List];
+        false -> [Value|lists:sublist(List, ?MAX_QUEUE_LENGTH)]
     end.    
 %% --------------------------------------------------------------------
 %%% Test functions

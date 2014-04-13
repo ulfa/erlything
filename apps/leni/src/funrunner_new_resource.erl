@@ -141,12 +141,21 @@ process_post(ReqData, Context) ->
 handle_post("cancel", Body) ->
     ok;
 handle_post("save", Body) ->    
-    {"fnode", Node} = lists:keyfind("fnode",1, Body),
     {"fname", Name} = lists:keyfind("fname",1, Body),
+    {"fnode", Node} = lists:keyfind("fnode",1, Body),
+    {"fdriver", Driver} = lists:keyfind("fdriver",1, Body),
+    {"fid", Id} = lists:keyfind("fid",1, Body),
     {"ffun", Fun} = lists:keyfind("ffun",1, Body),
     {"fcomment", Comment} = lists:keyfind("fcomment",1, Body),    
-    Msg = sender_util:create_message(node(), funrunner_new_resource, {save, Name, Fun, Comment}),    
+    Msg = save(Name, Node, Driver, Id, Fun, Comment),
     sender_util:send_message(Msg).
+
+save(Name, [], [], [], Fun, Comment) ->
+    sender_util:create_message(node(), funrunner_new_resource, {save, Name, [], Fun, Comment});
+save(Name, Node, Driver, Id, Fun, Comment) ->
+    Message = {list_to_atom(Node), list_to_atom(Driver), list_to_atom(Id)},
+    sender_util:create_message(node(), funrunner_new_resource, {save, Name, Message, Fun, Comment}).
+    
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 
 % where Mediatype is a string of content-type format and the Handler is an atom naming 
