@@ -229,7 +229,7 @@ finish_request(ReqData, Context) ->
 to_html(ReqData, Context) ->
 	Node = wrq:get_qs_value("node",ReqData),
 	Name = wrq:get_qs_value("name",ReqData),
-	{ok, Content} = funrunner_dtl:render([{node, Node},{name, Name},{links, create_links(Node, Name)},{funs, get_funs(Node, Name)}]),
+	{ok, Content} = funrunner_dtl:render([{node, Node},{name, Name},{links, create_links(Node, Name)},{funs, get_funs(Node, Name)}, {results, get_results(Node, Name)}, {errors, get_errors(Node, Name)}]),
     {Content, ReqData, Context}.
 
 to_json(ReqData, Context) ->
@@ -242,10 +242,25 @@ get_funs(Node, Name) when is_list(Node)->
         {Driver, Config} -> proplists:get_value(funs, Config, [])
     end.
 
+get_results(Node, Name) ->
+    case rpc:call(list_to_atom(Node), thing, get_module_config, [Name]) of 
+        {badrpc, Reason} -> lager:error("got error during call ~p thing:get_module_config(~p) with reason ~p", [Node, Name, Reason]),
+                            [];
+        Config -> convert_timestamp_to_date(proplists:get_value(results, Config, []))
+    end.
+
+get_errors(Node, Name) ->
+    case rpc:call(list_to_atom(Node), thing, get_module_config, [Name]) of 
+        {badrpc, Reason} -> lager:error("got error during call ~p thing:get_module_config(~p) with reason ~p", [Node, Name, Reason]),
+                            [];
+        Config -> convert_timestamp_to_date(proplists:get_value(errors, Config, [])) 
+    end.
+
 create_links(Node, Name) ->
 	[{new, "funrunners/new?node=" ++ Node ++ "&name=" ++ Name, "New"}].
 
-
+convert_timestamp_to_date(List) ->
+    lists:foldr(fun({Timestamp, A, B}, Acc) -> [{date:timestamp_to_date(Timestamp), A, B}|Acc] end, [], List).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

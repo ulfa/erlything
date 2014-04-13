@@ -25,9 +25,18 @@ init(Config) ->
     lager:info("funrunner_driver:init('~p')", [Config]),
     {ok, Config}.
 
-handle_msg([Node ,Sensor, Id, Time, {run_result, Name, {ok, Result}}], Config, Module_config) ->
-    lager:info("run_result from : ~p : ~p", [Name, Result]),
+handle_msg([Node ,Sensor, Id, Time, {run_result, Name, {ok, Result}}], Config, Module_config) ->    
+    Table_Id = proplists:get_value(?TABLE, Config),
+    [{results, Data}] = ets:lookup(Table_Id, results),
+    ets:insert(Table_Id, [{results, add(Data, {Time, Name, Result})}]),
     Config;
+
+handle_msg([Node ,Sensor, Id, Time, {error, Text, Reason}], Config, Module_config) ->
+    Table_Id = proplists:get_value(?TABLE, Config),
+    [{errors, Data}] = ets:lookup(Table_Id, errors),
+    ets:insert(Table_Id, [{errors, add(Data, {Time, Text, Reason})}]),
+    Config;
+
 
 handle_msg([Node ,Sensor, Id, Time, {save, Name, Message, Command, Comment}], Config, Module_config) ->
     save_fun(Name, Message, Command, Comment, Config, Module_config);

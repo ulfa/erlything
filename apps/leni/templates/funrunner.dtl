@@ -44,11 +44,13 @@
                 </tr>   
             </thead>
             <tbody>
+                {% for time, name, result in results %}
                 <tr>        
-                    <td>2014-02-28 09:49:14</td>    
-                    <td>schimmel</a></td>      
-                    <td>ok</td>
+                    <td>{{time}}</td>    
+                    <td>{{name}}</a></td>      
+                    <td>{{result}}</td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
@@ -67,11 +69,13 @@
                 </tr>   
             </thead>
             <tbody>
+                {% for time, text, reason in errors %}
                 <tr>        
-                    <td>2014-02-28 09:49:14</td>    
-                    <td>running fun with name : arg_test and args : ~p {1, int}</td>
-                    <td>function_clause</td>
+                    <td>{{time}}</td>    
+                    <td>{{text}}</td>
+                    <td>{{reason}}</td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
