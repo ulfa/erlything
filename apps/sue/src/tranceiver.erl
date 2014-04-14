@@ -22,7 +22,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0]).
 -export([start/0]).
--export([set_observer/1, send_msg_oberserver/1]).
+-export([register_listener/1, send_msg_listener/1]).
 %% ====================================================================
 %% External functions
 %% ====================================================================
@@ -30,15 +30,15 @@
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {sender, receiver, observer}).
+-record(state, {sender, receiver, listener}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
-set_observer(Pid) when is_pid(Pid) ->
-	gen_server:call(?MODULE, {set_observer, Pid}).	
+register_listener(Pid) when is_pid(Pid) ->
+	gen_server:call(?MODULE, {register_listener, Pid}).	
 
-send_msg_oberserver(Message) ->
-	gen_server:cast(?MODULE, {send_msg_oberserver, Message}).	
+send_msg_listener(Message) ->
+	gen_server:cast(?MODULE, {send_msg_listener, Message}).	
 
 %%--------------------------------------------------------------------
 %% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
@@ -70,8 +70,8 @@ init([]) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_call({set_observer, Pid}, _From, State) ->
-    {reply, ok, State#state{observer = Pid}};
+handle_call({register_listener, Pid}, _From, State) ->
+    {reply, ok, State#state{listener = Pid}};
 
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -84,8 +84,8 @@ handle_call(_Request, _From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------	
-handle_cast({send_msg_oberserver, Message}, #state{observer = Observer} = State) ->
-	send_message(Observer, Message),
+handle_cast({send_msg_listener, Message}, #state{listener = Listener} = State) ->
+	send_message(Listener, Message),
     {noreply, State};
 
 handle_cast(_Msg, State) ->
@@ -143,11 +143,11 @@ code_change(_OldVsn, State, _Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-send_message(Observer,Message) ->
+send_message(Listener,Message) ->
 	ok;
-send_message(Observer,Message) when is_pid(Observer) ->
-	Observer ! Message.
-	
+send_message(Listener,Message) when is_pid(Listener) ->
+	Listener ! Message.
+
 %% <<"SEARCH:COOKIENODE:STATE:TIME":UPTIME>>
 decode_message(<<_Action:7/binary, Cookie:16/binary, Rest/binary>> = Message) ->	
 	Is_valid_cookie = decode_cookie(Cookie, get_local_cookie()),

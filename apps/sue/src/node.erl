@@ -147,14 +147,14 @@ handle_info({update, Node}, #state{status=Old_s}=State) ->
 handle_info({nodeup, Node, InfoList}, #state{node = Node1} = State) ->
 	lager:info("nodeup : ~p ~p", [Node, InfoList]),
 	case erlang:atom_to_binary(Node, utf8) =:= Node1 of
-		true -> tranceiver:send_msg_oberserver(?MESSAGE_ALIVE(Node)),
+		true -> tranceiver:send_msg_listener(?MESSAGE_ALIVE(Node)),
 				{noreply, State#state{status=?ALIVE, reason=InfoList, time=get_timestamp()}};
 		false -> {noreply, State}
 	end;
 handle_info({nodedown, Node, InfoList}, #state{node = Node1} = State) ->
 	lager:info("nodedown : ~p, ~p", [Node, InfoList]),
 	case erlang:atom_to_binary(Node, utf8) =:= Node1 of
-		true -> tranceiver:send_msg_oberserver(?MESSAGE_DEAD(Node)),
+		true -> tranceiver:send_msg_listener(?MESSAGE_DEAD(Node)),
 				{noreply, State#state{status=?DEAD, reason=InfoList, time=get_timestamp()}};
 		false -> {noreply, State}
 	end;
