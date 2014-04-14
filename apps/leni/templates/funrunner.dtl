@@ -30,6 +30,7 @@
         </table>
     </div>
 </div>
+{% if results %}
 <div class="panel panel-info">
     <div class="panel-heading">
         <h2 class="panel-title">Result</h2>  
@@ -55,6 +56,8 @@
         </table>
     </div>
 </div>
+{% endif%}
+{% if errors %}
 <div class="panel panel-danger">
     <div class="panel-heading">
         <h2 class="panel-title">Error</h2>  
@@ -80,6 +83,6 @@
         </table>
     </div>
 </div>
-
+{% endif%}
 
 {% endblock %}
