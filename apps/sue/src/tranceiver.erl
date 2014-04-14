@@ -22,7 +22,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0]).
 -export([start/0]).
--export([register_listener/1, send_msg_listener/1]).
+-export([register_listener/1, unregister_listener/0, send_msg_listener/1]).
 %% ====================================================================
 %% External functions
 %% ====================================================================
@@ -36,6 +36,9 @@
 %% ====================================================================
 register_listener(Pid) when is_pid(Pid) ->
 	gen_server:call(?MODULE, {register_listener, Pid}).	
+
+unregister_listener() ->
+	gen_server:call(?MODULE, {unregister_listener}).	
 
 send_msg_listener(Message) ->
 	gen_server:cast(?MODULE, {send_msg_listener, Message}).	
@@ -58,7 +61,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{}, 0}.
+    {ok, #state{listener = undefined}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -72,6 +75,10 @@ init([]) ->
 %% --------------------------------------------------------------------
 handle_call({register_listener, Pid}, _From, State) ->
     {reply, ok, State#state{listener = Pid}};
+
+handle_call({unregister_listener}, _From, State) ->
+    {reply, ok, State#state{listener = undefined}};
+
 
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -143,9 +150,9 @@ code_change(_OldVsn, State, _Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-send_message(Listener,Message) ->
+send_message(undefined, Message) ->
 	ok;
-send_message(Listener,Message) when is_pid(Listener) ->
+send_message(Listener, Message) when is_pid(Listener) ->
 	Listener ! Message.
 
 %% <<"SEARCH:COOKIENODE:STATE:TIME":UPTIME>>

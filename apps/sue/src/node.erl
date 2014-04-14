@@ -136,7 +136,7 @@ handle_cast(Msg, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_info({update, Node}, #state{status=Old_s}=State) ->
-	lager:info("update node : ~p from state : ~p ", [Node, Old_s]),
+	lager:debug("update node : ~p from state : ~p ", [Node, Old_s]),
 	New_s = ping_node(Node),
 	start_timer(Node),
 	case New_s =:= Old_s of 
@@ -145,14 +145,14 @@ handle_info({update, Node}, #state{status=Old_s}=State) ->
 	end;
 	
 handle_info({nodeup, Node, InfoList}, #state{node = Node1} = State) ->
-	lager:info("nodeup : ~p ~p", [Node, InfoList]),
+	lager:debug("nodeup : ~p ~p", [Node, InfoList]),
 	case erlang:atom_to_binary(Node, utf8) =:= Node1 of
 		true -> tranceiver:send_msg_listener(?MESSAGE_ALIVE(Node)),
 				{noreply, State#state{status=?ALIVE, reason=InfoList, time=get_timestamp()}};
 		false -> {noreply, State}
 	end;
 handle_info({nodedown, Node, InfoList}, #state{node = Node1} = State) ->
-	lager:info("nodedown : ~p, ~p", [Node, InfoList]),
+	lager:debug("nodedown : ~p, ~p", [Node, InfoList]),
 	case erlang:atom_to_binary(Node, utf8) =:= Node1 of
 		true -> tranceiver:send_msg_listener(?MESSAGE_DEAD(Node)),
 				{noreply, State#state{status=?DEAD, reason=InfoList, time=get_timestamp()}};
