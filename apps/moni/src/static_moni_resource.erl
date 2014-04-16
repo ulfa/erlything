@@ -13,11 +13,11 @@
  
 init(DocRoot) -> 
 	Directory = filename:join(code:priv_dir(moni),DocRoot),
-  lager:info("1.... ~p", [Directory]),
+  %%lager:info("1.... ~p", [Directory]),
 	{ok, #context{docroot=Directory}}.
  
 resource_exists(ReqData, Context) ->
-  lager:info("2.... ~p", [wrq:disp_path(ReqData)]),
+  %%lager:info("2.... ~p", [wrq:disp_path(ReqData)]),
   case get_full_path(Context#context.docroot, wrq:disp_path(ReqData)) of
     undefined -> {false, ReqData, Context};
     Path ->
