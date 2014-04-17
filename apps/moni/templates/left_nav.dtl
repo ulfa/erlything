@@ -1,0 +1,19 @@
+<nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav" id="side-menu">
+                    <li>
+                        <a href="/overview"><i class="fa fa-dashboard fa-fw"></i>Overview</a>
+                    </li>
+                    {% for node, state, detail in nodes %}
+	                    <li>
+    	                    <a href="/dashboard/{{node}}">
+    	                    	<i class="fa fa-power-off fa-fw"></i>
+    	                   		{{node}}
+    	                    </a>
+        	            </li>
+                    {% endfor %}                        
+                </ul>
+                <!-- /#side-menu -->
+            </div>
+            <!-- /.sidebar-collapse -->
+</nav>

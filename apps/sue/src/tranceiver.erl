@@ -22,7 +22,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0]).
 -export([start/0]).
-
+-export([register_listener/1, unregister_listener/0, send_msg_listener/1]).
 %% ====================================================================
 %% External functions
 %% ====================================================================
@@ -30,10 +30,19 @@
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {sender, receiver}).
+-record(state, {sender, receiver, listener}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
+register_listener(Pid) when is_pid(Pid) ->
+	gen_server:call(?MODULE, {register_listener, Pid}).	
+
+unregister_listener() ->
+	gen_server:call(?MODULE, {unregister_listener}).	
+
+send_msg_listener(Message) ->
+	gen_server:cast(?MODULE, {send_msg_listener, Message}).	
+
 %%--------------------------------------------------------------------
 %% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the server
@@ -52,7 +61,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{}, 0}.
+    {ok, #state{listener = undefined}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -64,6 +73,13 @@ init([]) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_call({register_listener, Pid}, _From, State) ->
+    {reply, ok, State#state{listener = Pid}};
+
+handle_call({unregister_listener}, _From, State) ->
+    {reply, ok, State#state{listener = undefined}};
+
+
 handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
@@ -75,6 +91,10 @@ handle_call(_Request, _From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------	
+handle_cast({send_msg_listener, Message}, #state{listener = Listener} = State) ->
+	send_message(Listener, Message),
+    {noreply, State};
+
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
@@ -130,6 +150,11 @@ code_change(_OldVsn, State, _Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+send_message(undefined, Message) ->
+	ok;
+send_message(Listener, Message) when is_pid(Listener) ->
+	Listener ! Message.
+
 %% <<"SEARCH:COOKIENODE:STATE:TIME":UPTIME>>
 decode_message(<<_Action:7/binary, Cookie:16/binary, Rest/binary>> = Message) ->	
 	Is_valid_cookie = decode_cookie(Cookie, get_local_cookie()),

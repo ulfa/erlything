@@ -1,3 +1,4 @@
+
 %%
 %% Copyright (c) 2013 Ulf Angermann  All Rights Reserved.
 %%
@@ -228,7 +229,8 @@ finish_request(ReqData, Context) ->
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->
 	Node = wrq:get_qs_value("node",ReqData),
-	{ok, Content} = funrunners_dtl:render([{funs, get_list_of_funs(nodes())}, {links, create_links(Node)}]),
+	Name = wrq:get_qs_value("name",ReqData),
+	{ok, Content} = funrunners_dtl:render([{funs, get_list_of_funs(nodes())}, {links, create_links(Node,Name)}]),
     {Content, ReqData, Context}.
 
 to_json(ReqData, Context) ->
@@ -246,7 +248,7 @@ is_not_badrpc({badrpc, Reason}) ->
 is_not_badrpc(Any) ->
 	true.
 
-create_links(Node) ->
+create_links(Node, Name) ->
 	[{new, "funrunners/new?node=" ++ Node, "New"}].
 
 %% --------------------------------------------------------------------

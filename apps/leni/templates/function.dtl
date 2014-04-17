@@ -1,56 +1,59 @@
 {% extends "base_without.dtl" %}
 
-
-{% block title %} Funs on {{node}}{% endblock %}
+{% block title %} Fun :{{fname}}{% endblock %}
 
 {% block body %}
 
-<div class="well">
-   <form class="form-horizontal" action="/actors/funrunner" method="post">
-        <div class="control-group">
-            <label class="control-label" for="inputFunName">Name</label>
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h2 class="panel-title">Function with name : {{fname}} </h2>  
+    </div>
+    <div class="panel-body">
+    <form role="form" action="/actors/funrunner" method="post">
+        <div class="form-group">
+            <label>Name</label>
             <div class="controls">
-                <input type="text" class="span8" id="fName" name="fName" placeholder="Fun Name" value="{{fname}}">
+                <input type="text" class="form-control col-md-8" id="fName" name="fName" placeholder="Fun Name" value="{{fname}}">
             </div>
         </div>
 
-        <div class="control-group">
-            <span class="control-label">Message</span>
+        <div class="form-group">
+            <label>Message</label>
             <div class="controls form-inline">            
-                <input type="text" class="input-medium" id="inputNode" name="fNode"  placeholder="Node" value="{{fnode}}">
-                <input type="text" class="input-medium" id="inputDriver" name="fDriver" placeholder="Driver" value="{{fdriver}}">
-                <input type="text" class="input-medium" id="inputId" name="fId" placeholder="Id" value="{{fid}}">
+                <input type="text" class="form-control input-medium" id="inputNode" name="fNode"  placeholder="Node" value="{{fnode}}">
+                <input type="text" class="form-control input-medium" id="inputDriver" name="fDriver" placeholder="Driver" value="{{fdriver}}">
+                <input type="text" class="form-control input-medium" id="inputId" name="fId" placeholder="Id" value="{{fid}}">
             </div>
         </div>
 
-        <div class="control-group">
+        <div class="form-group">
             <label class="control-label" for="inputFun">Fun</label>
             <div class="controls">
-                <textarea class="span8" id="inputFun" name="fFun" rows="6" placeholder="fun(X) -> X + 1 end.">{{command}}</textarea>
+                <textarea class="form-control col-md-8" id="inputFun" name="fFun" rows="6" placeholder="fun(X) -> X + 1 end.">{{command}}</textarea>
             </div>
         </div>
 
-        <div class="control-group">
+        <div class="form-group">
             <label class="control-label" for="inputComment">Comment</label>
             <div class="controls">
-                <textarea class="span8" id="inputFunComment" name="fComment" rows="3" >{{comment}}</textarea>
+                <textarea class="form-control col-md-8" id="inputFunComment" name="fComment" rows="3" >{{comment}}</textarea>
             </div>
         </div>
 
-        <div class="control-group">
+        <div class="form-group">
             <label class="control-label" for="inputArgs">Arguments</label>
             <div class="controls">
-                <input type="text" class="span8" id="inputArgs" name="fArgs" placeholder="{Value, Type}">
+                <input type="text" class="form-control col-md-8" id="inputArgs" name="fArgs" placeholder="{Value, Type}">
             </div>
         </div>
-
-        <div class="control-group">
-            <div class="controls">
-                <button type="submit" class="btn" name="button" value="save">Save</button>
-                <button type="submit" class="btn btn-primary" name="button" value="run">Run</button>
-            </div>
-        </div>
+        
+        <button type="submit" class="btn btn-default" name="button" value="save">Save</button>
+        <button type="submit" class="btn btn-primary" name="button" value="run">Run</button>
+        <button type="submit" class="btn btn-default" name="button" value="run">Cancel</button>
     </form>
+    </div>
+    <div class="panel-footer">
+    </div>
 </div>
 
 {% endblock %}

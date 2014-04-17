@@ -81,7 +81,7 @@ start([Node, Ip, Uptime]) ->
 init([Node, Ip, Uptime]) ->
 	net_kernel:monitor_nodes(true, [nodedown_reason]),		
 	start_timer(Node),
-    {ok, #state{node = erlang:atom_to_binary(Node, utf8), ip = Ip, time = get_timestamp(), uptime=Uptime}}.
+    {ok, #state{status = ?ALIVE, node = erlang:atom_to_binary(Node, utf8), ip = Ip, time = get_timestamp(), uptime=Uptime}}.
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
 %% Description: Handling call messages
@@ -147,13 +147,15 @@ handle_info({update, Node}, #state{status=Old_s}=State) ->
 handle_info({nodeup, Node, InfoList}, #state{node = Node1} = State) ->
 	lager:debug("nodeup : ~p ~p", [Node, InfoList]),
 	case erlang:atom_to_binary(Node, utf8) =:= Node1 of
-		true -> {noreply, State#state{status=?ALIVE, reason=InfoList, time=get_timestamp()}};
+		true -> tranceiver:send_msg_listener(?MESSAGE_ALIVE(Node)),
+				{noreply, State#state{status=?ALIVE, reason=InfoList, time=get_timestamp()}};
 		false -> {noreply, State}
 	end;
 handle_info({nodedown, Node, InfoList}, #state{node = Node1} = State) ->
 	lager:debug("nodedown : ~p, ~p", [Node, InfoList]),
 	case erlang:atom_to_binary(Node, utf8) =:= Node1 of
-		true -> {noreply, State#state{status=?DEAD, reason=InfoList, time=get_timestamp()}};
+		true -> tranceiver:send_msg_listener(?MESSAGE_DEAD(Node)),
+				{noreply, State#state{status=?DEAD, reason=InfoList, time=get_timestamp()}};
 		false -> {noreply, State}
 	end;
 
@@ -179,6 +181,9 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------	
+send_msg(State) ->
+	State.
+
 get_app_info1(Node, App) ->
 	Processes = process_info:get_processes(App, all, Node),
 	convert_children(Processes).

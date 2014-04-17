@@ -4,7 +4,11 @@
 
 {% block body %}
 
-	<div class="well">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2 class="panel-title">List of available nodes</h2>  
+    </div>
+    <div class="panel-body">
 		<table class="table">  
         	<thead>  
           	  <tr>  
@@ -32,5 +36,5 @@
 			{% endfor %}
 		</table>
 	</div>
-
+</div>
 {% endblock %}

@@ -232,7 +232,7 @@ to_html(ReqData, Context) ->
     Hum_temp_list = get_data(Node, Name),
     Temp_list = create_temp_list(Hum_temp_list),
     Hum_list = create_hum_list(Hum_temp_list),
-    {ok, Content} = dht22_dtl:render([{temp_hum_list, Hum_temp_list}, {temp_list, Temp_list}, {hum_list, Hum_list}]),
+    {ok, Content} = dht22_dtl:render([{node, Node},{temp_hum_list, Hum_temp_list}, {temp_list, Temp_list}, {hum_list, Hum_list}]),
     {Content, ReqData, Context}.  
 
 get_data(Node, Name) when is_list(Node)->

@@ -11,19 +11,22 @@
                 <li class="active"><a href="#table" data-toggle="tab">Table view</a></li>
                 <li><a href="#graphic" data-toggle="tab">Graphic view</a></li>
         </ul>
-
-<div class="tab-content">
-        <div id="table" class="tab-pane active">
-        <div class="well">
-        <table class="table">
-                <thead>
+          <div class="tab-content">
+          <div id="table" class="tab-pane active">
+            <div class="panel panel-info">
+              <div class="panel-heading">
+                <h2 class="panel-title">DHT22 on {{node}}</h2>  
+              </div>
+              <div class="panel-body">
+                <table class="table">
+                  <thead>
                         <tr>
                                 <th>Time</th>
                                 <th>Temp in °C</th>
                                 <th>Humidity in %</th>
                         </tr>
-                </thead>
-                <tbody>
+                  </thead>
+                  <tbody>
                         <tr>
                         {% for time, temp_hum_list in temp_hum_list %}
                                 <td>{{time}}</td>
@@ -31,12 +34,12 @@
                                 <td>{{value}}</td>
                         {% endfor %}
                         </tr>
-                </tbody>
-        {% endfor %}
-        </table>
-        </div>
-
-</div>
+                  </tbody>
+                        {% endfor %}
+                </table>
+              </div>
+            </div>
+          </div>
         <div id="graphic" class="tab-pane">
         <div class="row-fluid">
           <div class="container">
@@ -100,6 +103,7 @@
 
     </script>
         </div>
+</div>
 </div>
 </div>
 {% endblock %}

@@ -4,13 +4,13 @@
 
 {% block body %}
 
-<div class="well">
-		<h1>Message count : {{counter}}</h1>
-</div>
 
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h2 class="panel-title">Message count : <span class="badge">{{counter}}</span></h2> 
+    </div>
+    <div class="panel-body">
 
-
-<div class="well">
 <table class="table">
 	<thead>
 		<tr>
@@ -34,4 +34,6 @@
 	</tbody>
 </table>
 </div>
+</div>
+
 {% endblock %}

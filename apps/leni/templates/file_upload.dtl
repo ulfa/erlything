@@ -3,14 +3,19 @@
 {% block title %}File upload{% endblock %}
 
 {% block body %}
-<div class="well">
- <form action="upload" method="post" enctype="multipart/form-data">    
-        <div class="control-group">
-                <div class="controls">                            
-                    <input  type="file" name='filedata' />
-                    <input type="submit" class="btn btn-primary" value="Upload">
-                </div> 
-        </div>        
-</form>
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">File upload</h2>  
+    </div>
+    <div class="panel-body">
+    	<div class="form-group">
+    		<label>File input</label>
+ 			<form role="form" action="upload" method="post" enctype="multipart/form-data">    			
+				<input  type="file" name='filedata'/>
+				<br>
+				<input type="submit" class="btn btn-primary" value="Upload">
+			</form>
+		</div>
+	</div>	
 </div>
 {% endblock %}

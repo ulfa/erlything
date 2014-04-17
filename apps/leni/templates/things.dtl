@@ -5,22 +5,25 @@
 {% block body %}
 
 <div class="tabbable">
-        <ul class="nav nav-tabs">
-                <li class="active"><a href="#actors" data-toggle="tab">Actors</a></li>
-                <li><a href="#sensors" data-toggle="tab">Sensors</a></li>
+	<ul class="nav nav-tabs">
+		<li class="active">
+			<a href="#actors" data-toggle="tab">Actors</a>
+		</li>
+			<li>
+				<a href="#sensors" data-toggle="tab">Sensors</a>
+			</li>
         </ul>
 
-
-
-<div class="tab-content">
+    <div class="tab-content">
         <div id="actors" class="tab-pane active">
-
-<div class="well">
-
 {%for node, list_of_things in actor %}
 
-<div class="well">
-	<h2>{{node}}</h2>  
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">{{node}}</h2>  
+    </div>
+    <div class="panel-body">
+	
 	{% if list_of_things %}
 		<table class="table">  
         	<thead>  
@@ -44,20 +47,17 @@
 		</table>
 	{% endif %}
 	</div>
+    </div>
 {% endfor %}
 </div>
-</div>
 
-
-
-        <div id="sensors" class="tab-pane">
-
-<div class="well">
-
+<div id="sensors" class="tab-pane">
 {%for node, list_of_things in sensor %}
-
-<div class="well">
-	<h2>{{node}}</h2>  
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">{{node}}</h2>  
+    </div>
+    <div class="panel-body">
 	{% if list_of_things %}
 		<table class="table">  
         	<thead>  
@@ -81,6 +81,8 @@
 		</table>
 	{% endif %}
 	</div>
+    </div>
+
 {% endfor %}
 </div>
 </div>

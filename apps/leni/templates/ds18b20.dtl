@@ -1,6 +1,6 @@
 {% extends "base_without.dtl" %}
 
-{% block title %}Temp{% endblock %}
+{% block title %}Temperature{% endblock %}
 
 {% block body %}
 
@@ -9,18 +9,21 @@
                 <li class="active"><a href="#table" data-toggle="tab">Table view</a></li>
                 <li><a href="#graphic" data-toggle="tab">Graphic view</a></li>
         </ul>
-<div class="tab-content">
-        <div id="table" class="tab-pane active">
-        <div class="well">
+        <div class="tab-content">
+          <div id="table" class="tab-pane active">
+          <div class="panel panel-info">
+    <div class="panel-heading">
+        <h2 class="panel-title">{{node}} ds18b20</h2>  
+    </div>
+    <div class="panel-body">
         <table class="table">
                 <thead>
                         <tr>
 							<th>Time</th>
-                            <th>Temp in °C</th>                                
-                        </tr>
+              <th>Temp in °C</th>                                
+              </tr>
                 </thead>
-                <tbody>
-                       
+                <tbody>                       
                         {% for time, temp in temp%}
                          <tr>
                                 <td>{{time}}</td>          
@@ -30,9 +33,11 @@
                         
                 </tbody>
         </table>
-        </div>
-
+    </div>
+  <div class="panel-footer"></div>
 </div>
+</div>
+
         <div id="graphic" class="tab-pane">
         <div class="row-fluid">
           <div class="container">

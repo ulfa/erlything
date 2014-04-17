@@ -1,9 +1,13 @@
 {% extends "base.dtl" %}
 
-<title>{% block title %}Info : {{node}}{% endblock %}</title>
+<title>{% block title %}System info : {{node}}{% endblock %}</title>
 
 {% block body %}
-	<div class="well scroller">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2 class="panel-title">Sysinfo : {{node}}</h2>  
+    </div>
+    <div class="panel-body">
 		<table class="table">  
         	<thead>  
           	  <tr>  
@@ -15,12 +19,17 @@
 				{% for sysinfo, value, comments in sysinfos %}						
 				{% ifnotequal sysinfo "alloc_info" %}
 				<tr>
-					<td><a href="#" data-toggle="tooltip" title="{{comments}}">{{sysinfo}}</a></td>
-					<td>{{value}}</td>	
+					<td>
+						<label data-toggle="tooltip" data-placement="bottom" title="{{comments}}">{{sysinfo}}</label>
+					</td>
+					<td>
+						{{value}}
+					</td>	
 				</tr>
 				{% endifnotequal %}
 				{% endfor %}
 			</tbody>
 		</table>
 	</div>
+</div>
 {% endblock %}

@@ -17,5 +17,7 @@
 -define(ALIVE, <<"Alive">>).
 -define(DEAD, <<"Dead">>).
 -define(UNKNOWN, <<"Unknown">>).
+-define(MESSAGE_ALIVE(Message), {external_interrupt, sue, info, {alive, Message}}).
+-define(MESSAGE_DEAD(Message), {external_interrupt, sue, error, {dead, Message}}).
 
 

@@ -5,68 +5,84 @@
 
 {% block body %}
 
-
-<div class="well">
-<h3>Function</h3>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Command</th>
-            <th>Comment</th>
-        </tr>   
-    </thead>
-    <tbody>
-    {% for fun_name, msg, fun, command, comment in funs%}
-        <tr>            
-            <td><a href="/actors/funrunner?node={{node}}&name={{name}}&fun_name={{fun_name}}">{{fun_name}}</a></td>      
-            <td>{{command}}</td>
-            <td>{{comment}}</td>            
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">Function</h2>  
+    </div>
+    <div class="panel-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Command</th>
+                    <th>Comment</th>
+                </tr>   
+            </thead>
+            <tbody>
+            {% for fun_name, msg, fun, command, comment in funs%}
+                <tr>            
+                    <td><a href="/actors/funrunner?node={{node}}&name={{name}}&fun_name={{fun_name}}">{{fun_name}}</a></td>      
+                    <td>{{command}}</td>
+                    <td>{{comment}}</td>            
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-
-<div class="well">
-<h3>Result</h3>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Time</th>
-            <th>Name</th>
-            <th>Result</th>            
-        </tr>   
-    </thead>
-    <tbody>
-        <tr>        
-            <td>2014-02-28 09:49:14</td>    
-            <td>schimmel</a></td>      
-            <td>ok</td>
-        </tr>
-    </tbody>
-</table>
+{% if results %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h2 class="panel-title">Result</h2>  
+    </div>
+    <div class="panel-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Name</th>
+                    <th>Result</th>            
+                </tr>   
+            </thead>
+            <tbody>
+                {% for time, name, result in results %}
+                <tr>        
+                    <td>{{time}}</td>    
+                    <td>{{name}}</a></td>      
+                    <td>{{result}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-
-<div class="well">
-<h3>Error</h3>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Time</th>
-            <th>Text</th>
-            <th>Error</th>
-        </tr>   
-    </thead>
-    <tbody>
-        <tr>        
-            <td>2014-02-28 09:49:14</td>    
-            <td>running fun with name : arg_test and args : ~p {1, int}</td>
-            <td>function_clause</td>
-        </tr>
-    </tbody>
-</table>
+{% endif%}
+{% if errors %}
+<div class="panel panel-danger">
+    <div class="panel-heading">
+        <h2 class="panel-title">Error</h2>  
+    </div>
+    <div class="panel-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Text</th>
+                    <th>Error</th>
+                </tr>   
+            </thead>
+            <tbody>
+                {% for time, text, reason in errors %}
+                <tr>        
+                    <td>{{time}}</td>    
+                    <td>{{text}}</td>
+                    <td>{{reason}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-
+{% endif%}
 
 {% endblock %}

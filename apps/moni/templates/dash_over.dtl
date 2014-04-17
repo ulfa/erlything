@@ -1,0 +1,65 @@
+{% extends "dash_base.dtl" %}
+
+<title>{% block title %}Overview{% endblock %}</title>
+
+{% block body %}
+<nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav" id="side-menu">
+                    <li>
+                        <a href="/overview"><i class="fa fa-dashboard fa-fw"></i>Overview</a>
+                    </li>
+                    {% for node, state, detail in nodes %}
+	                    <li>
+    	                    <a href="/dashboard/{{node}}">
+    	                    	<i class="fa fa-power-off fa-fw"></i>
+    	                   		{{node}}
+    	                    </a>
+        	            </li>
+                    {% endfor %}                        
+                </ul>
+                <!-- /#side-menu -->
+            </div>
+            <!-- /.sidebar-collapse -->
+</nav>
+<div id="page-wrapper">
+	<div class="row">
+		<div class="col-lg-12">	
+			<h1 class="page-header">Overview</h1>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-lg-6">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					Nodes
+				</div>
+				<div class="panel-body">
+					<table class="table">  
+        	<thead>  
+          	  <tr>  
+				  <th>Node</th>  
+				  <th>Ip address</th>  				  							  				  
+			  </tr>  
+			</thead>  
+			{% for node, state, ip in nodes %}		
+			<tbody>  
+				<tr> 
+					{% ifequal state "Alive" %} 
+					<td><nobr><a href="/dashboard/{{node}}"><i class="fa fa-table fa-fw"></i> {{node}}</a></nobr></td>  
+					{% else %}
+					<td> {{node}} </td>
+					{% endifequal %}
+					<td> {{ip}} </td>
+				</tr>  
+			</tbody>
+			{% endfor %}
+		</table>
+				</div>
+			</div>	
+		<div>
+		<div class="col-lg-6">
+		<div>
+	</div>
+</div>	
+{% endblock %}

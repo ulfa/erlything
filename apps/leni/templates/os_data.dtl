@@ -4,14 +4,28 @@
 
 {% block body %}
 
+
+<div class="container-fluid">
+    <div class="row">
+        
 {% for node, temp, avg1, avg5, avg15 in os_data %}
-<div class="well">
-	<h1>{{node}}</h1>
+<div class="col-xs-6">
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">{{node}}</h2>  
+    </div>
+    <div class="panel-body">
+
 	<p><strong>Temperature 	:</strong> {{temp}} C</p>
 	<p><strong>Load 1  min. :</strong> {{avg1}}</p>
 	<p><strong>Load 5  min. :</strong>{{avg5}}</p>
 	<p><strong>Load 15 min. :</strong>{{avg15}}</p>
 </div>
+<div class="panel-footer"></div>
+</div>
+</div>
 {% endfor %}
+    </div>
+    </div>
 </div>
 {% endblock %}

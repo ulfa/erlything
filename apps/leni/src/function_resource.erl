@@ -129,9 +129,8 @@ create_path(ReqData, Context) ->
 % If it succeeds, it should return true.
 %
 process_post(ReqData, Context) ->
-    lager:info("1...... this is a test ....~p",[wrq:req_body(ReqData)]),
+    lager:info("1...... this is a test ....~p",[wrq:req_qs(ReqData)]),
     Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
-    
     Button = get_value("button", Body),
     handle_post(Button, Body),
     {true, ReqData, Context}.
@@ -151,8 +150,7 @@ handle_post("save", Body) ->
 handle_post("run", Body) ->
     F_name = get_value("fName", Body),
     F_args = get_value("fArgs", Body),
-    Msg = sender_util:create_message(node(), ?MODULE, "default", date:get_date_seconds(), {run, F_name, F_args }),
-    lager:info("2...... this is a test ....~p",[Msg]),
+    Msg = sender_util:create_message(node(), ?MODULE, "default", date:get_date_seconds(), {run, F_name, F_args }),    
     sender_util:send_message(Msg).
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 
@@ -249,9 +247,13 @@ finish_request(ReqData, Context) ->
 to_html(ReqData, Context) ->
     Node = wrq:get_qs_value("node",ReqData),    
     Name = wrq:get_qs_value("name",ReqData),    
-    Fun_name = wrq:get_qs_value("fun_name",ReqData),
-    {N, {F_node, F_driver, F_id}, C, Co} = get_fun(Node, Name, Fun_name), 
-    {ok, Content} = function_dtl:render([{node, Node},{fname, N}, {fnode, F_node}, {fdriver, F_driver}, {fid, F_id},{command, C}, {comment, Co}]),
+    lager:info("to_html : ~p",[wrq:req_qs(ReqData)]),
+    Fun_name = wrq:get_qs_value("fun_name",ReqData),    
+    {Name1, {F_node1, F_driver1, F_id1}, Command, Comment} = case get_fun(Node, Name, Fun_name) of 
+        {N, {F_node, F_driver, F_id}, C, Co} -> {N, {F_node, F_driver, F_id}, C, Co};
+        {N, [], C, Co} -> {N, {[], [], []}, C, Co}
+    end,
+    {ok, Content} = function_dtl:render([{node, Node},{fname, Name1}, {fnode, F_node1}, {fdriver, F_driver1}, {fid, F_id1},{command, Command}, {comment, Comment}]),
     {Content, ReqData, Context}.
 
 to_json(ReqData, Context) ->

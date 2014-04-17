@@ -3,45 +3,44 @@
 {% block title %}new{% endblock %}
 
 {% block body %}
-    <div class="well">    
-    <form class="form-horizontal" method="post">
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h2 class="panel-title">Create a new function</h2>  
+    </div>
+    <div class="panel-body">
+    <form role="form" method="post">
         <input type="hidden" name="node" value="{{node}}">
 
-        <div class="control-group">
-            <label class="control-label" for="inputFunName">Name</label>
-            <div class="controls">
-                <input type="text" id="inputFunName" name="name" placeholder="Fun Name">
+        <div class="form-group">
+            <label>Name</label>     
+            <div class="controls">       
+                <input class="form-control col-md-8" type="text" name="fname" placeholder="Fun Name">
             </div>
         </div>
-        <div class="control-group">
-            <span class="control-label">Message</span>
+        <div class="form-group">
+            <label>Message</span>
             <div class="controls form-inline">            
-                <input type="text" class="input-medium" id="inputNode" placeholder="Node">
-                <input type="text" class="input-medium" id="inputDriver" placeholder="Driver">
-                <input type="text" class="input-medium" id="inputId" placeholder="Id">
+                <input type="text" class="form-control input-medium" name="fnode" placeholder="Node">
+                <input type="text" class="form-control input-medium" name="fdriver" placeholder="Driver">
+                <input type="text" class="form-control input-medium" name="fid" placeholder="Id">
             </div>
         </div>
-        <div class="control-group">
-            <label class="control-label" for="inputFun">Fun</label>
+        <div class="form-group">
+            <label>Fun</label>
             <div class="controls">
-                <textarea class="span8" id="inputFun" name="fun" rows="6" placeholder="fun([X]) -> X + 1 end."></textarea>
+                <textarea class="form-control col-md-8" name="ffun" rows="6" placeholder="fun([X]) -> X + 1 end."></textarea>
             </div>
         </div>
 
-        <div class="control-group">
-            <label class="control-label" for="inputComment">Comment</label>
+        <div class="form-group">
+            <label>Comment</label>
             <div class="controls">
-                <textarea class="span8" id="inputFunComment" name="comment" rows="3" >{{comment}}</textarea>
+                <textarea class="form-control col-md-8" name="fcomment" rows="3" >{{comment}}</textarea>
             </div>
-        </div>
-
-        <div class="control-group">
-        <div class="controls">
-          <button type="submit" class="btn btn-primary">Save</button>
-          <button type="cancel" class="btn">Cancel</button>
-        </div>
-        </div>
-          
+        </div>        
+        <button type="submit" name="button" value="save" class="btn btn-primary">Save</button>
+        <button type="submit" name="button" value="cancel" class="btn btn-default">Cancel</button>          
     </form>
     </div>
+</div>
 {% endblock %}

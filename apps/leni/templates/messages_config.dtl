@@ -4,7 +4,6 @@
 
 {% block body %}
 
-
 <div class="tabbable">
 	<ul class="nav nav-tabs">
 	{%for node, messages_config in messages %}
@@ -16,7 +15,6 @@
 	{%endfor%}
 	</ul>
 
-<div class="well">
 	<div class="tab-content">	
 	{%for node, messages_config in messages %}		
 	{%if forloop.counter == 1%}
@@ -24,8 +22,13 @@
     {% else %}
     	<div id="{{node|cut:"@"}}" class="tab-pane">
     {% endif %}    
-		{%for driver, id, messages in messages_config%}
-			<h2>{{driver}} {{id}}</h2>
+
+	{%for driver, id, messages in messages_config%}
+		<div class="panel panel-default">
+    	<div class="panel-heading">
+        	<h2 class="panel-title">{{driver}}_{{id}}</h2>  
+    	</div>
+    	<div class="panel-body">
 			<table class="table">
 				<thead>  
           	  		<tr>  
@@ -44,9 +47,13 @@
 					{%endfor%}
 				</tbody> 
 			</table>
-		{%endfor%}
+		</div>		
 	</div>
 	{%endfor%}
-</div>
+	</div>
+	{%endfor%}
+	</div>
+	</div>
+	</div>
 </div>
 {% endblock %}

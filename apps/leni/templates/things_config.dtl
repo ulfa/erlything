@@ -14,54 +14,55 @@
 		{% endif %}		
 	{%endfor%}
 	</ul>
-<div class="well">
 
 	<div class="tab-content">
-{%for node, things_config in things %}
+	{%for node, things_config in things %}	
+		{%if forloop.counter == 1%}
+    		<div id="{{node|cut:"@"}}" class="tab-pane active">
+    	{% else %}
+    		<div id="{{node|cut:"@"}}" class="tab-pane">
+    	{% endif %}
 	
-	{%if forloop.counter == 1%}
-    	<div id="{{node|cut:"@"}}" class="tab-pane active">
-    {% else %}
-    	<div id="{{node|cut:"@"}}" class="tab-pane">
-    {% endif %}
-	
-	{%for thing, name, parameters in things_config%}
-		<form method="post">
-			<input type="hidden" name="node" value="{{node}}"/>
-            <input type="hidden" name="thing" value="{{name}}"/>
-     <div class="well">
-		<h2>{{name}}</h2>
-		<table class="table">
-			<thead>
-				<tr>
-					<th>key</th>
-					<th>value</th>
-				</tr>	
-			</thead>
-			<tbody>
-		{%for key,value in parameters%}
-			<tr>
-				<td>{{key}}</td>
-				{%if key == "activ" and value == "true"%}
-					<td><button type="submit" class="btn btn-danger btn-small">Off</button></td>	
-					<input type="hidden" name="active" value="false"/>				
-				{%elif key == "activ" and value == "false" %}
-					<td><button type="submit" class="btn btn-primary btn-small">On</button></td>
-					<input type="hidden" name="active" value="true"/>
-				{%else%}
-					<td>{{value}}</td>					
-				{%endif%}
-			</tr>
+		{%for thing, name, parameters in things_config%}
+			<div class="panel panel-default">
+    			<div class="panel-heading">
+        			<h2 class="panel-title">{{name}}</h2>  
+    			</div>
+    			<div class="panel-body">
+					<form method="post">
+						<input type="hidden" name="node" value="{{node}}"/>
+            			<input type="hidden" name="thing" value="{{name}}"/>
+						<table class="table">
+							<thead>
+								<tr>
+									<th>key</th>
+									<th>value</th>
+								</tr>	
+							</thead>
+							<tbody>
+								{%for key,value in parameters%}
+								<tr>
+									<td>{{key}}</td>
+									{%if key == "activ" and value == "true"%}
+									<td><button type="submit" class="btn btn-danger btn-small">Off</button></td>	
+										<input type="hidden" name="active" value="false"/>				
+									{%elif key == "activ" and value == "false" %}
+									<td><button type="submit" class="btn btn-primary btn-small">On</button></td>
+										<input type="hidden" name="active" value="true"/>
+									{%else%}
+									<td>{{value}}</td>					
+									{%endif%}
+								</tr>
+								{%endfor%}
+							</tbody>
+						</table>
+					</form>
+				</div>
+			</div>
 		{%endfor%}
-			</tbody>
-		</table>
-	</div>
-	</form>
+		</div>		
 	{%endfor%}
-		</div>
-{%endfor%}
 	</div>
 	</div>
-</div>
 </div>
 {% endblock %}

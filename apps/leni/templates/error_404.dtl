@@ -4,14 +4,16 @@
 
 {% block body %}
 
-<center>
-
-    <h1>Page not found</h1>
-
-    <div>
-        <form method="post">
-            <button type="submit" class="btn btn-large">Back home</button>
-        </form>
-    </div>
-</center>
+<div class="jumbotron">
+	<center>
+    	<h1>Page not found</h1>
+    	<br>
+    	<br>
+    	<div>
+        	<form method="post">
+            	<button type="submit" class="btn btn-danger btn-large">Back home</button>
+        	</form>
+    	</div>
+	</center>
+</div>
 {% endblock %}
