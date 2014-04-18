@@ -25,7 +25,6 @@ init(Config) ->
     end,
     {ok, Config}.
     
-
 stop(Config) ->
     lager:info("~p:stop('~p')", [?MODULE, Config]),
     application:stop(emqttc),
