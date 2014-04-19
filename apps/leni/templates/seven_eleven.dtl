@@ -3,9 +3,19 @@
 {% block title %}seven eleven{% endblock %}
 
 {% block body %}
+<div class="panel panel-info">
+	 <div class="panel-heading">
+        <h2 class="panel-title">Ring my bell</h2> 
+    </div>
+    <div class="panel-body">
+    	<center>
  		<div>
 				<form method="post">
 					<button type="submit" class="btn btn-danger btn-large">Ring</button>
 				</form>
 		</div>
+	</center>
+	</div>
+
+</div>
 {% endblock %}
