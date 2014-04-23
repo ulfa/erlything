@@ -21,6 +21,7 @@
 -define(STOPPED, "stopped").
 
 -define(MAX_QUEUE_LENGTH, 30).
+-define(MQTT_PREFIX, "erlyThing").
 
 
 
