@@ -1,7 +1,7 @@
 {% extends "base_without.dtl" %}
 {% block title %}Switches{% endblock %}
 {% block body %}
-    <div class="panel panel-default">
+    <div class="panel panel-info">
         <div class="panel-heading">
             <h2 class="panel-title">{{node}}</h2>  
         </div>
