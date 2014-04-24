@@ -152,8 +152,12 @@ args_to_types(Args) ->
 
 convert(Value, int) when is_integer(Value) ->    
     Value;
-convert(Value, int)  ->
-    list_to_integer(Value).
+
+convert(Value, atm) when is_atom(Value) ->
+    Value;
+
+convert(Value, str) when is_list(Value) ->
+    Value.
 
 run_fun(Fun, Name, Args) when is_function(Fun) and is_list(Args) ->
     lager:info("~p ~p ~w" , [Fun, Name, Args]),
@@ -231,10 +235,12 @@ test_exception() ->
 -ifdef(TEST).
 string_to_args_test() ->
     ?assertEqual([{1,i}, {2,s}],string_to_args("[{1,i}, {2,s}].")),
-    ?assertEqual([{10, int}],string_to_args("[{10,int}].")).
+    ?assertEqual([{10, int}],string_to_args("[{10,int}].")),
+    ?assertEqual([{'Bell', atm}],string_to_args("[{'Bell',atm}].")).
 
 args_to_types_test() ->
-    ?assertEqual([1],args_to_types([{1,int}])).
+    ?assertEqual([1],args_to_types([{1,int}])),
+    ?assertEqual(['Bell'], args_to_types([{'Bell',atm}])).
 
 
 -endif.
