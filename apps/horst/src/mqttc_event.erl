@@ -98,8 +98,8 @@ handle_event({publish, Topic, Payload}, State) ->
     {ok, State};
 
 handle_event({publish, Topic, Payload, 1, MsgId}, State) ->
-    lager:info("publish: topic(id: ~p): ~p", [MsgId, Topic]),
-    lager:info("publish: payload: ~p", [Payload]),
+    %%lager:info("publish: topic(id: ~p): ~p", [MsgId, Topic]),
+    %%lager:info("publish: payload: ~p", [Payload]),
     emqttc:puback(emqttc, MsgId),
     {ok, State};
 

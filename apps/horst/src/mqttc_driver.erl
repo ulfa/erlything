@@ -24,8 +24,10 @@ init(Config) ->
     [Host, Port, Filter] = config:get_values([host, port, filter], MC),    
     ok = application:start(emqttc),
     mqttc_event:start_link() ,
-    emqttc:start_link([{host, Host}, {port, Port}]),
-
+    case emqttc:start_link([{host, Host}, {port, Port}]) of 
+        {ok,Pid} -> Pid;
+        {error,{already_started,Pid}} -> Pid 
+    end,
     emqttc_event:add_handler(mqttc_event, Filter),
     {ok, Config}.
     

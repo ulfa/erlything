@@ -161,6 +161,6 @@ These things are used in my internal project and they work for me.
 * cuberl is an application which integrates the Max! Cube from eq-3
 * fungi_driver is an application which warns you if one of your rooms is fungi  endangered.
 * node_driver gets informed when a node is down or gets started
-* mqttc_driver can send messages to http://www.mqttdashboard.com/
+* mqttc_driver can send messages to mqtt broker like http://www.mqttdashboard.com/
 
 
