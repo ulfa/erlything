@@ -22,7 +22,6 @@ init(Config) ->
     ok = tranceiver:register_listener(self()),
     {ok, Config}.
     
-
 stop(Config) ->
     lager:info("~p:stop('~p')", [?MODULE, Config]),
     ok = tranceiver:unregister_listener(self()),
