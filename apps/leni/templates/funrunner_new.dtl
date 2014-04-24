@@ -28,7 +28,7 @@
         <div class="form-group">
             <label>Fun</label>
             <div class="controls">
-                <textarea class="form-control col-md-8" name="ffun" rows="6" placeholder="fun([X]) -> X + 1 end."></textarea>
+                <textarea class="form-control col-md-8" name="ffun" rows="6" placeholder="fun([Name, Pid, X]) -> X + 1 end."></textarea>
             </div>
         </div>
 
