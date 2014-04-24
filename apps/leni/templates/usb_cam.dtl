@@ -4,12 +4,14 @@
 
 {% block body %}
 
-<div class="container">
-		<div class="row">
-{%for photo, date in photos%}
-			<div class="span4"><img src="/photos/{{photo}}" class="img-rounded">{{date|linebreaks}}</div>
-{%endfor%}
-		</div>
+<div class="container-fluid">
+    <div class="row">
+		{%for photo, date in photos%}
+			<div class="col-xs-3">
+				<img src="/photos/{{photo}}" class="img-rounded">{{date|linebreaks}}
+			</div>
+		{%endfor%}
+	</div>
 
 </div>
 {% endblock %}
