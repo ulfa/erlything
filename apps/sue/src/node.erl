@@ -141,20 +141,21 @@ handle_info({update, Node}, #state{status=Old_s}=State) ->
 	start_timer(Node),
 	case New_s =:= Old_s of 
 		true -> {noreply, State};
-		false -> {noreply, State#state{status=New_s, time=get_timestamp(), reason=[]}}
+		false -> send_msg(Node, New_s), 
+                {noreply, State#state{status=New_s, time=get_timestamp(), reason=[]}}
 	end;
 	
 handle_info({nodeup, Node, InfoList}, #state{node = Node1} = State) ->
 	lager:debug("nodeup : ~p ~p", [Node, InfoList]),
 	case erlang:atom_to_binary(Node, utf8) =:= Node1 of
-		true -> tranceiver:send_msg_listener(?MESSAGE_ALIVE(Node)),
+		true -> send_msg(Node, ?ALIVE),
 				{noreply, State#state{status=?ALIVE, reason=InfoList, time=get_timestamp()}};
 		false -> {noreply, State}
 	end;
 handle_info({nodedown, Node, InfoList}, #state{node = Node1} = State) ->
 	lager:debug("nodedown : ~p, ~p", [Node, InfoList]),
 	case erlang:atom_to_binary(Node, utf8) =:= Node1 of
-		true -> tranceiver:send_msg_listener(?MESSAGE_DEAD(Node)),
+		true -> send_msg(Node, ?DEAD),
 				{noreply, State#state{status=?DEAD, reason=InfoList, time=get_timestamp()}};
 		false -> {noreply, State}
 	end;
@@ -162,6 +163,7 @@ handle_info({nodedown, Node, InfoList}, #state{node = Node1} = State) ->
 handle_info(Info, State) ->
 	lager:warning("got a message i can't handle info: ~p in state : ~p", [Info, State]),
     {noreply, State}.
+
 %% --------------------------------------------------------------------
 %% Function: terminate/2
 %% Description: Shutdown the server
@@ -181,8 +183,12 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------	
-send_msg(State) ->
-	State.
+send_msg(Node, ?DEAD) ->
+    tranceiver:send_msg_listener(?MESSAGE_DEAD(Node));
+
+send_msg(Node, ?ALIVE) ->
+    tranceiver:send_msg_listener(?MESSAGE_ALIVE(Node)).
+
 
 get_app_info1(Node, App) ->
 	Processes = process_info:get_processes(App, all, Node),
