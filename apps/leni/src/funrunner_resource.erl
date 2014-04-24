@@ -260,7 +260,7 @@ create_links(Node, Name) ->
 	[{new, "funrunners/new?node=" ++ Node ++ "&name=" ++ Name, "New"}].
 
 convert_timestamp_to_date(List) ->
-    lists:foldr(fun({Timestamp, A, B}, Acc) -> [{date:timestamp_to_date(Timestamp), A, B}|Acc] end, [], List).
+    lists:foldr(fun({Timestamp, A, B, C}, Acc) -> [{date:timestamp_to_date(Timestamp), A, B, C}|Acc] end, [], List).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

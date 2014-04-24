@@ -40,14 +40,16 @@
             <thead>
                 <tr>
                     <th>Time</th>
+                    <th>Node</th>
                     <th>Name</th>
                     <th>Result</th>            
                 </tr>   
             </thead>
             <tbody>
-                {% for time, name, result in results %}
+                {% for time, node, name, result in results %}
                 <tr>        
-                    <td>{{time}}</td>    
+                    <td>{{time}}</td>
+                    <td>{{node}}</td>    
                     <td>{{name}}</a></td>      
                     <td>{{result}}</td>
                 </tr>
@@ -67,14 +69,16 @@
             <thead>
                 <tr>
                     <th>Time</th>
+                    <th>Node</th>
                     <th>Text</th>
                     <th>Error</th>
                 </tr>   
             </thead>
             <tbody>
-                {% for time, text, reason in errors %}
+                {% for time, node, text, reason in errors %}
                 <tr>        
                     <td>{{time}}</td>    
+                    <td>{{node}}</td>    
                     <td>{{text}}</td>
                     <td>{{reason}}</td>
                 </tr>

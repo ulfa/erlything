@@ -25,30 +25,31 @@ init(Config) ->
     lager:info("funrunner_driver:init('~p')", [Config]),
     {ok, Config}.
 
-handle_msg([Node ,Sensor, Id, Time, {run_result, Name, {ok, Result}}], Config, Module_config) ->    
+handle_msg([Node ,Sensor, Id, Time, {run_result, Name, {ok, Result}}], Config, Module_config) ->  
+    lager:info("get result for fun : ~p with result : ~p", [Name, Result]),  
     Table_Id = proplists:get_value(?TABLE, Config),
     [{results, Data}] = ets:lookup(Table_Id, results),
-    ets:insert(Table_Id, [{results, add(Data, {Time, Name, Result})}]),
+    ets:insert(Table_Id, [{results, add(Data, {Time, Node, Name, Result})}]),
     Config;
 
 handle_msg([Node ,Sensor, Id, Time, {error, Text, Reason}], Config, Module_config) ->
     Table_Id = proplists:get_value(?TABLE, Config),
     [{errors, Data}] = ets:lookup(Table_Id, errors),
-    ets:insert(Table_Id, [{errors, add(Data, {Time, Text, Reason})}]),
+    ets:insert(Table_Id, [{errors, add(Data, {Time, Node, Text, Reason})}]),
     Config;
 
 
 handle_msg([Node ,Sensor, Id, Time, {save, Name, Message, Command, Comment}], Config, Module_config) ->
     save_fun(Name, Message, Command, Comment, Config, Module_config);
 
-handle_msg([Node ,Sensor, Id, Time, {run,{Node_1, Driver_1, Id_1, Time_1, Body}}], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, {run,{Node_1, Driver_1, Id_1, Time_1, Body} = Msg}], Config, Module_config) ->
     Msg = {Node_1, Driver_1, Id_1, Body},
     lager:info("run fun for message : ~p ", [Msg]),
     Funs = config:get_value(funs, Module_config, []),
     {Name, Fun} = get_fun(Funs, {Node_1, Driver_1, Id_1}),      
     try
         Result = run_fun(Fun, Name, Body),
-        lager:info("Result of fun : ~p is : ~p", [Name, Result]),
+        lager:info("Result of fun : ~p is : ~p", [Msg, Result]),
         create_message_and_send(Module_config, {run_result, Name, {ok, Result}})
     catch   
         _:Error -> create_message_and_send(Module_config, {error, "running fun with name : " ++ Name ++ " ", Error}),
@@ -64,10 +65,11 @@ handle_msg([Node ,Sensor, Id, Time, {run, Name, Args}], Config, Module_config) w
         Arguments  = string_to_args("[" ++ Args ++ "]."),        
         Result = run_fun(Fun, Name, args_to_types(Arguments)),
         lager:info("Result for fun with name : ~p is : ~p", [Name, Result]),
-        create_message_and_send(Module_config, Name,{run_result, Name, {ok,Result}})
+        create_message_and_send(Module_config, Name,{run_result, Name, {ok, Result}})
     catch 
-        _:Error -> create_message_and_send(Module_config, {error, "running fun with name : " ++ Name ++ " and args : ~p " ++ Args ++ " ", Error}),
-                    handle_error(Config, Module_config, Name, "running fun with name : " ++ Name ++ " and args : ~p " ++ Args ++ " ", Error)
+        _:Error -> lager:error("fun : ~p Error : ~p", [Name, Error]),
+                   create_message_and_send(Module_config, {error, "running fun with name : " ++ Name ++ " and args :" ++ Args ++ " ", Error}),
+                   handle_error(Config, Module_config, Name, "running fun with name : " ++ Name ++ " and args : " ++ Args ++ " ", Error)
     end,
     Config;
 
@@ -163,6 +165,7 @@ run_fun(Fun, Name, Args) when is_function(Fun) and is_list(Args) ->
     lager:info("~p ~p ~w" , [Fun, Name, Args]),
     Fun(self(), Name, Args);  
 run_fun(Fun, Name, Args) when is_function(Fun) ->
+    lager:info("~p ~p ~w" , [Fun, Name, Args]),
     Fun(self(),Name, [Args]).      
 
 get_fun(Funs, {Node, Driver, Id} = Msg) ->  
