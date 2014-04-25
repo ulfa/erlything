@@ -39,8 +39,9 @@ stop(Config) ->
 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
     lager:info("~p got a message with body : ~p : ", [?MODULE, Body]),
-    Prefix = proplists:get_value(prefix, Module_config, ?MQTT_PREFIX),    
-    emqttc:publish(emqttc, create_topic(Prefix, Node, Sensor, Id), create_payload(Time, Body)),
+    Prefix = proplists:get_value(prefix, Module_config, ?MQTT_PREFIX),
+    increase_counter(Config, publish_counter),
+    ok = emqttc:publish(emqttc, create_topic(Prefix, Node, Sensor, Id), create_payload(Time, Body)),
     Config.
 
 create_topic(Prefix, Node ,Sensor, Id) ->
@@ -48,6 +49,10 @@ create_topic(Prefix, Node ,Sensor, Id) ->
 
 create_payload(Time, Body) ->
     term_to_binary({binary_to_integer(Time), Body}).
+
+increase_counter(Config, Counter) ->
+    Table_Id = proplists:get_value(?TABLE, Config),
+    ets:update_counter(Table_Id, Counter, 1). 
 
 %% --------------------------------------------------------------------
 %%% Test functions

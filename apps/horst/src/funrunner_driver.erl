@@ -248,5 +248,12 @@ args_to_types_test() ->
     ?assertEqual([1],args_to_types([{1,int}])),
     ?assertEqual(['Bell'], args_to_types([{'Bell',atm}])).
 
-
+fun_test() ->
+    fun(Name, Pid, [Body]) -> 
+        case Body of 
+            "off" -> ok; 
+            "on" -> sensor:send(Name, Body),
+                    sensor:send_after(Pid, 20000,[{Name,  "off"}])
+        end
+    end.
 -endif.
