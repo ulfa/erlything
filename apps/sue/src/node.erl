@@ -50,10 +50,12 @@ pid_info(Node, Pid) when is_atom(Node)->
 	gen_server:call(Node, {pid_info, Node, Pid}).
 	
 get_status(Node) when is_pid(Node)->
-	gen_server:call(Node, get_state);
+try 
+	gen_server:call(Node, get_state, 100)
+catch
+	_:Error -> lager:error("can't get_state of node : ~p with error : ~p", [Node, Error])
+end.
 	
-get_status(Node) when is_atom(Node)->
-	gen_server:call(Node, get_state).
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------

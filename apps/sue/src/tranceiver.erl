@@ -34,8 +34,8 @@
 %% ====================================================================
 %% Server functions
 %% ====================================================================
-register_listener(Pid) when is_pid(Pid) ->
-	gen_server:call(?MODULE, {register_listener, Pid}).	
+register_listener(Listener) when is_pid(Listener) ->
+	gen_server:call(?MODULE, {register_listener, Listener}).	
 
 unregister_listener() ->
 	gen_server:call(?MODULE, {unregister_listener}).	
@@ -73,8 +73,8 @@ init([]) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_call({register_listener, Pid}, _From, State) ->
-    {reply, ok, State#state{listener = Pid}};
+handle_call({register_listener, Listener}, _From, State) ->
+    {reply, ok, State#state{listener = Listener}};
 
 handle_call({unregister_listener}, _From, State) ->
     {reply, ok, State#state{listener = undefined}};
@@ -151,7 +151,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 send_message(undefined, Message) ->
-	ok;
+	lager:error("there is no listener registered!");
 send_message(Listener, Message) when is_pid(Listener) ->
 	Listener ! Message.
 
@@ -191,7 +191,7 @@ get_cookie() ->
 	encode_cookie(atom_to_list(erlang:get_cookie())).
 
 get_node() ->
-	erlang:atom_to_binary(node(), utf8).	
+	atom_to_binary(node(), utf8).	
 
 get_state() ->
 	?ALIVE.
