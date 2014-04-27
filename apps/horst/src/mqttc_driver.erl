@@ -48,7 +48,7 @@ create_topic(Prefix, Node ,Sensor, Id) ->
     filename:join([Prefix, Node, Sensor, Id]).
 
 create_payload(Time, Body) ->
-    term_to_binary({binary_to_integer(Time), Body}).
+    term_to_binary({list_to_integer(binary_to_list(Time)), Body}).
 
 increase_counter(Config, Counter) ->
     Table_Id = proplists:get_value(?TABLE, Config),

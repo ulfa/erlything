@@ -167,7 +167,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 create_message(Topic, {Time, Body}) ->
     [Prefix, Node, Sensor, Id] = binary:split(Topic, <<"/">>, [global]),
-    [Node, Sensor, Id, integer_to_binary(Time), Body].
+    [Node, Sensor, Id, list_to_binary(integer_to_list(Time)), Body].
 
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
