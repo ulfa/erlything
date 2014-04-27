@@ -53,7 +53,8 @@ get_status(Node) when is_pid(Node)->
 try 
 	gen_server:call(Node, get_state, 100)
 catch
-	_:Error -> lager:error("can't get_state of node : ~p with error : ~p", [Node, Error])
+	%%_:Error -> lager:error("can't get_state of node : ~p with error : ~p", [Node, Error])
+	_:Error -> ok
 end.
 	
 %% --------------------------------------------------------------------
