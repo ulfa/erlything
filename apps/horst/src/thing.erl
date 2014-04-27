@@ -51,7 +51,11 @@ get_start_time(Name) ->
 get_type(Name) when is_list(Name)->
 	get_type(list_to_atom(Name));
 get_type(Name) ->
-    gen_server:call(Name, {get_type}).
+    try 
+        gen_server:call(Name, {get_type}, 100)
+    catch
+        _:Error -> ok
+    end.
 get_icon(Name) when is_list(Name)->
     get_icon(list_to_atom(Name));
 get_icon(Name) ->
