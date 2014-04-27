@@ -7,8 +7,11 @@
 <div class="container-fluid">
     <div class="row">
 		{%for photo, date in photos%}
-			<div class="col-xs-3">
-				<img src="/photos/{{photo}}" class="img-rounded">{{date|linebreaks}}
+			<div class="col-xs-6 col-md-3">
+				<a href="#" class="thumbnail">
+	   				<img data-src="holder.js/100%x180" src="/photos/{{photo}}" class="img-rounded">{{date|linebreaks}}
+   				</a>
+
 			</div>
 		{%endfor%}
 	</div>
