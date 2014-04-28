@@ -54,7 +54,7 @@ get_type(Name) ->
     try 
         gen_server:call(Name, {get_type}, 100)
     catch
-        _:Error -> ok
+        _:Error -> undefined
     end.
 get_icon(Name) when is_list(Name)->
     get_icon(list_to_atom(Name));
