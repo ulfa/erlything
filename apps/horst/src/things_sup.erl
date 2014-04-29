@@ -54,14 +54,14 @@ is_actor(actor) ->
 	true;
 is_actor(sensor) ->
 	false;
-is_actor(unknown) ->
+is_actor(undefined) ->
 	false.
 
 is_sensor(sensor) ->
 	true;
 is_sensor(actor) ->
 	false;
-is_sensor(unknown) ->
+is_sensor(undefined) ->
 	false.
 is_valid_pid(undefined) ->
 	false;

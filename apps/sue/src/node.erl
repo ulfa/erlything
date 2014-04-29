@@ -54,7 +54,7 @@ try
 	gen_server:call(Node, get_state, 100)
 catch
 	%%_:Error -> lager:error("can't get_state of node : ~p with error : ~p", [Node, Error])
-	_:Error -> ok
+	_:Error -> undefined
 end.
 	
 %% --------------------------------------------------------------------
@@ -187,12 +187,14 @@ code_change(OldVsn, State, Extra) ->
 %%% Internal functions
 %% --------------------------------------------------------------------	
 send_msg(Node, ?DEAD) ->
-    tranceiver:send_msg_listener(?MESSAGE_DEAD(Node));
+    send_msg(?MESSAGE_DEAD(Node));
 
 send_msg(Node, ?ALIVE) ->
-    tranceiver:send_msg_listener(?MESSAGE_ALIVE(Node)).
+    send_msg(?MESSAGE_ALIVE(Node)).
 
-
+send_msg(Message) ->
+	lager:info("send message : ~p", [Message]),
+	tranceiver:send_msg_listener(Message).
 get_app_info1(Node, App) ->
 	Processes = process_info:get_processes(App, all, Node),
 	convert_children(Processes).
