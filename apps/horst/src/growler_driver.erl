@@ -26,11 +26,11 @@ init(Config) ->
     {ok, Config}.
 
 handle_msg([Node ,<<"system">>, Id, Time, {error,{dead, Node1}}], Config, Module_config) -> 
-    send_message(error, io_lib:format("Node: ~p is dead!", [Node1])),
+    send_message(error, lists:flatten(io_lib:format("Node: ~p is dead!", [Node1]))),
     Config;   
 
 handle_msg([Node ,Sensor, Id, Time, {error,{Config_file, Text, Reason}}], Config, Module_config) -> 
-    send_message(error, io_lib:format("Config: ~p is corrupt, because of : ~p", [Config_file, Reason])),
+    send_message(error, lists:flatten(io_lib:format("Config: ~p is corrupt", [Config_file]))),
     Config;   
 
 
@@ -41,6 +41,7 @@ handle_msg(Unknown_message, Config, Module_config) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 send_message(error, Message) ->
+    lager:info("Message: ~p", [Message]),
     growler:error(Message);
 send_message(info, Message) ->
     growler:success(Message). 
