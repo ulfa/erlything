@@ -49,6 +49,33 @@ $ cd erlything
 $ make
 $ ./dev.sh
 ```
+### Note
+When  you start erlyThing the first time, you get an error message _Please, configure the path to the sources : enoent_ This message occurs, because
+[erlbuild](https://github.com/ulfa/erlbuild) is not configured. 
+
+There are two options now:
+
+* remove the erlbuild app from the dev.sh 
+* configure the path for the application
+
+### Removing erlbuild from the dev.sh
+Edit the dev.sh and remove the part _-s erlbuild_
+
+### Configure the path for the application
+
+Edit the file apps/erlbuild/src/erlbuild.app.src
+
+Exchange the existing path entries with the following ones
+
+
+	{src_dir, "./apps/horst/src"},
+	{dtl_dir, "./apps/leni/templates"},
+  	{compiler_options, [{i, "./apps/horst/include"}, {outdir, "./apps/horst/ebin"}, {parse_transform, lager_transform}]},
+	{erlydtl_options, [{compiler_options, []}, {out_dir, "./apps/leni/ebin"}]},
+
+After saving the file you have to compile again.
+
+### Check if the the system is up and running
 
 When erlyThing is up and running you can check it with : [moni](http://localhost:8000) and if you want to see your 
 deployed things you can use : [leni](http://localhost:8080) In leni you can navigate to the System Logger and you will find 
