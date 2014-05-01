@@ -11,7 +11,7 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([init/1, content_types_provided/2, allowed_methods/2, resource_exists/2]).
+-export([init/1, content_types_provided/2, allowed_methods/2, resource_exists/2, process_post/2, post_is_create/2, finish_request/2]).
 -export([to_json/2, to_html/2]).
 -export([is_authorized/2]).
 %% --------------------------------------------------------------------
@@ -83,7 +83,7 @@ valid_content_headers(ReqData, Context) ->
 % will be sent. Note that these are all-caps and are atoms. (single-quoted)
 %
 allowed_methods(ReqData, Context) ->
-    {['GET'], ReqData, Context}.
+    {['GET', 'POST'], ReqData, Context}.
 %
 % This is called when a DELETE request should be enacted 
 % and should return true if the deletion succeeded.
@@ -118,7 +118,17 @@ create_path(ReqData, Context) ->
 % If it succeeds, it should return true.
 %
 process_post(ReqData, Context) ->
-	{false, ReqData, Context}.
+    Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
+    [{id, Node}] = wrq:path_info(ReqData),
+    Button = get_value("button", Body),  
+    case Button of
+    	"delete" -> lager:info("body : ~p", [Body]),
+ 					Nodes_to_delete = lists:delete({"button", "delete"}, Body),    
+    				rpc:call(erlang:list_to_atom(Node), sue, delete, Nodes_to_delete);
+    	_ -> ok
+    end,
+	{true, ReqData, Context}.
+
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 
 % where Mediatype is a string of content-type format and the Handler is an atom naming 
@@ -236,6 +246,8 @@ get_nodes1([{Name, Details}|Nodes], Acc) ->
 	State = proplists:get_value(state, Details), 
 	get_nodes1(Nodes, [{Name, State, Details}|Acc]).
 
+get_value(Key, List) ->
+    proplists:get_value(Key, List). 
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

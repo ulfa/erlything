@@ -9,9 +9,11 @@
         <h2 class="panel-title">List of available nodes</h2>  
     </div>
     <div class="panel-body">
+    	<form role="form" method="post">
 		<table class="table">  
         	<thead>  
-          	  <tr>  
+          	  <tr>
+          	  	  <th>Selection</th>  
 				  <th>Node Name</th>  
 				  <th>Ip address</th>  
 				  <th>Status</th>  
@@ -21,8 +23,11 @@
 			  </tr>  
 			</thead>  
 			{% for node, state, detail in nodes %}		
-			<tbody>  
+			<tbody>
 				<tr> 
+					<td>	 
+						<input type="checkbox" name="{{node}}"/>
+					</td>
 					{% ifequal state "Alive" %} 
 					<td><a href="/sysinfo/{{ node }}">{{ node }}</a></td>  
 					{% else %}
@@ -35,6 +40,8 @@
 			</tbody>
 			{% endfor %}
 		</table>
+		<button type="submit" name="button" value="delete" class="btn btn-primary">Delete</button>
+		</form>
 	</div>
 </div>
 {% endblock %}

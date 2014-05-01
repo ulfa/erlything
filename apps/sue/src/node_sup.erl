@@ -12,7 +12,7 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([start_link/0, start_child/1]).
+-export([start_link/0, start_child/1, delete/1]).
 -export([init/1]).
 
 -export([get_children/0, is_child/1]).
@@ -50,3 +50,11 @@ is_child(Node) ->
 		false -> false;
 		_ -> true
 	end.
+
+delete([]) ->
+	ok;
+delete([{Thing, _A}|Things]) ->
+	supervisor:terminate_child(?MODULE, list_to_atom(Thing)),
+	delete(Things).
+
+

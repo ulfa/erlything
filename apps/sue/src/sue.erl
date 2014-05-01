@@ -14,7 +14,7 @@
 %% Application callbacks
 -export([start/0, stop/0]).
 -export([get_children/0, get_children/1, add_node/1, sys_info/1, etop/1, memory/1]).
--export([get_applications/1, process_info/2, app_info/2]).
+-export([get_applications/1, process_info/2, app_info/2, delete/1]).
 -export([set_debug/0, set_info/0]).
 
 %% doc starrt the application
@@ -73,3 +73,8 @@
 
 	set_info() ->
 		lager:set_loglevel(lager_console_backend, info).	
+
+	delete(Nodes_to_delete) when is_list(Nodes_to_delete) ->
+		lager:info("delete the following nodes: ~p", [Nodes_to_delete]),
+		node_sup:delete(Nodes_to_delete). 
+
