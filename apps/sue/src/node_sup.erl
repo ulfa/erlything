@@ -54,7 +54,8 @@ is_child(Node) ->
 delete([]) ->
 	ok;
 delete([{Thing, _A}|Things]) ->
-	supervisor:terminate_child(?MODULE, list_to_atom(Thing)),
+	Result = supervisor:terminate_child(?MODULE, whereis(list_to_atom(Thing))),
+	lager:info("Node terminated with result : ~p", [Result]),
 	delete(Things).
 
 

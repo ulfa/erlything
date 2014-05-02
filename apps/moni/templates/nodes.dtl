@@ -13,7 +13,7 @@
 		<table class="table">  
         	<thead>  
           	  <tr>
-          	  	  <th>Selection</th>  
+          	  	  <th></th>  
 				  <th>Node Name</th>  
 				  <th>Ip address</th>  
 				  <th>Status</th>  
