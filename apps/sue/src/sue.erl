@@ -75,6 +75,5 @@
 		lager:set_loglevel(lager_console_backend, info).	
 
 	delete(Nodes_to_delete) when is_list(Nodes_to_delete) ->
-		lager:info("delete the following nodes: ~p", [Nodes_to_delete]),
 		node_sup:delete(Nodes_to_delete). 
 

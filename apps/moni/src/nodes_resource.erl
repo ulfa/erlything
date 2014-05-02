@@ -122,8 +122,7 @@ process_post(ReqData, Context) ->
     [{id, Node}] = wrq:path_info(ReqData),
     Button = get_value("button", Body),  
     case Button of
-    	"delete" -> lager:info("body : ~p", [Body]),
- 					Nodes_to_delete = lists:delete({"button", "delete"}, Body),    
+    	"delete" -> Nodes_to_delete = lists:delete({"button", "delete"}, Body),    
     				rpc:call(erlang:list_to_atom(Node), sue, delete, [Nodes_to_delete]);
     	_ -> ok
     end,
