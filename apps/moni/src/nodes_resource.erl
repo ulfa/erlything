@@ -241,6 +241,8 @@ get_nodes(Node) ->
 
 get_nodes1([], Acc) ->
 	Acc;
+get_nodes1([undefined|Nodes], Acc) ->
+		get_nodes1(Nodes, Acc);
 get_nodes1([{Name, Details}|Nodes], Acc) ->
 	State = proplists:get_value(state, Details), 
 	get_nodes1(Nodes, [{Name, State, Details}|Acc]).
