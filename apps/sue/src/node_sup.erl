@@ -55,6 +55,7 @@ delete([]) ->
 	ok;
 delete([{Thing, _A}|Things]) ->
 	supervisor:terminate_child(?MODULE, whereis(list_to_atom(Thing))),
+	supervisor:delete_child(?MODULE, list_to_atom(Thing)),
 	delete(Things).
 
 
