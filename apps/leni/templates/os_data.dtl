@@ -8,14 +8,14 @@
 <div class="container-fluid">
     <div class="row">
         
-{% for node, temp, avg1, avg5, avg15 in os_data %}
+{% for node, time, temp, avg1, avg5, avg15 in os_data %}
 <div class="col-xs-6">
 <div class="panel panel-info">
     <div class="panel-heading">
         <h2 class="panel-title">{{node}}</h2>  
     </div>
     <div class="panel-body">
-
+    <p><strong>Date         :</strong> {{time}}</p>
 	<p><strong>Temperature 	:</strong> {{temp}} C</p>
 	<p><strong>Load 1  min. :</strong> {{avg1}}</p>
 	<p><strong>Load 5  min. :</strong>{{avg5}}</p>

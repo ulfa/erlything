@@ -31,7 +31,7 @@ handle_msg([Node ,Sensor, Id, Time, OS_data], Config, Module_config) ->
 	Table_Id = thing:get_table_id(Config) ,
 	[{data, Data}] = ets:lookup(Table_Id, data),
 	[{funs, Funs}] = ets:lookup(Table_Id, funs),
-	Data_1 = lists:keystore(Node, 1, Data, {Node,  OS_data}), 
+	Data_1 = lists:keystore(Node, 1, Data, {Node, date:timestamp_to_date(Time), OS_data}), 
 	thing:save_data_to_ets(Config, Data_1),
 	apply_functions(Funs, Node, proplists:lookup(temp, OS_data)),
 	Config;
@@ -55,7 +55,7 @@ apply_functions(undefined, Node, Data) ->
 apply_functions([], Node,  Data) ->
 	lager:info("no rules for module : ~p defined", [?MODULE]);
 apply_functions(Funs, Node, Data) ->
-	lager:info("~p : ~p", [Funs, Data]),
+	%%lager:info("~p : ~p", [Funs, Data]),
 	dsl:apply_rules(Funs, Node, Data). 
 %% --------------------------------------------------------------------
 %%% Test functions

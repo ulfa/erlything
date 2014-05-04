@@ -42,7 +42,9 @@ backup(Table) ->
     gen_server:call(?MODULE, {backup_table, Table}).
 restore(Table) ->
     gen_server:call(?MODULE, {restore_table, Table}).
-delete(Table) ->
+delete(Table) when is_list(Table) ->
+    delete(list_to_atom(Table));    
+delete(Table) when is_atom(Table) ->
     gen_server:call(?MODULE, {delete_table, Table}).
 
 %% --------------------------------------------------------------------

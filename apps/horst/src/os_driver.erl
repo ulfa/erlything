@@ -35,7 +35,7 @@ call_sensor(Config, Module_config) ->
     Data = call_driver(),
     Msg = sensor:create_message(node(), ?MODULE, sensor:get_id(Config), date:get_date_seconds(), Data),
     sensor:send_message(nodes(), Msg),
-    thing:save_data_to_ets(Config, Data),
+    %%thing:save_data_to_ets(Config, Data),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions

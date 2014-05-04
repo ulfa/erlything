@@ -240,7 +240,7 @@ get_data(Node, Name) when is_list(Node)->
 create_data([]) ->
     [];
 create_data(List) ->
-    lists:reverse([{binary_to_list(Node), Temp, Avg1, Avg5, Avg15} || {Node, [{temp, Temp}, {avg1, Avg1}, {avg5, Avg5}, {avg15, Avg15}]} <- List]).
+    lists:reverse([{binary_to_list(Node), Time, Temp, Avg1, Avg5, Avg15} || {Node, Time, [{temp, Temp}, {avg1, Avg1}, {avg5, Avg5}, {avg15, Avg15}]} <- List]).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
