@@ -276,9 +276,8 @@ handle_info({Port, Payload}, State=#state{config = Config}) when is_port(Port) -
 handle_info({'EXIT', Port, normal}, State) ->
     {noreply, State};  
 
-
 handle_info(Info, State) ->
-    lager:error("~p got message : ~p that i don't understand.", [?MODULE, Info]),
+    lager:error("~p got message : ~p that i don't understand. ~p", [?MODULE, Info, State]),
     {noreply, State}.
 
 %% --------------------------------------------------------------------

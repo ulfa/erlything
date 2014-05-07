@@ -111,8 +111,11 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+send_msg([Node ,Sensor, Id, Time, Payload] = Message) ->
+    lists:foreach(fun(Pid) -> Pid ! Message end, things_sup:get_actors_pids());
 send_msg(Message) ->
-    lists:foreach(fun(Pid) -> Pid ! Message end, things_sup:get_actors_pids()).
+    lager:error("got a message which is not correct : ~p", [Message]).
+    
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
