@@ -391,7 +391,7 @@ ets_usage(false, Config, _Module_config) ->
     
 create_ets(Config, Module_config) ->
     Name = proplists:get_value(name, Config),
-    Id = sensor:get_id(Config),
+    Id = config_handler:get_id(Config),
     ets_mgr:init_table(self(), list_to_atom(Name ++ "_" ++ Id), Module_config).  
 
 check_init(Module) ->

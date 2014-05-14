@@ -93,8 +93,11 @@ lager:info("Filter : ~p", [Filter]),
 handle_event({publish, Topic, Payload}, State) ->
     %%lager:info("publish: topic: ~p", [Topic]),
     %%lager:info("1a.publish: payload: ~p", [Payload]),
-    Message = create_message(Topic, binary_to_term(Payload)),
-    lager:info("message : ~p", [Message]),
+    case create_message(Topic, binary_to_term(Payload)) of 
+        Message -> lager:debug(".... send message ~p from ~p ", [Message, node()]);
+                    %%sensor:send_message(Message);
+        _ -> "nothing"
+    end,
     {ok, State};
 
 handle_event({publish, Topic, Payload, 1, MsgId}, State) ->
@@ -167,7 +170,15 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 create_message(Topic, {Time, Body}) ->
     [Prefix, Node, Sensor, Id] = binary:split(Topic, <<"/">>, [global]),
-    [Node, Sensor, Id, list_to_binary(integer_to_list(Time)), Body].
+    case check_message(binary_to_atom(Node, utf8), node()) of 
+        false -> [];
+        true ->  [Node, Sensor, Id, list_to_binary(integer_to_list(Time)), Body]
+    end.
+
+check_message(Node, Node) ->
+    false;
+check_message(Node, Node1) ->
+    true.
 
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).

@@ -20,7 +20,7 @@
 call_sensor(Config, Module_config) ->
     Value = call_driver(),
     Value_1 = parse_message_from_dht22(Value),
-    Msg = sensor:create_message(node(), ?MODULE, sensor:get_id(Config), date:get_date_seconds(), Value_1),
+    Msg = sensor:create_message(node(), ?MODULE, config_handler:get_id(Config), date:get_date_seconds(), Value_1),
     lager:debug("got the temp and the humidity from the DHT22 ~p",[Msg]),
     sensor:send_message(nodes(), Msg),
     thing:save_data_to_ets(Config, Value_1),
