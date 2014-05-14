@@ -105,7 +105,7 @@ create_entry(description, Value) ->
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
 create_description_test() ->
-    ?assertEqual([{description, []}], create_entry(description, [])).
+    ?assertEqual({description, "Please, add the description here"}, create_entry(description, [])).
 
 create_thing_test() ->
     node_config:start(),

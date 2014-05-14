@@ -165,7 +165,7 @@ write_config_test() ->
 
 	application:load(horst),
 	write_config(horst, "test.config", [Data]),
-	[Config] = config_handler:get_config(horst, "test.config"),	
+	[Config] = config_handler:get_config(horst, "test.config"), 	
 	?assertEqual(Data, Config).	
 
 create_thing_spec_test() ->
@@ -176,7 +176,7 @@ create_thing_spec_test() ->
 		{description,"Switches in my office"}]}],
 	P = [{name, "Switches office"},{type, actor}, {driver, transmitter_433_driver, [{"Ventilator",1},{"Licht",2}]}, {activ, true},{description,"Switches in my office"}],
 	io:format("...~p~n",[create_thing_spec(Config)]),
-	?assertEqual([{'Switches office', {thing, start_link, [P]}, permanent, 5000, worker, [thing]}], create_thing_spec(Config)).
+	?assertEqual([{'Switches office', {thing, start_link, [P]}, transient, 5000, worker, [thing]}], create_thing_spec(Config)).
 
 get_config_test() ->
 	application:load(horst),
