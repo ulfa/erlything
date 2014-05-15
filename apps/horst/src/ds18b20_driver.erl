@@ -28,7 +28,7 @@ call_sensor(Config, Module_config) ->
     Value = parse_message(Temp_line),
     Msg = sensor:create_message(node(), ?MODULE, config_handler:get_id(Config), Value),
     sensor:send_message(Msg),
-    thing:save_data_to_ets(Config, Value),
+     thing:set_value(self(), Value),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions

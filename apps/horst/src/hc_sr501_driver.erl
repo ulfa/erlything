@@ -30,6 +30,7 @@ init(Config) ->
 handle_msg({gpio_interrupt, 0, Pin, Status}, Config, Modul_config) ->
 	Msg = create_message(Status, config_handler:get_id(Config)),
 	sensor:send_message(Msg),
+	thing:set_value(self(), create_value(Status)),
 	lager:debug("send message : ~p", [Msg]),
 	Module_config_1 = lists:keyreplace(last_changed, 1, Modul_config, {last_changed, date:get_date_seconds()}),
 	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1});
@@ -44,6 +45,10 @@ handle_msg(Unknown_message, Config, Module_config) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+create_value(1) ->
+	?RISING;
+create_value(0) ->
+	?FALLING.
 create_message(1, Id) ->
 	sensor:create_message(node(), ?MODULE, Id, date:get_date_seconds(), ?RISING);
 create_message(0, Id) ->

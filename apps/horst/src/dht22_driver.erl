@@ -23,7 +23,7 @@ call_sensor(Config, Module_config) ->
     Msg = sensor:create_message(node(), ?MODULE, config_handler:get_id(Config), date:get_date_seconds(), Value_1),
     lager:debug("got the temp and the humidity from the DHT22 ~p",[Msg]),
     sensor:send_message(nodes(), Msg),
-    thing:save_data_to_ets(Config, Value_1),
+    thing:set_value(self(), Value_1),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
