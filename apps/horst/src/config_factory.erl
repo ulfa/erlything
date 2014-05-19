@@ -28,36 +28,37 @@
 %% --------------------------------------------------------------------
 -export([create_thing/2]).
 
-create_thing(Name, [{actor, Value}, {driver, {Driver, Function}, Module_Config}]) ->
-    Config = get_config(),
-    Config_1 = case is_entry(Name, Config) of 
-        true -> lager:info("Entry with name : ~p already exists!", [Name]);
-        false -> create_entries(Name, [{actor, Value}, {driver, {Driver, Function}, Module_Config}])
+create_thing(Name, Config) ->
+    Existing_config = get_config(),
+    Thing_config = case is_entry(Name,  Existing_config) of 
+        true -> lager:error("Entry with name : ~p already exists!", [config:get_value(thing, Existing_config)]),
+                [];
+        false -> create_entries(Name, Config)
     end,
-    {thing, Name, Config_1}.
-
-
-create_entries(Name, [{actor, Value}, {driver, {Driver, Function}, Module_Config}]) ->
-    [create_entry(Entry, []) || Entry <- [id, icon, ets, activ, timer, database]].
+    {thing, Name, Thing_config}.
     
-
+create_entries(Name, Config) ->
+    [create_entry(Key, config:get_value(Key, Config)) || Key <- [type, ets, icon, id,driver, activ, timer, database, description]].
+    
 get_config() ->
     {Node, Config} = node_config:get_things_config(),
     Config.
+
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
 is_entry(Name, Config) ->
     lists:keymember(Name, 2, Config).     
 
-create_entry(actor, true) ->
-    {actor, true};
-create_entry(actor, false) ->
-    {actor, false};    
-create_entry(actor, Value) ->
-    {actor, false};
+create_entry(type, sensor) ->
+    {type, sensor};    
+
+create_entry(type, actor) ->
+    {type, actor};
+create_entry(type, sensor) ->
+    {type, sensor};    
     
-create_entry(id, []) ->
+create_entry(id, undefined) ->
     create_entry(id, "default");
 create_entry(id, Value) ->
     {id, Value};
@@ -67,21 +68,24 @@ create_entry(icon, []) ->
 create_entry(icon, Value) ->
     {icon, Value};
 
-create_entry(ets, []) ->
+create_entry(ets, undefined) ->
     create_entry(ets, false);
 create_entry(ets, true) ->
     {ets, true};
 create_entry(ets, false) ->
     {ets, false};
 
-create_entry(activ, []) ->
+create_entry(activ, undefined) ->
     create_entry(activ, false);
 create_entry(activ, false) ->
     {activ, false};
 create_entry(activ, true) ->
     {activ, false};
 
-create_entry(timer, []) ->
+create_entry(driver, {Driver, Function, Parameters}) when  is_atom(Driver), is_atom(Function), is_list(Parameters)->
+    {driver, {Driver, Function}, Parameters};
+
+create_entry(timer, undefined) ->
     {timer, 0};
 create_entry(timer, 0) ->
     {timer, 0};
@@ -90,12 +94,12 @@ create_entry(timer, Value) when is_list(Value) ->
 create_entry(timer, Value) when is_integer(Value) ->
     {timer, Value};
 
-create_entry(database, []) ->
+create_entry(database, undefined) ->
     {database, []};
 create_entry(database, Value) ->
     {database, Value};
 
-create_entry(description, []) ->
+create_entry(description, undefined) ->
     {description, "Please, add the description here"};   
 create_entry(description, Value) ->
     {description, Value}.    
@@ -105,10 +109,22 @@ create_entry(description, Value) ->
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
 create_description_test() ->
-    ?assertEqual({description, "Please, add the description here"}, create_entry(description, [])).
+    ?assertEqual({description, "Please, add the description here"}, create_entry(description, undefined)).
 
-create_thing_test() ->
+create_config_test() ->
+    application:load(horst),
     node_config:start(),
-    create_thing("test", [{actor, sensor}, {driver, {test_driver, call_sensor},[]}]).
+    Result = {thing,"Sample_Sensor1",
+     [{type,sensor},
+      {ets,true},
+      {icon,"temp.png"},
+      {id, "default"},
+      {driver,{sample_driver,call_sensor},[{init,true},{data,[]}]},
+      {activ,false},
+      {timer,5000},
+      {database,[]},
+      {description,"Sample sensor for playing with"}]},
+      ?assertEqual(Result, create_thing("Sample_Sensor1",[{type, sensor}, {ets, true}, {icon, "temp.png"}, 
+        {driver, {sample_driver, call_sensor, [{init, true}, {data, []}]}}, {timer, 5000}, {description,"Sample sensor for playing with"}])). 
 -endif.
     
