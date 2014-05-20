@@ -19,6 +19,7 @@
 -export([get_messages_for_module/3, is_active/1]).
 -export([set_active/3]).
 -export([get_id/1]).
+-export([add_thing_to_config/2, get_thing_config/2]).
 
 get_messages_for_module(Messages, Module, Id) ->
 	case lists:keyfind({Module, Id}, 1, Messages) of 
@@ -46,9 +47,13 @@ set_active(Config, Name, Status) when is_list(Config) ->
 set_active({thing, Name, Config}, Status) ->
 	{thing, Name, lists:keyreplace(activ, 1, Config, {activ, Status})}.
 
+add_thing_to_config(Thing_config, Config) ->
+	Act_config = get_config(horst, Config),
+	write_config(horst, Config, [Thing_config|Act_config]).
+
 get_thing_config(Config, Thing) ->	
 	case lists:keysearch(Thing, 2, Config) of 
-		false -> false;
+		false -> [];
 		{value, Thing_Config} -> Thing_Config 
 	end.
 
@@ -83,6 +88,23 @@ is_type(Type, Type_1) ->
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
+
+add_thing_to_config_test() ->
+	application:load(horst),
+	C1 = {thing,"Sample_Sensor1",
+     [{type,sensor},
+      {ets,true},
+      {icon,"temp.png"},
+      {id, "default"},
+      {driver,{sample_driver,call_sensor},[{init,true},{data,[]}]},
+      {activ,false},
+      {timer,5000},
+      {database,[]},
+      {description,"Sample sensor for playing with"}]},
+	add_thing_to_config(C1, "test.config").
+
+
+
 
 is_active_set_test() ->
 	Config = {thing, "Switches office",
@@ -149,7 +171,7 @@ get_thing_config_test() ->
 		{activ, true},
 		{description,"Message Logger"}]},
 	?assertEqual(Thing_Config, get_thing_config(Config, "Message_Logger")),
-	?assertEqual(false, get_thing_config(Config, "Message Logger")).
+	?assertEqual([], get_thing_config(Config, "Message Logger")).
 
 write_config_test() ->
 	Data = [{thing, "Switches office",
@@ -164,8 +186,8 @@ write_config_test() ->
 		{description,"mm"}]}],
 
 	application:load(horst),
-	write_config(horst, "test.config", [Data]),
-	[Config] = config_handler:get_config(horst, "test.config"), 	
+	write_config(horst, "test.config", Data),
+	Config = config_handler:get_config(horst, "test.config"), 	
 	?assertEqual(Data, Config).	
 
 create_thing_spec_test() ->

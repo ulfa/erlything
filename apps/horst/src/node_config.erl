@@ -29,6 +29,7 @@
 -export([set_messages_config/2, set_things_config/2]).
 -export([get_messages_for_module/2]).
 -export([set_active/2]).
+-export([add_thing_to_config/1, get_thing_config/1]).
 
 set_active(Thing, true) ->
     gen_server:call(?MODULE, {set_active, Thing, true});
@@ -47,7 +48,10 @@ set_messages_config(Key, Value) ->
 	gen_server:call(?MODULE, {set_messages_config, Key, Value}).
 set_things_config(Key, Value) ->
 	gen_server:call(?MODULE, {set_things_config, Key, Value}).
-
+add_thing_to_config(Config)  when is_list(Config) ->
+    gen_server:call(?MODULE, {add_thing_to_config, Config}).
+get_thing_config(Thing) when is_list(Thing)-> 
+    gen_server:call(?MODULE, {get_thing_config, Thing}).
 %% --------------------------------------------------------------------
 %% record definitions
 %% valid: is the file ok or corrupt
@@ -103,9 +107,20 @@ handle_call({get_messages_for_module, Module, Id}, From, State=#state{messages=M
 handle_call({set_messages_config, Key, Value}, From, State) ->
     {reply, "not implemented yet", State};
 
+handle_call({add_thing_to_config, Config}, From, State=#state{things = Things}) ->
+    Result = case config_handler:add_thing_to_config(Config) of
+        ok -> ok;
+        _ -> lager:error("an error occurered during adding new config: ~p", [Config]),
+             error
+             end,
+    {replay, Result, State};
+
+handle_call({get_thing_config, Thing}, From, State=#state{things = Things}) ->
+    Result = config_handler:get_thing_config(Things, Thing),
+    {reply, Result, State};
+
 handle_call({set_things_config, Key, Value}, From, State) ->
     {reply, "not implemented yet", State}.
-
 %% --------------------------------------------------------------------
 %% Function: handle_cast/2
 %% Description: Handling cast messages

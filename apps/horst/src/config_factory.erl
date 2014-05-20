@@ -27,6 +27,7 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([create_thing/2]).
+-export([check_thing/1]).
 
 create_thing(Name, Config) ->
     Existing_config = get_config(),
@@ -37,6 +38,14 @@ create_thing(Name, Config) ->
     end,
     {thing, Name, Thing_config}.
     
+check_thing({thing, Name, Parameters}) ->
+    [is_valid(Key, config:get_value(Key,Parameters)) || Key <- [type, ets, icon, id, driver, activ, timer, database, description]].
+%% --------------------------------------------------------------------
+%%% Internal functions
+%% --------------------------------------------------------------------
+is_valid(Key, Parameter) ->
+    {Key, Parameter} = create_entry(Key, Parameter).
+    
 create_entries(Name, Config) ->
     [create_entry(Key, config:get_value(Key, Config)) || Key <- [type, ets, icon, id,driver, activ, timer, database, description]].
     
@@ -44,9 +53,6 @@ get_config() ->
     {Node, Config} = node_config:get_things_config(),
     Config.
 
-%% --------------------------------------------------------------------
-%%% Internal functions
-%% --------------------------------------------------------------------
 is_entry(Name, Config) ->
     lists:keymember(Name, 2, Config).     
 
