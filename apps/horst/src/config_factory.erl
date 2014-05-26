@@ -38,16 +38,24 @@ create_thing(Name, Config) ->
     end,
     {thing, Name, Thing_config}.
     
-check_thing({thing, Name, Parameters}) ->
-    [is_valid(Key, config:get_value(Key,Parameters)) || Key <- [type, ets, icon, id, driver, activ, timer, database, description]].
+check_thing({thing, _Name, Parameters}) ->
+    [is_valid(Key, get_value(Key, Parameters)) || Key <- [type, ets, icon, id, driver, activ, timer, database, model_fun, description]].
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+get_value(driver, Parameters) ->
+    {value, {driver,{Driver, Function}, Paras}} = lists:keysearch(driver, 1, Parameters),    
+    {Driver, Function, Paras};
+get_value(Key, Parameters) when is_atom(Key)->
+    config:get_value(Key, Parameters).
+
+is_valid(driver, Parameter) ->
+    {driver,{Driver, Function}, Paras} = create_entry(driver, Parameter);
 is_valid(Key, Parameter) ->
     {Key, Parameter} = create_entry(Key, Parameter).
     
 create_entries(Name, Config) ->
-    [create_entry(Key, config:get_value(Key, Config)) || Key <- [type, ets, icon, id,driver, activ, timer, database, description]].
+    [create_entry(Key, config:get_value(Key, Config)) || Key <- [type, ets, icon, id, driver, activ, timer, database, model_fun, description]].
     
 get_config() ->
     {Node, Config} = node_config:get_things_config(),
@@ -87,9 +95,9 @@ create_entry(activ, false) ->
     {activ, false};
 create_entry(activ, true) ->
     {activ, false};
-
+                    
 create_entry(driver, {Driver, Function, Parameters}) when  is_atom(Driver), is_atom(Function), is_list(Parameters)->
-    {driver, {Driver, Function}, Parameters};
+    {driver, {Driver, Function}, Parameters};    
 
 create_entry(timer, undefined) ->
     {timer, 0};
@@ -105,6 +113,10 @@ create_entry(database, undefined) ->
 create_entry(database, Value) ->
     {database, Value};
 
+create_entry(model_fun, undefined) ->
+    {model_fun, undefined};
+create_entry(model_fun, {Modul, Function}) ->
+    {model_fun, {Modul, Function}};
 create_entry(description, undefined) ->
     {description, "Please, add the description here"};   
 create_entry(description, Value) ->
@@ -116,6 +128,31 @@ create_entry(description, Value) ->
 -ifdef(TEST).
 create_description_test() ->
     ?assertEqual({description, "Please, add the description here"}, create_entry(description, undefined)).
+
+check_thing_test() ->
+    application:load(horst),
+    node_config:start(),
+    Config = {thing,"Sample_Sensor1",
+     [{type,sensor},
+      {ets,true},
+      {icon,"temp.png"},
+      {id, "default"},
+      {driver,{sample_driver,call_sensor},[{init,true},{data,[]}]},
+      {activ,false},
+      {timer,5000},
+      {database,[]},
+      {description,"Sample sensor for playing with"}]},
+    Result = [{type,sensor},
+      {ets,true},
+      {icon,"temp.png"},
+      {id, "default"},
+      {driver,{sample_driver,call_sensor},[{init,true},{data,[]}]},
+      {activ,false},
+      {timer,5000},      
+      {database,[]},
+      {model_fun, undefined},
+      {description,"Sample sensor for playing with"}],
+      ?assertEqual(Result, check_thing(Config)).
 
 create_config_test() ->
     application:load(horst),

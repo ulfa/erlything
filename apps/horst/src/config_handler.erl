@@ -49,6 +49,7 @@ set_active({thing, Name, Config}, Status) ->
 
 add_thing_to_config(Thing_config, Config) ->
 	Act_config = get_config(horst, Config),
+	config_factory:check_thing(Thing_config), 	
 	write_config(horst, Config, [Thing_config|Act_config]).
 
 get_thing_config(Config, Thing) ->	
