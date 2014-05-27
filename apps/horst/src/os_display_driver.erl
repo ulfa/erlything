@@ -33,7 +33,7 @@ handle_msg([Node ,Sensor, Id, Time, OS_data], Config, Module_config) ->
 	[{funs, Funs}] = ets:lookup(Table_Id, funs),
 	Data_1 = lists:keystore(Node, 1, Data, {Node, date:timestamp_to_date(Time), OS_data}), 
 	thing:save_data_to_ets(Config, Data_1),
-	apply_functions(Funs, Node, proplists:lookup(temp, OS_data)),
+	apply_functions(Config, Funs, Node, proplists:lookup(temp, OS_data)),
 	Config;
 
 handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
@@ -50,13 +50,13 @@ add(List, Value) ->
         false -> [Value|lists:sublist(List, ?MAX_QUEUE_LENGTH)]
     end.    
 
-apply_functions(undefined, Node, Data) ->
+apply_functions(Config, undefined, Node, Data) ->
 	lager:info("no rules for module : ~p defined", [?MODULE]);
-apply_functions([], Node,  Data) ->
+apply_functions(Config, [], Node,  Data) ->
 	lager:info("no rules for module : ~p defined", [?MODULE]);
-apply_functions(Funs, Node, Data) ->
+apply_functions(Config, Funs, Node, Data) ->
 	%%lager:info("~p : ~p", [Funs, Data]),
-	dsl:apply_rules(Funs, Node, Data). 
+	dsl:apply_rules(Config,Funs, Node, Data). 
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

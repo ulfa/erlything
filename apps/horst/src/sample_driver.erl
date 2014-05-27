@@ -24,8 +24,7 @@ stop(Config) ->
     {ok, Config}.
 
 call_sensor(Config, Module_config) ->
-    Msg = sensor:create_message(node(), ?MODULE, [{sample, "test"}]),
-    sensor:send_message(Msg),
+    ?SEND([{sample, "test"}]),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions

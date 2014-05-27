@@ -40,7 +40,7 @@ send_message(Config, []) ->
     lager:debug("there are no modules which i could reload.");
 
 send_message(Config, Changed_Modules) ->
-    sensor:send(?MODULE, {data, {"reloaded the following modules",Changed_Modules}}).
+    ?SEND({data, {"reloaded the following modules", Changed_Modules}}).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

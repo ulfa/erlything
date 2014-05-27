@@ -4,6 +4,9 @@ erl_crash.dump
 deps/gpio/priv/gpio_drv.so
 log/*
 apps/*/ebin/*
+apps/*/logs/*
+apps/*/test/*.beam
+ct_test/*
 .eunit/
 rel/horst/*
 deps

@@ -42,11 +42,11 @@ handle_msg({external_interrupt, cuberl, error, {fatal, Reason}}, Config, Module_
 
 handle_msg({external_interrupt, cuberl, live_data, Body}, Config, Module_config) ->
     lager:info("~p got a message with values: ~p", [?MODULE, Body]),
-    send_message(Body),
+    ?SEND(Body),
     Config;
 handle_msg({external_interrupt, cuberl,  Body}, Config, Module_config) ->
     lager:info("~p got a message with values: ~p", [?MODULE, Body]),
-    send_message(Body),
+    ?SEND(Body),
     Config;
 
 handle_msg({external_interrupt, Application,  Body}, Config, Module_config) ->
@@ -60,10 +60,6 @@ handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
 handle_msg(Unknown_message, Config, Module_config) ->
     lager:warning("~p got a message with incorrect values: ~p",[?MODULE, Unknown_message]),
     Config.
-
-send_message(Body) ->
-    Msg = sensor:create_message(node(), ?MODULE, Body), 
-    sensor:send_message(Msg).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

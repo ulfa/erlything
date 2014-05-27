@@ -10,6 +10,11 @@
 
 -module(horst).
 
+%% --------------------------------------------------------------------
+%% Include files
+%% --------------------------------------------------------------------
+-include("../include/horst.hrl").
+
 %% Application callbacks
 -export([start/0, stop/0]).
 -export([set_debug/0, set_info/0]).
@@ -31,11 +36,11 @@ start() ->
 	ensure_started(ssl),
 	ensure_started(sue),
  	application:start(gpio),
-    ensure_started(?MODULE),
-    sensor:send('system', {info, {"System is started!",[]}}). 
+    ensure_started(?MODULE),    
+    ?SEND(?SYSTEM, {info, {"System is started!",[]}}). 
 
 stop() ->
-    sensor:send('system', {info, {"System is going down!",[]}}),
+    ?SEND(?SYSTEM, {info, {"System is going down!",[]}}),
 	application:start(public_key),
 	application:stop(crypto),
 	application:stop(ssl),

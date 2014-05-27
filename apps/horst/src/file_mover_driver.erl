@@ -25,20 +25,20 @@ init(Config) ->
 
 call_sensor(Config, Module_config) ->
     [Filter, Source, Destination] = config:get_level_values([data], [file_format, source, destination], Module_config), 
-    move_files(Destination, find_files(Source, Filter)),
+    move_files(Config, Destination, find_files(Source, Filter)),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-move_files(Destination, []) ->
+move_files(_Config, _Destination, []) ->
     ok;
-move_files(Destination, [File|List_of_files]) ->
+move_files(Config, Destination, [File|List_of_files]) ->
     lager:info("move file : ~p to dest : ~p", [File, Destination]),
     Basefile = filename:basename(File),
     {ok, BytesCopied} = file:copy(File, filename:join(Destination, Basefile)),
     ok = file:delete(File), 
-    sensor:send(?MODULE, [{moved_file, Basefile}]), 
-    move_files(Destination, List_of_files).
+    ?SEND([{moved_file, Basefile}]),    
+    move_files(Config, Destination, List_of_files).
 
 find_files(Path, Filter) ->
     filelib:wildcard(filename:join(Path, Filter)). 
