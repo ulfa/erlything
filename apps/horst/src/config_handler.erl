@@ -64,7 +64,7 @@ get_thing_config(Config, Thing) ->
 	end.
 
 write_config(Application, Config_file, Data) ->
-	file:write_file(filename:join([code:priv_dir(Application), "config", Config_file]), io_lib:fwrite("~p.\n", [Data])).
+	ok = file:write_file(filename:join([code:priv_dir(Application), "config", Config_file]), io_lib:fwrite("~p.\n", [Data])).
 
 create_thing_spec(Config) when is_list(Config)->
 	[?THING(list_to_atom(Name), [{name, Name}|List]) || {thing, Name, List} <- Config, is_active(List)].
