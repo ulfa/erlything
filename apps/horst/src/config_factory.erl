@@ -51,9 +51,11 @@ get_value(Key, Parameters) when is_atom(Key)->
 
 is_valid(driver, Parameter) ->
     {driver,{Driver, Function}, Paras} = create_entry(driver, Parameter);
+is_valid(Key, undefined) ->
+    {Key, Parameter} = create_entry(Key, undefined);
 is_valid(Key, Parameter) ->
     {Key, Parameter} = create_entry(Key, Parameter).
-    
+
 create_entries(Name, Config) ->
     [create_entry(Key, config:get_value(Key, Config)) || Key <- [type, ets, icon, id, driver, activ, timer, database, model_fun, description]].
     
@@ -94,7 +96,7 @@ create_entry(activ, undefined) ->
 create_entry(activ, false) ->
     {activ, false};
 create_entry(activ, true) ->
-    {activ, false};
+    {activ, true};
                     
 create_entry(driver, {Driver, Function, Parameters}) when  is_atom(Driver), is_atom(Function), is_list(Parameters)->
     {driver, {Driver, Function}, Parameters};    
@@ -136,7 +138,7 @@ check_thing_test() ->
      [{type,sensor},
       {ets,true},
       {icon,"temp.png"},
-      {id, "default"},
+      {id, undefined},
       {driver,{sample_driver,call_sensor},[{init,true},{data,[]}]},
       {activ,false},
       {timer,5000},

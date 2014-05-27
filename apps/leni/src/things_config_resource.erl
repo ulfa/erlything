@@ -148,7 +148,7 @@ process_request(ReqData, Context,"copy_delete", Body) ->
 	{"button", Button} = lists:keyfind("button",1, Body),
 	process_request(ReqData, Context, Button, Body);
 
-process_request(ReqData, Context,"copy", Body) ->	
+process_request(ReqData, Context,"copy", Body) ->		
 	{"node", Node} = lists:keyfind("node",1, Body),
 	{"thing", Thing} = lists:keyfind("thing",1, Body),	
 	{"selected_node", Selected_node} = lists:keyfind("selected_node",1, Body),
@@ -159,11 +159,14 @@ process_request(ReqData, Context,"copy", Body) ->
 process_request(ReqData, Context,"delete", Body) ->	
 	{"node", Node} = lists:keyfind("node",1, Body),
 	{"thing", Thing} = lists:keyfind("thing",1, Body),
+	{"selected_node", Selected_node} = lists:keyfind("selected_node",1, Body),
+	Msg = sender_util:create_message(?MODULE, [{action, "delete"}, {thing, Thing}, {target, Selected_node}]), 
+	sender_util:send_message(list_to_atom(Node), Msg), 
 	Location = "/things_config",
 	{true, wrq:do_redirect(true, wrq:set_resp_header("location", Location, ReqData)), Context};
 process_request(ReqData, Context,"export", Body) ->	
 	{"node", Node} = lists:keyfind("node",1, Body),
-	{"thing", Thing} = lists:keyfind("thing",1, Body),
+	{"thing", Thing} = lists:keyfind("thing",1, Body),	
 	Msg = sender_util:create_message(?MODULE, [{action, "export"}, {thing, Thing}]), 
 	sender_util:send_message(list_to_atom(Node), Msg), 
 	Location = "/things_config",

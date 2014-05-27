@@ -33,12 +33,16 @@ init(Config) ->
 stop(Config) ->
     Config.
 
-handle_msg([Node ,Sensor, Id, Time, [{action, "copy"}, {thing, Thing}, {target, Target}]] = Msg, Config, Module_config) when is_list(Thing) ->
+handle_msg([Node ,Sensor, Id, Time, [{action, "copy"}, {thing, Thing}, {target, Target}]] = Msg, Config, Module_config) ->
     lager:info("~p got message : ~p", [?MODULE, Msg]),
     Thing_config = node_config:get_thing_config(Thing),
     lager:info(".... : ~p", [Thing_config]),
-    Result = rpc:call(Target, node_config, add_thing_to_config, [Thing, Thing_config]),
-    ?SEND(lists:flatten(io_lib:format("copied ~p - config to node : ~p !", [Thing, Target]))),
+    case rpc:call(list_to_atom(Target), node_config, add_thing_to_config, [Thing_config, ?THINGS_CONFIG]) of 
+        Result -> lager:info("copied ~p - config to node : ~p !", [Thing, Target]),
+                  ?SEND(lists:flatten(io_lib:format("copied ~p - config to node : ~p !", [Thing, Target])));
+        {badrpc, Reason} -> lager:error("couldn't copy ~p - config to node : ~p", [Thing, Thing_config]),
+                            ?SEND(lists:flatten(io_lib:format("couldn't copy ~p - config to node : ~p", [Thing, Thing_config])))
+    end,
     Config;
 
 handle_msg([Node ,Sensor, Id, Time, [{action, "delete"}, {thing, Thing}, {target, Target}]] = Msg, Config, Module_config) ->

@@ -65,8 +65,8 @@
             				<input type="hidden" name="thing" value="{{name}}"/>
             				<input type="hidden" name="form" value="copy_delete"/>	
                             <button type="submit" class="btn btn-small btn-default" name="button" value="copy">Copy</button>
-                            <button type="submit" class="btn btn-small btn-danger" name="button" value="delete">Delete</button>
-                            <strong>to / from</strong>						
+                            <!-- button type="submit" class="btn btn-small btn-danger" name="button" value="delete">Delete</button -->
+                            <strong>to</strong>						
 								<div class="form-group">
 									<select class="selectpicker" name="selected_node">                                    
     								{%for node in nodes%}
