@@ -155,45 +155,45 @@ end_per_group(_group, Config) ->
 %%--------------------------------------------------------------------
 %%-----------------------------node_config--------------------------
 init_per_testcase(set_things_file, Config) ->
-  ok = rpc:call('erlything1@macbook-pro', node_config, set_things_file, ["things.config", []]),
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_things_file, ["things.config", []]),
   ct:sleep(?SLEEP), 
   Config;
 
 init_per_testcase(set_active, Config) ->
-  ok = rpc:call('erlything1@macbook-pro', node_config, set_things_file, ["things.config", [get_thing_data()]]),
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_things_file, ["things.config", [get_thing_data()]]),
   ct:sleep(?SLEEP),
   Config;
 
 init_per_testcase(delete_thing_config, Config) ->
-  ok = rpc:call('erlything1@macbook-pro', node_config, set_things_file, ["things.config", [get_thing_data()]]),
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_things_file, ["things.config", [get_thing_data()]]),
   ct:sleep(?SLEEP),
   Config;
 
 init_per_testcase(get_things_config, Config) ->
-  ok = rpc:call('erlything1@macbook-pro', node_config, set_things_file, ["things.config", [get_thing_data()]]),
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_things_file, ["things.config", [get_thing_data()]]),
   ct:sleep(?SLEEP),
   Config;
 
 init_per_testcase(add_thing_to_config, Config) ->
-  ok = rpc:call('erlything1@macbook-pro', node_config, set_things_file, ["things.config", []]),
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_things_file, ["things.config", []]),
   ct:sleep(?SLEEP),
   Config;
 
 init_per_testcase(set_messages_file, Config) ->
-  ok = rpc:call('erlything1@macbook-pro', node_config, set_messages_file, ["messages.config", []]),
-  ok = rpc:call('erlything@macbook-pro', node_config, set_messages_file, ["messages.config", []]),
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_messages_file, ["messages.config", []]),
+  ok = rpc:call(ct:get_config(node, Config), node_config, set_messages_file, ["messages.config", []]),
   ct:sleep(?SLEEP),
   Config;
 
 %%-----------------------------config_driver--------------------------
 init_per_testcase(copy_config, Config) ->
-  ok = rpc:call('erlything1@macbook-pro', node_config, set_things_file, ["things.config", [get_config_driver(),get_thing_data()]]),  
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_things_file, ["things.config", [get_config_driver(),get_thing_data()]]),  
   ct:sleep(?SLEEP),
-  ok = rpc:call('erlything1@macbook-pro', node_config, set_active, ["Config_Manager", true]),
-  ok = rpc:call('erlything@macbook-pro', node_config, set_things_file, ["things.config", []]),
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_active, ["Config_Manager", true]),
+  ok = rpc:call(ct:get_config(node, Config), node_config, set_things_file, ["things.config", []]),
 
   Message = {{config_driver,"default"}, [{all, <<"horst_SUITE">>, all}]},
-  ok = rpc:call('erlything1@macbook-pro', node_config, set_messages_file, ["messages.config", [Message]]),
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_messages_file, ["messages.config", [Message]]),
   ct:sleep(?SLEEP),
   Config;
 
@@ -220,33 +220,35 @@ end_per_testcase(_TestCase, Config) ->
 %%  Here are the test cases
 %%--------------------------------------------------------------------
 %%-----------------------------node_config--------------------------
-set_things_file(_Config) ->
-    ok = rpc:call('erlything@macbook-pro', node_config, set_things_file, ["things.config", [get_thing_data()]]).
+set_things_file(Config) ->
+    ok = rpc:call(ct:get_config(node, Config), node_config, set_things_file, ["things.config", [get_thing_data()]]).
 
-set_active(_Config) ->
-  ok = rpc:call('erlything1@macbook-pro', node_config, set_active, ["Sample_Sensor1", true]),
-  ok = rpc:call('erlything1@macbook-pro', node_config, set_active, ["Sample_Sensor1", false]),
+set_active(Config) ->
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_active, ["Sample_Sensor1", true]),
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_active, ["Sample_Sensor1", false]),
   {error, _Reason} =  rpc:call('erlything1@macbook-pro', node_config, set_active, ["Sample_Sensor1", "something"]).
 
-delete_thing_config(_Config) ->
-  ok = rpc:call('erlything1@macbook-pro', node_config, delete_thing_config, ["Sample_Sensor1"]).
+delete_thing_config(Config) ->
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, delete_thing_config, ["Sample_Sensor1"]).
 
-get_things_config(_Config) ->
-  {'erlything1@macbook-pro',[{thing, "Sample_Sensor1", _List}]} =  rpc:call('erlything1@macbook-pro', node_config, get_things_config,[]).
+get_things_config(Config) ->
+  Node = ct:get_config(node_1, Config),
+  {Node,[{thing, "Sample_Sensor1", _List}]} =  rpc:call(ct:get_config(node_1, Config), node_config, get_things_config,[]).
 
-add_thing_to_config(_Config) ->
-  ok = rpc:call('erlything1@macbook-pro', node_config, add_thing_to_config, [get_thing_data(), "things.config"]).
+add_thing_to_config(Config) ->
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, add_thing_to_config, [get_thing_data(), "things.config"]).
 
-set_messages_file(_Config) ->
+set_messages_file(Config) ->
   Message = {{config_driver,"default"}, [{all, <<"horst_SUITE">>, all}]},
-  ok = rpc:call('erlything1@macbook-pro', node_config, set_messages_file, ["messages.config", [Message]]).
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_messages_file, ["messages.config", [Message]]).
 
 %%-----------------------------config_driver--------------------------
-copy_config(_Config) ->
-  Message = create_message(node(), 'horst_SUITE', "default", [{action, "copy"}, {thing, "Sample_Sensor1"}, {target, "erlything@macbook-pro"}]),
-  sensor:send_message('erlything1@macbook-pro', Message),
+copy_config(Config) ->
+  Message = create_message(node(), 'horst_SUITE', "default", [{action, "copy"}, {thing, "Sample_Sensor1"}, {target, atom_to_list(ct:get_config(node, Config))}]),
+  sensor:send_message(ct:get_config(node_1, Config), Message),
   ct:sleep(?SLEEP),
-  {'erlything@macbook-pro',[{thing, "Sample_Sensor1", _List}]} =  rpc:call('erlything@macbook-pro', node_config, get_things_config,[]).
+  Node = ct:get_config(node, Config),
+  {Node,[{thing, "Sample_Sensor1", _List}]} =  rpc:call(ct:get_config(node, Config), node_config, get_things_config,[]).
 
 delete_config(_Config) ->
   ok.
