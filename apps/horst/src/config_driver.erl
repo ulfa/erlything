@@ -35,8 +35,7 @@ stop(Config) ->
 
 handle_msg([Node ,Sensor, Id, Time, [{action, "copy"}, {thing, Thing}, {target, Target}]] = Msg, Config, Module_config) ->
     lager:info("~p got message : ~p", [?MODULE, Msg]),
-    Thing_config = node_config:get_thing_config(Thing),
-    lager:info(".... : ~p", [Thing_config]),
+    Thing_config = node_config:get_thing_config(Thing),    
     case rpc:call(list_to_atom(Target), node_config, add_thing_to_config, [Thing_config, ?THINGS_CONFIG]) of 
         Result -> lager:info("copied ~p - config to node : ~p !", [Thing, Target]),
                   ?SEND(lists:flatten(io_lib:format("copied ~p - config to node : ~p !", [Thing, Target])));
@@ -47,7 +46,13 @@ handle_msg([Node ,Sensor, Id, Time, [{action, "copy"}, {thing, Thing}, {target, 
 
 handle_msg([Node ,Sensor, Id, Time, [{action, "delete"}, {thing, Thing}, {target, Target}]] = Msg, Config, Module_config) ->
     lager:info("~p got message : ~p", [?MODULE, Msg]),
-    ?SEND(lists:flatten(io_lib:format("deleted ~p - config from node : ~p !", [Thing, Target]))),
+    Thing_config = node_config:get_thing_config(Thing),
+    case rpc:call(list_to_atom(Target), node_config, delete_thing_config, [Thing_config, ?THINGS_CONFIG]) of 
+        Result -> lager:info("deleted ~p - config from node : ~p !", [Thing, Target]),
+                  ?SEND(lists:flatten(io_lib:format("deleted ~p - config from node : ~p !", [Thing, Target])));
+        {badrpc, Reason} -> lager:error("couldn't deleted ~p - config from node : ~p !", [Thing, Target]),
+                            ?SEND(lists:flatten(io_lib:format("couldn't cdeleted ~p - config from node : ~p !", [Thing, Target])))
+    end,
     Config;
 
 handle_msg([Node ,Sensor, Id, Time, [{action, "export"}, {thing, Thing}]] = Msg, Config, Module_config) ->

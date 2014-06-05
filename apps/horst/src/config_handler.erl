@@ -19,7 +19,9 @@
 -export([get_messages_for_module/3, is_active/1]).
 -export([set_active/3]).
 -export([get_id/1]).
+-export([add_message_to_config/2]).
 -export([add_thing_to_config/2, get_thing_config/2]).
+-export([delete_thing_config/2, write_config/3]).
 
 get_messages_for_module(Messages, Module, Id) ->
 	case lists:keyfind({Module, Id}, 1, Messages) of 
@@ -55,6 +57,21 @@ add_thing_to_config(Thing_config, Config_file) ->
 			  write_config(horst, Config_file, [Thing_config|Act_config]),
 			  ok;
 		_Any -> {error, "thing already exist"}
+	end.
+
+add_message_to_config({{Module, Id}, List} = Message, Config_file) ->
+	Act_messages = get_config(horst, Config_file),
+	case lists:keyfind({Module, Id}, 1, Act_messages) of 
+		false -> {error, "message already exists"};
+		[] -> write_config(horst, Config_file, [Message|Act_messages]), 
+			  ok
+	end.
+
+delete_thing_config(Thing, Config_file) ->
+	Act_config = get_config(horst, Config_file),
+	case lists:keytake(Thing, 2, Act_config) of 
+		false -> false;
+		{value, Tuple, New_thing_config} -> ok = write_config(horst, Config_file, New_thing_config)
 	end.
 
 get_thing_config(Config, Thing) ->	
@@ -95,8 +112,25 @@ is_type(Type, Type_1) ->
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
 
+delete_thing_config_test() ->
+	ok = write_config(horst, "test.config", []),
+	C1 = {thing,"Sample_Sensor1",
+     [{type,sensor},
+      {ets,true},
+      {icon,"temp.png"},
+      {id, "default"},
+      {driver,{sample_driver,call_sensor},[{init,true},{data,[]}]},
+      {activ,false},
+      {timer,5000},
+      {database,[]},
+      {description,"Sample sensor for playing with"}]},
+	ok = application:load(horst),
+	ok = write_config(horst, "test.config", [C1]),
+	ok = delete_thing_config(C1, "test.config"),
+	[] = get_config(horst, "test.config").
+
 add_thing_to_config_test() ->
-	application:load(horst),
+	ok = application:load(horst),
 	write_config(horst, "test.config", []),
 	C1 = {thing,"Sample_Sensor1",
      [{type,sensor},
