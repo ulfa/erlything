@@ -28,6 +28,7 @@ call_sensor(Config, Module_config) ->
     Value = parse_message(Temp_line),
     thing:save_data_to_ets(Config, Value),
     ?SEND(Value),
+     thing:set_value(self(), Value),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions

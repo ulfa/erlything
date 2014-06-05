@@ -22,7 +22,7 @@
 %% --------------------------------------------------------------------
 init(Config) ->
 	lager:info("~p:init('~p')", [?MODULE, Config]),
-    {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
+    {driver, {Module, _Func}, Module_config} = lists:keyfind(driver, 1, Config),
     [Pin, Int_type] = config:get_values([pin, int_type], Module_config),
 	gpio:set_interrupt(Pin, Int_type),
 	{ok, Config}.

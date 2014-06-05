@@ -34,12 +34,19 @@
 -export([start/0]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
 -export([get_state/1, set_state/2, get_module_config/1, get_start_time/1, get_name/1, get_icon/1]).
--export([save_data_to_ets/2, save_data_to_ets/3, get_table_id/1, get_model/1]).
+-export([save_data_to_ets/2, save_data_to_ets/3, get_table_id/1, get_model/1, set_value/2, get_value/1]).
 -export([stop/1]).
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
+get_value(Name) when is_list(Name) ->
+    get_name(list_to_atom(Name));
+get_value(Name) ->
+    gen_server:call(Name, {get_value}).
+
+set_value(Pid, Value) when is_pid(Pid) ->
+    gen_server:cast(Pid, {set_value, Value}). 
 get_name(Pid) when is_pid(Pid) ->
     gen_server:call(Pid, {get_name});
 get_name(undefined) ->
@@ -98,7 +105,7 @@ stop(Name) ->
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {config, allowed_msgs, start_time}).
+-record(state, {config, allowed_msgs, start_time, value}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -121,7 +128,7 @@ start() ->
 %% --------------------------------------------------------------------
 init(Config) ->
     process_flag(trap_exit, true),
-    {ok, #state{config=Config, allowed_msgs = [], start_time=0}, 0}.
+    {ok, #state{config=Config, allowed_msgs = [], start_time=0, value=undefined}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -133,6 +140,8 @@ init(Config) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_call({get_value}, From, State=#state{value = Value}) ->
+    {reply, Value, State};
 handle_call({get_name}, From, State=#state{config = Config}) ->
     {reply, proplists:get_value(name, Config) , State};
 handle_call({get_start_time}, From, State=#state{start_time = Start_time}) ->
@@ -188,7 +197,6 @@ save_data_to_ets(Config, Key, Value) ->
   Table_Id = proplists:get_value(?TABLE, Config),
   ets:insert(Table_Id, [{Key, Value}]).
 
-
 get_table_id(Config) ->
     proplists:get_value(?TABLE, Config).
 %% --------------------------------------------------------------------
@@ -201,14 +209,14 @@ get_table_id(Config) ->
 handle_cast(die, State) ->
     exit(self(),killed),
     {noreply, State};
-
+handle_cast({set_value, Value}, State) ->
+    {noreply, State#state{value=Value}};
 handle_cast({stop}, State=#state{config = Config}) ->
     Name = proplists:get_value(name, Config), 
     lager:info("stopping thing : ~p ", [Name]),
      {stop, normal, State}; 
 handle_cast(Msg, State) ->
     {noreply, State}.
-
 %% --------------------------------------------------------------------
 %% Function: handle_info/2
 %% Description: Handling all non call/cast messages

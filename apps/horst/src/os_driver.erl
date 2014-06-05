@@ -34,7 +34,7 @@ stop(Config) ->
 call_sensor(Config, Module_config) ->
     Data = call_driver(),    
     ?SEND(Data),
-    %%thing:save_data_to_ets(Config, Data),
+    thing:set_value(self(), Data),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions

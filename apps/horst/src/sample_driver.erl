@@ -25,6 +25,7 @@ stop(Config) ->
 
 call_sensor(Config, Module_config) ->
     ?SEND([{sample, "test"}]),
+    thing:set_value(self(), [{sample, "test"}]),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions

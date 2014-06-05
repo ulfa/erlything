@@ -22,6 +22,7 @@ call_sensor(Config, Module_config) ->
     Value_1 = parse_message_from_dht22(Value),    
     thing:save_data_to_ets(Config, Value_1),
     ?SEND(Value_1),
+    thing:set_value(self(), Value_1),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
