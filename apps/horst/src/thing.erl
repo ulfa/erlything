@@ -147,7 +147,7 @@ handle_call({get_name}, From, State=#state{config = Config}) ->
 handle_call({get_start_time}, From, State=#state{start_time = Start_time}) ->
     {reply, Start_time, State};
 handle_call({get_type}, From, State=#state{config = Config}) ->
-    {reply, proplists:get_value(type, Config, unknown) , State};
+    {reply, proplists:get_value(type, Config, undefined) , State};
 handle_call({get_driver}, From, State=#state{config = Config}) ->
 	{driver, Module, Module_config} = lists:keyfind(driver, 1, Config),
     {reply, {Module, Module_config} , State};
@@ -409,7 +409,7 @@ check_init(Module) ->
         1 -> lager:warning("there is a init function in the module '~p', but it is false or not available in the config", [Module]),
              false;
         Any -> lager:waring("the init function has too many arguments"),
-                false
+             false
     end.
 
 %% --------------------------------------------------------------------
