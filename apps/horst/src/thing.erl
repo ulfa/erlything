@@ -271,7 +271,7 @@ handle_info({'ETS-TRANSFER', TableId, Pid, _Data}, State=#state{config = Config}
  
 handle_info({send_after, Messages}, State) ->
     lager:info("now we send the message : ~p ", [Messages]),
-    sensor:send_messages(Messages),
+    sensor:send_messages([], Messages),
     {noreply, State};
     
 handle_info({Port, Payload}, State=#state{config = Config}) when is_port(Port) ->
@@ -301,7 +301,7 @@ handle_info(Info, State) ->
     case proplists:get_value(stop, Exports) of 
         undefined -> lager:warning("there is no stop function in module : ~p", [Module]);
         1 -> driver_stop(Module, Config);
-        Any -> lager:waring("the stop function has too many arguments")
+        Any -> lager:warning("the stop function has too many arguments")
     end,
     ok.
     
@@ -408,8 +408,8 @@ check_init(Module) ->
         undefined -> true;
         1 -> lager:warning("there is a init function in the module '~p', but it is false or not available in the config", [Module]),
              false;
-        Any -> lager:waring("the init function has too many arguments"),
-             false
+        Any -> lager:warning("the init function has too many arguments"),
+                false
     end.
 
 %% --------------------------------------------------------------------

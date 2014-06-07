@@ -29,7 +29,8 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([create_message/5, create_message/4, create_message/3, send_message/1]).
+-export([create_message/5, create_message/4, create_message/3, create_message/2]).
+-export([send_message/1, send_message/2]).
 -export([encode/1]).
 %% --------------------------------------------------------------------
 %% record definitions
@@ -37,6 +38,9 @@
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+create_message(Module, Body) ->
+  create_message(node(), Module, get_id([]), date:get_date_seconds(), Body).
+
 create_message(Node, Module, Body) ->
   create_message(Node, Module, get_id([]), date:get_date_seconds(), Body).
 
@@ -48,9 +52,14 @@ create_message(Node, Sensor, Id, Time, Body) ->
 
 send_message(Message) ->
   send_message(nodes(), Message).
+
+send_message(Node, Message) when is_atom(Node)->
+  rpc:abcast([Node], 'actor_group', Message);
+
 send_message(Nodes, Message) ->
   send_message(Nodes, 'actor_group', Message).    
-send_message(Nodes, Target, Message) ->
+
+send_message(Nodes, Target, Message) when is_list(Nodes)->
   rpc:abcast([node()|Nodes], Target, Message).    
 
 encode([]) ->

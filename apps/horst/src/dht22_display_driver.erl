@@ -16,7 +16,6 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([handle_msg/3]).
--export([test_fill_with_value/0]).
 
 handle_msg([Node ,Sensor, Id, Time, [{temp, 0.0},{hum, 0.0}]], Config, Module_config) ->
 	lager:warning("dht22_display_driver got a message with incorrect values: ~p", [[Node ,Sensor, Id, Time, [{temp, 0.0},{hum, 0.0}]]]),
@@ -48,10 +47,6 @@ add(List, Value) ->
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
-test_fill_with_value() -> 
-    sensor:send_message(sensor:create_message('horst@erwin', 'dht22_driver', [{temp, 10.0}, {hum, 50}])), 
-    sensor:send_message(sensor:create_message('horst@erwin', 'dht22_driver', [{temp, 11.0}, {hum, 52}])).
-
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
 handle_msg_test() ->

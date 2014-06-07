@@ -1,9 +1,12 @@
-.DS_Store
+*/.DS_Store
 .ct_dialyzer.plt
 erl_crash.dump
 deps/gpio/priv/gpio_drv.so
 log/*
 apps/*/ebin/*
+apps/*/logs/*
+apps/*/test/*.beam
+ct_test/*
 .eunit/
 rel/horst/*
 deps
@@ -12,3 +15,4 @@ include/*~
 log/*
 deps/*
 backup/*
+variables-*

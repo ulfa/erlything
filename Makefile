@@ -42,11 +42,30 @@ tests: clean app eunit ct
 eunit:
 	@$(REBAR) eunit skip_deps=true
 
-ct:
-	@$(REBAR) ct
 
 docs:
 	@$(REBAR) doc skip_deps=true
 
 rcswitch:
 	$(MAKE) -C apps/horst/priv/driver/remote send
+
+ct_setup:
+	rm -rf ct_test/dev1 
+	rm -rf ct_test/dev2 
+	mkdir -p ct_test/dev1
+	mkdir -p ct_test/dev2
+	cp -R apps ct_test/dev1/apps
+	cp -R deps ct_test/dev1/deps
+	cp dev1.sh ct_test/dev1
+
+	cp -R apps ct_test/dev2/apps
+	cp -R deps ct_test/dev2/deps
+	cp dev.sh ct_test/dev2
+
+ct_horst:
+	cd ./apps/horst
+	ct_run -dir ./apps/horst/test -suite ./apps/horst/test/horst_SUITE \
+	  -sname test -setcookie nocookie -logdir ./apps/horst/logs -label horst \
+	  -config ./apps/horst/test/app.config -cover ./apps/horst/test/cover.spec \
+	  -pa ./apps/horst/ebin
+	cd ../..

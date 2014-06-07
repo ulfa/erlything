@@ -12,7 +12,6 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([init/1, stop/1, handle_msg/3]).
--export([send_message/1]).
 
 init(Config) ->
     MD = config:get_module_config(Config), 
@@ -49,9 +48,6 @@ handle_msg(Message, Config, Module_config) ->
     lager:warning("cron_driver can't handle any message"),
     Config.
 
-send_message(Message) ->
-	lager:info("cron_driver will send the following message : ~p", [Message]),
-	sensor:send(?MODULE, Message). 
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------

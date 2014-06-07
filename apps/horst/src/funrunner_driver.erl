@@ -50,9 +50,9 @@ handle_msg([Node ,Sensor, Id, Time, {run,{Node_1, Driver_1, Id_1, Time_1, Body} 
     try
         Result = run_fun(Fun, Name, Body),
         lager:info("Result of fun : ~p is : ~p", [Msg, Result]),
-        create_message_and_send(Module_config, {run_result, Name, {ok, Result}})
+        create_message_and_send(Config, {run_result, Name, {ok, Result}})
     catch   
-        _:Error -> create_message_and_send(Module_config, {error, "running fun with name : " ++ Name ++ " ", Error}),
+        _:Error -> create_message_and_send(Config, {error, "running fun with name : " ++ Name ++ " ", Error}),
                     handle_error(Config, Module_config, Name, "running fun with name : " ++ Name ++ " ", Error)
     end,
     Config;
@@ -67,10 +67,10 @@ handle_msg([Node ,Sensor, Id, Time, {run, Name, Args}], Config, Module_config) w
                 Arguments  = string_to_args("[" ++ Args ++ "]."),        
                 Result = run_fun(Fun, Name, args_to_types(Arguments)),
                 lager:info("Result for fun with name : ~p is : ~p", [Name, Result]),
-                create_message_and_send(Module_config, Name,{run_result, Name, {ok, Result}})
+                create_message_and_send(Config, Name, {run_result, Name, {ok, Result}})
             catch 
                 _:Error -> lager:error("fun : ~p Error : ~p", [Name, Error]),
-                           create_message_and_send(Module_config, {error, "running fun with name : " ++ Name ++ " and args :" ++ Args ++ " ", Error}),
+                           create_message_and_send(Config, {error, "running fun with name : " ++ Name ++ " and args :" ++ Args ++ " ", Error}),
                            handle_error(Config, Module_config, Name, "running fun with name : " ++ Name ++ " and args : " ++ Args ++ " ", Error)
             end,
             Config
@@ -80,14 +80,14 @@ handle_msg([Node ,Sensor, Id, Time, {list, Name}], Config, Module_config) ->
     lager:info("list the fun with name : ~p", [Name]),
     Funs = config:get_value(funs, Module_config, []),
     Result = get_command(Funs, Name),
-    create_message_and_send(Module_config, {list_result, Name, {ok, Result}}),
+    create_message_and_send(Config, {list_result, Name, {ok, Result}}),
     Config;
 
 handle_msg([Node ,Sensor, Id, Time, {list}], Config, Module_config) ->
     lager:info("list all funs "),
     Funs = config:get_value(funs, Module_config, []),
     Result = get_commands(Funs),
-    create_message_and_send(Module_config, {list_result, {ok, Result}}),
+    create_message_and_send(Config, {list_result, {ok, Result}}),
     Config;
 
 handle_msg([Node ,Sensor, Id, Time, {error, Text, Others}], Config, Module_config) ->
@@ -133,12 +133,11 @@ handle_error(Config, Module_config, Name, Error_text, Error) ->
     Module_config_2 = lists:keyreplace(errors, 1 , Module_config, {errors, [{Name, Error_text, Error}]}),    
     lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_2}).
 
-create_message_and_send(Module_config, Result) ->
-    create_message_and_send(Module_config, config_handler:get_id(Module_config), Result).
+create_message_and_send(Config, Result) ->
+    create_message_and_send(Config, config_handler:get_id(Config), Result).
 
-create_message_and_send(Module_config, Id, Result) ->
-    Message = sensor:create_message(node(), ?MODULE, Id, Result),
-    sensor:send_message(nodes(), Message). 
+create_message_and_send(Config, Id, Result) ->    
+    ?SEND(Result).
 
 
 command_to_fun(Command) ->
@@ -210,25 +209,25 @@ test_me() ->
     sensor:send_message(nodes(), Message2).
 
 test_schimmel1() ->
-    Message=sensor:create_message(node(), 'testmodule', config_handler:get_id([]), {save, "schimmel", {<<"horst@raspberrypi">>,<<"dht22_driver">>,<<"default">>}, "fun(Pid, Name, [{temp, Temp}, {hum, Hum}]) -> io:format(\"~p~p~n\", [Temp, Hum]) end.", "Schimmel App"}),
-    sensor:send_message(Message).
+    Config = [],
+    ?SEND({save, "schimmel", {<<"horst@raspberrypi">>,<<"dht22_driver">>,<<"default">>}, "fun(Pid, Name, [{temp, Temp}, {hum, Hum}]) -> io:format(\"~p~p~n\", [Temp, Hum]) end.", "Schimmel App"}).
 
 test_schimmel_data() ->
-    Message=sensor:create_message('horst@raspberrypi', 'dht22_driver', [{temp, 10.0},{hum, 50}]),
-    sensor:send_message(Message).
+    Config = [],
+    ?SEND([{temp, 10.0},{hum, 50}]).
 
 test_send_after() ->
-    Message=sensor:create_message(node(), 'testmodule', config_handler:get_id([]), 
-        {save, "send_after", {<<"horst@macbook-pro">>,<<"testmodule">>,<<"default">>}, 
+    Config = [],
+    Message={save, "send_after", {<<"horst@macbook-pro">>,<<"testmodule">>,<<"default">>}, 
         "fun(Pid, Name, Body) ->                      
             sensor:send_after(Pid, 20000,[{Name, 'Das ist ein send_after test'}]),
             ok 
-         end.", "This is a send_after example"}),
-    sensor:send_message(Message).
+         end.", "This is a send_after example"},
+    ?SEND(Message).
 
 test_start_send_after() ->
-    Message=sensor:create_message('horst@macbook-pro', 'testmodule', "start send_after test"),
-    sensor:send_message(Message).
+    Config = [],
+    ?SEND("start send_after test").    
 
 test_exception() ->
     try  
@@ -252,7 +251,7 @@ fun_test() ->
     fun(Name, Pid, [Body]) -> 
         case Body of 
             "off" -> ok; 
-            "on" -> sensor:send(Name, Body),
+            "on" -> sensor:send([], Name, Body),
                     sensor:send_after(Pid, 20000,[{Name,  "off"}])
         end
     end.

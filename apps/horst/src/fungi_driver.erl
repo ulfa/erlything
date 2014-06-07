@@ -111,8 +111,7 @@ send_msg_to_human(Room, Window_state, Window_state, Config, Module_config) ->
     lager:info("~p sends nothing because the window is already in state : ~p", [?MODULE, Window_state]),
     Config;
 send_msg_to_human(Room, Window_state, Window_state_new, Config, Module_config) ->    
-    Msg = sensor:create_message(node(), ?MODULE, [{account, get_config(boxcar, Module_config)},{title, Window_state_new ++ " the window in room : " ++ Room }, {message, "see title"}, {sound, "digital-alarm"}]),
-    sensor:send_message(Msg),  
+    ?SEND([{account, get_config(boxcar, Module_config)},{title, Window_state_new ++ " the window in room : " ++ Room }, {message, "see title"}, {sound, "digital-alarm"}]),    
     Config.
 %%
 %% If the temp in the observed room is < 16 degrees then is increase the temp

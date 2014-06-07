@@ -24,17 +24,17 @@ init(Config) ->
     
 stop(Config) ->
     lager:info("~p:stop('~p')", [?MODULE, Config]),
-    ok = tranceiver:unregister_listener(self()),
+    ok = tranceiver:unregister_listener(),
     {ok, Config}.
 
 handle_msg({external_interrupt, sue, info, {alive, Node}}, Config, Module_config) ->
     lager:info("~p got a message that node : ~p is ALIVE!", [?MODULE, Node]),
-    sensor:send('system', {info, {alive, Node}}),
+    ?SEND(?SYSTEM, {info, {alive, Node}}),
     Config;
 
 handle_msg({external_interrupt, sue, error, {dead, Node}}, Config, Module_config) ->
     lager:info("~p got a message that node : ~p is DEAD!", [?MODULE, Node]),
-    sensor:send('system',{error, {dead, Node}}),
+    ?SEND(?SYSTEM,{error, {dead, Node}}),
     Config.
 
 %% --------------------------------------------------------------------

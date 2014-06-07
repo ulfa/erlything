@@ -25,29 +25,48 @@
 %% ====================================================================
 %% External functions
 %% ====================================================================
--export([get_messages_config/0, get_things_config/0]).
--export([set_messages_config/2, set_things_config/2]).
--export([get_messages_for_module/2]).
+-export([set_messages_config/2, get_messages_config/0, set_messages_file/2]).
+-export([get_things_config/0, set_things_config/2]).
+-export([get_messages_for_module/2, add_message_to_config/2]).
 -export([set_active/2]).
+-export([add_thing_to_config/2, get_thing_config/1]).
+-export([delete_thing_config/1, set_things_file/2]).
 
+set_messages_file(Config_file_name, Config) ->
+    gen_server:call(?MODULE, {set_messages_file, Config_file_name, Config}).
+
+add_message_to_config(Message, Config_file) ->
+    gen_server:call(?MODULE, {add_message_to_config, Message, Config_file}).
+
+-spec set_active(atom(), atom()) -> ok | {error, string()}.
+set_active([], Status) ->
+    {error, "Thing must not be an empty list"};
 set_active(Thing, true) ->
     gen_server:call(?MODULE, {set_active, Thing, true});
 set_active(Thing, false) ->
     gen_server:call(?MODULE, {set_active, Thing, false});
 set_active(Thing, Status) ->
-    lager:error("Activ : ~p is not a valid value!", [Status]),
-    {false, wrong_value}.
+    lager:error("Status : ~p is not a valid value!", [Status]),
+    {error, "Status must be true or false"}.
+
 get_messages_config() ->
 	gen_server:call(?MODULE, {get_messages_config}).
 get_things_config() ->
 	gen_server:call(?MODULE, {get_things_config}).
+set_things_file(Config_file_name, Config) ->
+    gen_server:call(?MODULE, {set_things_file, Config_file_name, Config}).    
 get_messages_for_module(Module, Id) ->
 	gen_server:call(?MODULE, {get_messages_for_module, Module, Id}).
 set_messages_config(Key, Value) ->
 	gen_server:call(?MODULE, {set_messages_config, Key, Value}).
 set_things_config(Key, Value) ->
 	gen_server:call(?MODULE, {set_things_config, Key, Value}).
-
+add_thing_to_config(Thing_config, Config_file) ->
+    gen_server:call(?MODULE, {add_thing_to_config, Thing_config, Config_file}).
+get_thing_config(Thing) when is_list(Thing)-> 
+    gen_server:call(?MODULE, {get_thing_config, Thing}).
+delete_thing_config(Thing) -> 
+    gen_server:call(?MODULE, {delete_thing_config, Thing, ?THINGS_CONFIG}).
 %% --------------------------------------------------------------------
 %% record definitions
 %% valid: is the file ok or corrupt
@@ -90,22 +109,57 @@ handle_call({set_active, Thing, Status}, From, State=#state{things = Thing_Confi
     Thing_Config_1 = config_handler:set_active(Thing_Config, Thing, Status),
     {reply, ok, State#state{things = Thing_Config_1}};
 
+handle_call({set_things_file, Config_file_name, Config}, From, State) ->
+    things_sup:kill_all_things(),
+    config_handler:write_config(horst, Config_file_name, Config),
+    {reply, ok, State};
 handle_call({get_messages_config}, From, State=#state{messages=Messages}) -> 
     {reply, {node(), Messages}, State};
 
 handle_call({get_things_config}, From, State=#state{things=Things}) ->
     {reply, {node(), Things}, State};
 
+handle_call({delete_thing_config, Thing_config, Config_file}, From, State=#state{things=Things}) ->
+    Result = case config_handler:delete_thing_config(Thing_config, Config_file) of 
+        ok -> ok;
+        {error, Reason} -> Reason
+    end,
+    {reply, Result, State};
+
 handle_call({get_messages_for_module, Module, Id}, From, State=#state{messages=Messages}) ->
 	Config = config_handler:get_messages_for_module(Messages, Module, Id), 
     {reply, Config, State};
 
+handle_call({set_messages_file, Config_file_name, Config}, From, State) ->
+    config_handler:write_config(horst, Config_file_name, Config),
+    {reply, ok, State};
+
 handle_call({set_messages_config, Key, Value}, From, State) ->
     {reply, "not implemented yet", State};
 
+handle_call({add_message_to_config, Message, Config_file}, From, State) ->
+    Result = case config_handler:add_message_to_config(Message, Config_file) of
+                ok -> ok;
+                {error, Reason} -> lager:error("an error occurered during adding new config: ~p", [Reason]),
+                                    Reason                               
+             end,
+    {reply, Result, State};
+
+
+handle_call({get_thing_config, Thing}, From, State=#state{things = Things}) ->
+    Result = config_handler:get_thing_config(Things, Thing),
+    {reply, Result, State};
+
+handle_call({add_thing_to_config, Thing_config, Config_file}, From, State) ->
+    Result = case config_handler:add_thing_to_config(Thing_config, Config_file) of
+                ok -> ok;
+                {error, Reason} -> lager:error("an error occurered during adding new config: ~p", [Reason]),
+                                    Reason                               
+             end,
+    {reply, Result, State};
+
 handle_call({set_things_config, Key, Value}, From, State) ->
     {reply, "not implemented yet", State}.
-
 %% --------------------------------------------------------------------
 %% Function: handle_cast/2
 %% Description: Handling cast messages
@@ -113,6 +167,7 @@ handle_call({set_things_config, Key, Value}, From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+
 handle_cast(Msg, State) ->
     {noreply, State}.
 
@@ -168,20 +223,20 @@ update_config(false, Config_file, State) ->
     State.
 
 update_state(?MESSAGES_CONFIG, {error, Reason} , State=#state{m_valid=true})  ->
-    sensor:send(?SYSTEM, {error, {?MESSAGES_CONFIG, "DAMAGED! Please, repair", Reason}}),
+    ?SEND(?SYSTEM, {error, {?MESSAGES_CONFIG, "DAMAGED! Please, repair", Reason}}),
     State=#state{m_valid=false};
 
 update_state(?MESSAGES_CONFIG, Config, State) ->
     [Pid ! {update_config, ?MESSAGES_CONFIG} ||Pid <- things_sup:get_things_pids()],
-    sensor:send(?SYSTEM, {info, {?MESSAGES_CONFIG, "updated succesfully"}}),
+    ?SEND(?SYSTEM, {info, {?MESSAGES_CONFIG, "updated succesfully"}}),
     State#state{messages=Config, m_valid=true};
 
 update_state(?THINGS_CONFIG, {error, Reason}, State=#state{t_valid=true})  ->
-    sensor:send(?SYSTEM, {error, {?THINGS_CONFIG, "DAMAGED! Please, repair", Reason}}),
+    ?SEND(?SYSTEM, {error, {?THINGS_CONFIG, "DAMAGED! Please, repair", Reason}}),
     State#state{t_valid=false};    
 update_state(?THINGS_CONFIG, Config, State) ->
     things_sup:update_list_of_things(Config),
-    sensor:send(?SYSTEM, {info, {?THINGS_CONFIG, "updated succesfully"}}),
+    ?SEND(?SYSTEM, {info, {?THINGS_CONFIG, "updated succesfully"}}),
     State#state{things=Config, t_valid=true}.
 
 get_poll_time() ->
@@ -201,4 +256,29 @@ start_timer() ->
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
+
+add_thing_to_config_test() ->
+    Thing_config = {thing,"Sample_Sensor1",
+     [{type,sensor},
+      {ets,true},
+      {icon,"temp.png"},
+      {id, "default"},
+      {driver,{sample_driver,call_sensor},[{init,true},{data,[]}]},
+      {activ,false},
+      {timer,5000},
+      {database,[]},
+      {description,"Sample sensor for playing with"}]},
+    ok = application:load(horst),
+    {ok,Pid} = node_config:start(),
+    write_config("test.config", []),
+    ok=node_config:add_thing_to_config(Thing_config, "test.config"),
+    Things_config=config_handler:get_config(horst, "test.config"),
+    Thing_config = config_handler:get_thing_config(Things_config, "Sample_Sensor1"),
+    write_config("test.config", []).
+
+delete_thing_config_test() ->
+    ok.
+    
+write_config(Config_file, Data) ->
+    file:write_file(filename:join([code:priv_dir(horst), "config", Config_file]), io_lib:fwrite("~p.\n", [Data])).  
 -endif.

@@ -1,5 +1,8 @@
 -module(dsl).
--export([create_rules/2, apply_rules/3]).
+
+-include("../include/horst.hrl").
+
+-export([create_rules/2, apply_rules/4]).
 
 
 create_rules(Module, Rules) ->
@@ -12,21 +15,19 @@ rule_to_function(Module, Rule) ->
     to_function(Module, Variable, Operator, Limit_type, Limit, Message_type, Action_type, Action_value).
 
 to_function(Module, Variable, Operator, Limit_type, Limit, Message_type, Action_type, Action_value) ->
-    fun(Node, {Variable, Value}) ->
+    fun(Config, Node, {Variable, Value}) ->
         if
-            (Value < Limit andalso Operator =:= less) ->
-                Msg = sensor:create_message(node(), Module, {Message_type, Node, Action_value}),
-                sensor:send_message(Msg); 
-            (Value > Limit andalso Operator =:= greater) ->
-                Msg = sensor:create_message(node(), Module, {Message_type, Node, Action_value}),
-                sensor:send_message(Msg); 
+            (Value < Limit andalso Operator =:= less) ->                
+                ?SEND([{Message_type, Node, Action_value}]);                
+            (Value > Limit andalso Operator =:= greater) ->                
+                ?SEND([{Message_type, Node, Action_value}]);
         true ->
             lager:debug("no rule applied")
         end
     end.
 
-apply_rules(Funs, Node, {temp, _Temp} = Data) ->
-    [Fun(Node, Data) || Fun <- Funs].
+apply_rules(Config, Funs, Node, {temp, _Temp} = Data) ->
+    [Fun(Config, Node, Data) || Fun <- Funs].
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

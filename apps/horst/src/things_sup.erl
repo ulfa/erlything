@@ -18,7 +18,7 @@
 -export([init/1]).
 -export([get_sensors/0, get_actors/0, get_sensors_pids/0, get_actors_pids/0]).
 -export([get_things/0, get_things_pids/0, update_list_of_things/1]).
--export([is_thing_running/2]).
+-export([is_thing_running/2, kill_all_things/0]).
 
 -include("../include/horst.hrl").
 
@@ -71,7 +71,7 @@ is_valid_pid(Pid) when is_pid(Pid) ->
 update_list_of_things(Config) ->
 	lager:info("update the list of sensors and actors, because the things.config changed"),
 	[start_if_not_running([{thing, Name, List}], supervisor:which_children(things_sup)) || {thing, Name, List} <- Config, config_handler:is_active(List)],
-	[kill_if_running(Name, supervisor:which_children(things_sup)) || {thing, Name, List} <- Config, false =:= config_handler:is_active(List)].
+	[kill_if_running(list_to_atom(Name), supervisor:which_children(things_sup)) || {thing, Name, List} <- Config, false =:= config_handler:is_active(List)].
 
 start_if_not_running([], Things) ->
 	ok;
@@ -82,17 +82,17 @@ start_if_not_running(Config, Things) ->
 		false -> [Child_spec] = config_handler:create_thing_spec(Config),
 				 Result = supervisor:start_child(?MODULE, Child_spec),
 				 lager:info("~p started thing with result : ~p", [Thing, Result]), 
-				 sensor:send(?SYSTEM, {info,{{thing, Thing}, ?STARTED}}), 
+				 ?SEND(?SYSTEM, {info,{{thing, Thing}, ?STARTED}}), 
 				 ok
 	end. 
 
 kill_if_running(Thing, Things) ->
 	case is_thing_running(Thing, Things) of 
 		false -> ok;
-		true -> Result = supervisor:terminate_child(?MODULE, list_to_atom(Thing)),
-				supervisor:delete_child(?MODULE, list_to_atom(Thing)),
+		true -> Result = supervisor:terminate_child(?MODULE, Thing),
+				supervisor:delete_child(?MODULE, Thing),
 				lager:info("terminated ~p with result : ~p", [Thing, Result]),
-				sensor:send(?SYSTEM, {info,{{thing, Thing}, ?STOPPED}}), 
+				?SEND(?SYSTEM, {info,{{thing, Thing}, ?STOPPED}}), 
 				ok
 	end. 
 
@@ -104,6 +104,15 @@ is_thing_running(Thing, Things) when is_atom(Thing) ->
 		_ -> true 
 	end.
 
+%% doc Kills all running things. This is needed for testing purpose
+%% !!! this will not update the things.config
+-spec kill_all_things() -> atom().
+kill_all_things() ->
+	Thing_list = supervisor:which_children(things_sup),
+	[ok = kill_if_running(Name, Thing_list) ||{Name, Pid, Type, Modules} <- Thing_list, Pid =/= undefined].
+%% --------------------------------------------------------------------
+%%% Test functions
+%% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
 
@@ -112,4 +121,5 @@ is_thing_running_test() ->
 	?assertEqual(true, is_thing_running('Temperatur_Sensor', Things)),
 	?assertEqual(false, is_thing_running('unknown_Sensor', Things)),
 	?assertEqual(false, is_thing_running('Message_Logger', Things)).
+
 -endif.
