@@ -53,13 +53,13 @@ create_message(Node, Sensor, Id, Time, Body) ->
 send_message(Message) ->
   send_message(nodes(), Message).
 
-send_message(Node, Message) when is_atom(Node)->
+send_message(Node, [Node_1, Module, Id, Time, Body] = Message) when is_atom(Node)->
   rpc:abcast([Node], 'actor_group', Message);
 
 send_message(Nodes, Message) ->
   send_message(Nodes, 'actor_group', Message).    
 
-send_message(Nodes, Target, Message) when is_list(Nodes)->
+send_message(Nodes, Target, [Node_1, Module, Id, Time, Body] = Message) when is_list(Nodes)->
   rpc:abcast([node()|Nodes], Target, Message).    
 
 encode([]) ->

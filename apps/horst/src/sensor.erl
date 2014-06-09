@@ -60,17 +60,21 @@ send_message(Message) ->
 	send_message(nodes(), Message).
 
 send_message(Node, Message) when is_atom(Node) ->
-	send_message([Node], Message);	
+	send_message([Node], Message);
+
 send_message(Nodes, Message) ->
 	send_message(Nodes, 'actor_group', Message).    
+
 send_message(Nodes, Target, Message) ->
 	send_message(node(), Nodes, Target, Message).
-send_message(Node, Nodes, Target, Message) ->
+
+send_message(Node, Nodes, Target, [Node_1, Module, Id, Time, Body] = Message) ->
 	rpc:abcast([Node|Nodes], Target, Message),
 	ok.
+
+
 send_after(Pid, Time, Messages) when is_list(Messages) ->
 	erlang:send_after(Time, Pid, {send_after, Messages}).    
-
 %%
 %% doc generates messages and send them. !!! only for testing !!!
 %%

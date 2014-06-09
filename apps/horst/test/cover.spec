@@ -1,6 +1,6 @@
 %% List of Nodes on which cover will be active during test.
 %% Nodes = [atom()]
-{nodes, ['erlything1@macbook-pro', 'erlything@macbook-pro']}.       
+{nodes, ['erlything1@ua-TA880GB', 'erlything@ua-TA880GB']}.       
 %% Cover analysis level.
 %% Level = details | overview
 {level, details}.       

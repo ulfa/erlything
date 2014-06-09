@@ -8,11 +8,12 @@
 %%% Created :  
 -module(cron_driver).
 
+-include("../include/horst.hrl").
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
 -export([init/1, stop/1, handle_msg/3]).
-
+-export([send_message/1]).
 init(Config) ->
     MD = config:get_module_config(Config), 
 	lager:info("cron_driver:init('~p')", [MD]),
@@ -51,6 +52,15 @@ handle_msg(Message, Config, Module_config) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+
+%% This function will be used, when a cron job fires.
+%% {daily,{every,{10,sec},{between,{6,am},{6,0,pm}}}},{cron_driver,send_message,["Test Message"]}}]}
+%% TODO: How can i get the config from the cron_driver?
+send_message(Message) ->
+    lager:info("cron_driver will send the following message : ~p", [Message]),
+    Config = [],
+    ?SEND(Message).
+
 start_jobs(Crontab) ->
 	[erlcron:cron(Job) || Job <- Crontab].
 
@@ -62,5 +72,5 @@ stop_jobs(Crontab) ->
 %%% Test functions
 %% --------------------------------------------------------------------
 -include_lib("eunit/include/eunit.hrl").
--ifdef(TEST).
+-ifdef(TEST).    
 -endif.

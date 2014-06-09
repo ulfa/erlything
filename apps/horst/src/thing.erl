@@ -31,7 +31,6 @@
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/1]).
--export([start/0]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
 -export([get_state/1, set_state/2, get_module_config/1, get_start_time/1, get_name/1, get_icon/1]).
 -export([save_data_to_ets/2, save_data_to_ets/3, get_table_id/1, get_model/1, set_value/2, get_value/1]).
@@ -115,9 +114,6 @@ stop(Name) ->
 %%--------------------------------------------------------------------
 start_link(Config) ->
     gen_server:start_link({local, list_to_atom(proplists:get_value(name, Config))}, ?MODULE, Config, []).
-
-start() ->
-	start_link([]).
 %% --------------------------------------------------------------------
 %% Function: init/1
 %% Description: Initiates the server
@@ -275,7 +271,7 @@ handle_info({send_after, Messages}, State) ->
     {noreply, State};
     
 handle_info({Port, Payload}, State=#state{config = Config}) when is_port(Port) ->
-    %%lager:info("got a message from a port with payload: ~p ", [Payload]),
+    lager:info("got a message from a port with payload: ~p ", [Payload]),
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
     Config_1 = Module:Func(Payload, Config, Module_config),        
     {noreply, State#state{config = Config_1}};

@@ -26,7 +26,6 @@ init(Config) ->
 
 stop(Config) ->
     lager:info("~p:stop('~p')", [?MODULE, Config]),
-    lager:info("stop is called"),
     application:stop(os_mon),
     application:unload(os_mon), 
     {ok, Config}.    
