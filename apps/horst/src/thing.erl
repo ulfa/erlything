@@ -113,7 +113,7 @@ stop(Name) ->
 %% Description: Starts the server
 %%--------------------------------------------------------------------
 start_link(Config) ->
-    gen_server:start_link({local, list_to_atom(proplists:get_value(name, Config))}, ?MODULE, Config, []).
+    gen_server:start_link({local, list_to_atom(config:get_value(name, Config))}, ?MODULE, Config, []).
 %% --------------------------------------------------------------------
 %% Function: init/1
 %% Description: Initiates the server
@@ -222,10 +222,10 @@ handle_cast(Msg, State) ->
 %% --------------------------------------------------------------------
 handle_info(timeout, State=#state{config = Config}) ->
 	{driver, {Driver, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    Config_1 = ets_usage(proplists:get_value(ets, Config, false), Config, Module_config),
+    Config_1 = ets_usage(config:get_value(ets, Config, false), Config, Module_config),
     Allowed_msgs = node_config:get_messages_for_module(Driver, config_handler:get_id(Config)),     
-    Config_2 = driver_init(Driver, proplists:get_value(init, Module_config, false), Config_1),
-	start_timer(proplists:get_value(timer, Config_2, 0)),
+    Config_2 = driver_init(Driver, config:get_value(init, Module_config, false), Config_1),
+	start_timer(config:get_value(timer, Config_2, 0)),
     {noreply, State#state{allowed_msgs = Allowed_msgs, start_time=now(), config = Config_2}};
 
 handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
@@ -236,7 +236,7 @@ handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_
 handle_info({call_sensor}, State=#state{config = Config}) ->
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
     Config_1 = Module:Func(Config, Module_config),
-    start_timer(proplists:get_value(timer, Config, 0)),
+    start_timer(config:get_value(timer, Config, 0)),
     {noreply, State#state{config = Config_1}};
 
 handle_info({gpio_interrupt, 0, Pin, Status}, State=#state{config = Config}) ->   
@@ -293,8 +293,8 @@ handle_info(Info, State) ->
     lager:info("Reason for termination : ~p",[Reason]),
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config), 
     lager:info("stopping thing of type : ~p", [Module]),
-    Exports = proplists:get_value(exports, Module:module_info(), []),
-    case proplists:get_value(stop, Exports) of 
+    Exports = config:get_value(exports, Module:module_info(), []),
+    case config:get_value(stop, Exports) of 
         undefined -> lager:warning("there is no stop function in module : ~p", [Module]);
         1 -> driver_stop(Module, Config);
         Any -> lager:warning("the stop function has too many arguments")
@@ -394,13 +394,13 @@ ets_usage(false, Config, _Module_config) ->
     Config.
     
 create_ets(Config, Module_config) ->
-    Name = proplists:get_value(name, Config),
+    Name = config:get_value(name, Config),
     Id = config_handler:get_id(Config),
     ets_mgr:init_table(self(), list_to_atom(Name ++ "_" ++ Id), Module_config).  
 
 check_init(Module) ->
-    Exports = proplists:get_value(exports, Module:module_info(), []),
-    case proplists:get_value(init, Exports) of 
+    Exports = config:get_value(exports, Module:module_info(), []),
+    case config:get_value(init, Exports) of 
         undefined -> true;
         1 -> lager:warning("there is a init function in the module '~p', but it is false or not available in the config", [Module]),
              false;
