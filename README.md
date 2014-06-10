@@ -133,7 +133,6 @@ This configuration file contains the things, which you want to use in your env.
 	{driver, {dht22_driver, call_sensor}, []}, 
 	{activ, false},
 	{timer, 0},
-	{database, []},
 	{description, "Temp sensor in my office"}
 	]}.
 ```
@@ -147,7 +146,6 @@ This configuration file contains the things, which you want to use in your env.
 |driver      | {Module, Function}, []      | the list contains driver specific paramter
 |activ       | true / false                | the thing will only be started if activ = true
 |timer       | int                         | if the driver needs timmer triggering, you must spec it here
-|database    | []                          | database parameter
 |descripition| String                      | a description
 
 ### Messages.config

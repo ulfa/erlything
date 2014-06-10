@@ -39,7 +39,7 @@ create_thing(Name, Config) ->
     {thing, Name, Thing_config}.
     
 check_thing({thing, _Name, Parameters}) ->
-    [is_valid(Key, get_value(Key, Parameters)) || Key <- [type, ets, icon, id, driver, activ, timer, database, model_fun, description]].
+    [is_valid(Key, get_value(Key, Parameters)) || Key <- [type, ets, icon, id, driver, activ, timer,model_fun, description]].
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
@@ -57,7 +57,7 @@ is_valid(Key, Parameter) ->
     {Key, Parameter} = create_entry(Key, Parameter).
 
 create_entries(Name, Config) ->
-    [create_entry(Key, config:get_value(Key, Config)) || Key <- [type, ets, icon, id, driver, activ, timer, database, model_fun, description]].
+    [create_entry(Key, config:get_value(Key, Config)) || Key <- [type, ets, icon, id, driver, activ, timer, model_fun, description]].
     
 get_config() ->
     {Node, Config} = node_config:get_things_config(),
@@ -110,11 +110,6 @@ create_entry(timer, Value) when is_list(Value) ->
 create_entry(timer, Value) when is_integer(Value) ->
     {timer, Value};
 
-create_entry(database, undefined) ->
-    {database, []};
-create_entry(database, Value) ->
-    {database, Value};
-
 create_entry(model_fun, undefined) ->
     {model_fun, undefined};
 create_entry(model_fun, {Modul, Function}) ->
@@ -142,7 +137,6 @@ check_thing_test() ->
       {driver,{sample_driver,call_sensor},[{init,true},{data,[]}]},
       {activ,false},
       {timer,5000},
-      {database,[]},
       {description,"Sample sensor for playing with"}]},
     Result = [{type,sensor},
       {ets,true},
@@ -151,7 +145,6 @@ check_thing_test() ->
       {driver,{sample_driver,call_sensor},[{init,true},{data,[]}]},
       {activ,false},
       {timer,5000},      
-      {database,[]},
       {model_fun, undefined},
       {description,"Sample sensor for playing with"}],
       ?assertEqual(Result, check_thing(Config)).
@@ -167,7 +160,6 @@ create_config_test() ->
       {driver,{sample_driver,call_sensor},[{init,true},{data,[]}]},
       {activ,false},
       {timer,5000},
-      {database,[]},
       {description,"Sample sensor for playing with"}]},
       ?assertEqual(Result, create_thing("Sample_Sensor1",[{type, sensor}, {ets, true}, {icon, "temp.png"}, 
         {driver, {sample_driver, call_sensor, [{init, true}, {data, []}]}}, {timer, 5000}, {description,"Sample sensor for playing with"}])). 
