@@ -25,9 +25,9 @@
 	<tbody>
 	{% for date, message in data %}
 		<tr>
-			<td>{{date}}</td>
+			<td class="nowrap">{{date}}</td>
 			{% for detail in message%}
-			<td>{{detail}}</td>
+			<td class="nowrap">{{detail}}</td>
 			{% endfor %}
 		</tr>
 	{% endfor %}
