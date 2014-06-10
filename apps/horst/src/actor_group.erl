@@ -80,9 +80,9 @@ handle_cast(Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_info(Msg, State) ->
-	lager:debug("got message: ~p", [Msg]),
-	send_msg(Msg),
+handle_info([Node ,Sensor, Id, Time, Payload] = Message, State) ->
+	lager:debug("got message: ~p", [Message]),
+	send_msg(Message),
     {noreply, State};
 
 handle_info(Info, State) ->
