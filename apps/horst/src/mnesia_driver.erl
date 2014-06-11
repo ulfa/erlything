@@ -12,10 +12,13 @@
 %% Include files
 %% --------------------------------------------------------------------
 -include("../include/horst.hrl").
+-include_lib("stdlib/include/qlc.hrl").
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
 -export([init/1, stop/1, handle_msg/3]).
+-export([select/3, select/4, select/5]).
+-export([table_exists/1, create_table_name/3]).
 
 init(Config) ->
 	lager:info("~p:init('~p')", [?MODULE, Config]),
@@ -27,7 +30,6 @@ stop(Config) ->
 	lager:info("~p:stop('~p')", [?MODULE, Config]),
 	{ok, Config}.
 
-
 handle_msg([Node ,Module, Id, Time, Body], Config, Module_config) ->
 	Table_name = create_table_name(Node, Module, Id),
 	case table_exists(Table_name) of
@@ -36,6 +38,19 @@ handle_msg([Node ,Module, Id, Time, Body], Config, Module_config) ->
 	end,
 	save_values(Table_name, Time, Body),
 	Config.
+
+select(Node, Module, Id) ->
+	{atomic, Result} = mnesia:transaction(
+		fun() ->
+    		qlc:e(qlc:q([E || E <- mnesia:table(create_table_name(Node, Module, Id))]))
+    		
+		end),
+	Result.
+
+select(Node, Module, Id, Time) ->
+	[].
+select(Node, Module, Id, From_time, To_time) ->
+	[].
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
@@ -50,6 +65,9 @@ table_exists(Table_name) ->
 
 save_values(Table_name, Time, Body) ->
 	mnesia:dirty_write({Table_name, binary_to_int(Time), Body}).
+
+create_table_name(Node, Module, Id) when is_list(Node), is_list(Module), is_list(Id) ->
+	create_table_name(list_to_binary(Node), list_to_binary(Module), list_to_binary(Id));
 
 create_table_name(Node, Module, Id) ->
 	list_to_atom(lists:flatten([binary_to_list(Node), "_", binary_to_list(Module), "_",  binary_to_list(Id)])). 
