@@ -184,7 +184,6 @@ init_per_testcase(set_messages_file, Config) ->
   ok = rpc:call(ct:get_config(node, Config), node_config, set_messages_file, ["messages.config", []]),
   ct:sleep(?SLEEP),
   Config;
-
 %%-----------------------------config_driver--------------------------
 init_per_testcase(copy_config, Config) ->
   ok = rpc:call(ct:get_config(node_1, Config), node_config, set_things_file, ["things.config", [get_config_driver(),get_thing_data()]]),  
@@ -196,10 +195,20 @@ init_per_testcase(copy_config, Config) ->
   ok = rpc:call(ct:get_config(node_1, Config), node_config, set_messages_file, ["messages.config", [Message]]),
   ct:sleep(?SLEEP),
   Config;
+%%-----------------------------mnesia_driver--------------------------
+init_per_testcase(handle_msg, Config) ->
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_things_file, ["things.config", [get_mnesia_driver()]]),
+  ct:sleep(?SLEEP),
+
+  Message = {{mnesia_driver, "default"}, [{all, <<"horst_SUITE">>, all}]},
+  ok = rpc:call(ct:get_config(node_1, Config), node_config, set_messages_file, ["messages.config", [Message]]),
+  ct:sleep(?SLEEP),
+  Table_name = mnesia_driver:create_table_name("test@node", "module", "default"), 
+  mnesia:delete_table(Table_name), 
+  Config;
 
 init_per_testcase(_TestCase, Config) ->
   Config.
-
 %%--------------------------------------------------------------------
 %% Function: end_per_testcase(TestCase, Config0) ->
 %%               void() | {save_config,Config1} | {fail,Reason}
@@ -252,6 +261,11 @@ copy_config(Config) ->
 
 delete_config(_Config) ->
   ok.
+
+%%-----------------------------mnesia_driver--------------------------
+handle_msg(Config) ->
+  mnesia_driver:handle_msg([<<"test@node">>, <<"module">>, <<"default">>, <<"12345678">>, {test, value}], [], []).
+
 %%--------------------------------------------------------------------
 %%  only helper
 %%--------------------------------------------------------------------
@@ -276,6 +290,18 @@ get_config_driver() ->
       {timer,0},
       {database,[]},
       {description,"Things Config Manager"}]}.
+
+get_mnesia_driver() ->
+  {thing,"Config_Manager",
+     [{type,actor},
+      {ets,false},
+      {icon,"temp.png"},
+      {driver,{mnesia_driver,handle_msg},[{data,[]}]},
+      {activ,true},
+      {timer,0},
+      {database,[]},
+      {description,"The database actor"}]}.
+
 
 create_message(Node, Module, Id, Body) ->
     [atom_to_binary(Node, utf8), atom_to_binary(Module, utf8), list_to_binary(Id), list_to_binary(integer_to_list(get_date_seconds())), Body].
