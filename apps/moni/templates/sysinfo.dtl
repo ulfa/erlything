@@ -8,7 +8,7 @@
         <h2 class="panel-title">Sysinfo : {{node}}</h2>  
     </div>
     <div class="panel-body">
-		<table class="table">  
+		<table id="table_id" class="table table-striped table-bordered" cellspacing="0" width="100%">  
         	<thead>  
           	  <tr>  
 				  <th>Type</th>  
