@@ -17,7 +17,7 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([init/1, stop/1, handle_msg/3]).
--export([select/3, select/4, select/5]).
+-export([select/5]).
 -export([table_exists/1, create_table_name/3]).
 
 init(Config) ->
@@ -39,18 +39,14 @@ handle_msg([Node ,Module, Id, Time, Body], Config, Module_config) ->
 	save_values(Table_name, Time, Body),
 	Config.
 
-select(Node, Module, Id) ->
+select(Node, Module, Id, From_time, To_time) ->
 	{atomic, Result} = mnesia:transaction(
 		fun() ->
-    		qlc:e(qlc:q([E || E <- mnesia:table(create_table_name(Node, Module, Id))]))
+    		qlc:e(qlc:q([{Table, Time, Payload} || {Table, Time, Payload} <- mnesia:table(create_table_name(Node, Module, Id)), Time >= From_time, Time =< To_time]))
     		
 		end),
 	Result.
 
-select(Node, Module, Id, Time) ->
-	[].
-select(Node, Module, Id, From_time, To_time) ->
-	[].
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------

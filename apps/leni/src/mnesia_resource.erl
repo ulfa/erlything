@@ -232,9 +232,15 @@ finish_request(ReqData, Context) ->
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->
     [Node, Module, Id] = wrq:path_tokens(ReqData),
-    Data = mnesia_driver:select(Node, Module, Id), 
+    From_time = wrq:get_qs_value("from_time", date:get_start_datetime(), ReqData),
+    To_time = wrq:get_qs_value("to_time", date:get_end_datetime(), ReqData),
+    Data = search_database(Node, Module, Id, date:create_seconds_from_string(From_time), date:create_seconds_from_string(To_time)), 
     {ok, Content} = mnesia_dtl:render([{data, convert_date(Data)}]),
     {Content, ReqData, Context}.  
+
+search_database(Node, Module, Id, From_time, To_time) ->
+    mnesia_driver:select(Node, Module, Id, From_time, To_time).
+
 
 convert_date(Data) ->
     [{Table, date:seconds_to_date(Time), Payload}|| {Table, Time, Payload} <- Data].
