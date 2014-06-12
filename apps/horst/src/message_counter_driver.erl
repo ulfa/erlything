@@ -22,7 +22,7 @@ handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
 	ets:update_counter(Table_Id, counter, 1),
 	[{data, Data}] = ets:lookup(Table_Id, data),
 	ets:insert(Table_Id, [{data, add(Data, {date:timestamp_to_date(Time), [binary_to_list(Node),
-		binary_to_list(Sensor), binary_to_list(Id), date:timestamp_to_date(Time), Body]})}]), 
+		binary_to_list(Sensor), binary_to_list(Id), Body]})}]), 
 	Config.
 %% --------------------------------------------------------------------
 %%% Internal functions

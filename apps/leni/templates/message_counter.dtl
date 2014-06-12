@@ -18,7 +18,6 @@
 			<th>Node</th>
 			<th>Thing</th>
 			<th>Id</th>
-			<th>Time</th>
 			<th>Payload</th>
 		</tr>	
 	</thead>
