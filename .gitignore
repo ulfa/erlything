@@ -16,4 +16,4 @@ log/*
 deps/*
 backup/*
 variables-*
-Mnesia.*
+Mnesia.e*
