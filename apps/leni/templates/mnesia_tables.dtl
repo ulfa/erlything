@@ -1,0 +1,29 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}Tables{% endblock %}
+
+{% block body %}
+
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h2 class="panel-title">Rows : <span class="badge">{{ data|length }}</span></h2> 
+    </div>
+    <div class="panel-body">
+
+<table id="table_ids" class="table table-striped table-bordered" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th>Table</th>
+        </tr>   
+    </thead>
+    <tbody>
+    {% for table, link in data %}
+        <tr>
+            <td><a href="data{{link}}">{{table}}</a></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

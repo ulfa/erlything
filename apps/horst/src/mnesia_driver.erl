@@ -18,7 +18,7 @@
 %% --------------------------------------------------------------------
 -export([init/1, stop/1, handle_msg/3]).
 -export([select/5]).
--export([table_exists/1, create_table_name/3]).
+-export([table_exists/1, create_table_name/3, get_tables/0]).
 
 init(Config) ->
 	lager:info("~p:init('~p')", [?MODULE, Config]),
@@ -59,6 +59,9 @@ table_exists(Table_name) ->
    Tables = mnesia:system_info(tables),
    lists:member(Table_name,Tables).
 
+get_tables() ->
+	{node(), mnesia:system_info(tables)}.
+
 save_values(Table_name, Time, Body) ->
 	mnesia:dirty_write({Table_name, binary_to_int(Time), Body}).
 
@@ -66,7 +69,7 @@ create_table_name(Node, Module, Id) when is_list(Node), is_list(Module), is_list
 	create_table_name(list_to_binary(Node), list_to_binary(Module), list_to_binary(Id));
 
 create_table_name(Node, Module, Id) ->
-	list_to_atom(lists:flatten([binary_to_list(Node), "_", binary_to_list(Module), "_",  binary_to_list(Id)])). 
+	list_to_atom(lists:flatten([binary_to_list(Node), ":", binary_to_list(Module), ":",  binary_to_list(Id)])). 
 
 binary_to_int(Bin) ->
 	list_to_integer(binary_to_list(Bin)).

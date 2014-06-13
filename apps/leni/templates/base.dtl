@@ -36,6 +36,10 @@
                         <li>
                             <a href="/logger/none">Logging</a>
                         </li>                                                 
+                        <li>
+                            <a href="/actors/tables">Tables</a>
+                        </li>                                                 
+
                     </ul>
                 </div>
             </div>

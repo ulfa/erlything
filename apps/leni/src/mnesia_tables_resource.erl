@@ -21,7 +21,7 @@
 %%%
 %%% Created : 
 
--module(mnesia_resource).
+-module(mnesia_tables_resource).
 
 %% --------------------------------------------------------------------
 %% External exports
@@ -46,11 +46,8 @@ init(_Config) ->
 % Returning non-true values will result in 404 Not Found.
 % 
 resource_exists(ReqData, Context) ->
-    Result = case wrq:path_tokens(ReqData) of 
-                [A,B,C] -> mnesia_driver:table_exists(mnesia_driver:create_table_name(A,B,C)); 
-                _ -> false
-            end,
-    {Result, ReqData, Context}.
+    {true, ReqData, Context}.
+
 %
 % true, if the service is available
 %
@@ -229,15 +226,18 @@ finish_request(ReqData, Context) ->
 %%% Additional functions
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->
-    [Node, Module, Id] = wrq:path_tokens(ReqData),
-    From_time = wrq:get_qs_value("from_time", date:get_start_datetime(), ReqData),
-    To_time = wrq:get_qs_value("to_time", date:get_end_datetime(), ReqData),
-    Data = search_database(Node, Module, Id, date:create_seconds_from_string(From_time), date:create_seconds_from_string(To_time)), 
-    {ok, Content} = mnesia_dtl:render([{data, convert_date(Data)}]),
+    {ok, Content} = mnesia_tables_dtl:render(get_tables([])),
     {Content, ReqData, Context}.  
 
-search_database(Node, Module, Id, From_time, To_time) ->
-    mnesia_driver:select(Node, Module, Id, From_time, To_time).
+get_tables(Node) ->
+    {Node_1, Tables} = mnesia_driver:get_tables(),
+    [{node, Node_1}, {data, convert(Tables)}].
+
+convert(Tables) ->
+    [[Table, create_link(string:tokens(atom_to_list(Table), ":"))] || Table <- Tables, Table /= 'schema'].
+
+create_link([A, B, C]) ->
+    lists:flatten(["/", A, "/", B, "/", C]) .
 
 
 convert_date(Data) ->
