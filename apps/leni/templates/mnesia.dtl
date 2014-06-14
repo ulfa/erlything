@@ -6,7 +6,7 @@
 
 <div class="panel panel-info">
     <div class="panel-heading">
-        <h2 class="panel-title">Rows : <span class="badge">{{ data|length }}</span></h2> 
+        <h2 class="panel-title">Table : {{table}}</h2>
     </div>
     <div class="panel-body">
 

@@ -1,6 +1,6 @@
 {% extends "base_without.dtl" %}
 
-{% block title %}Tables{% endblock %}
+{% block title %}Storage : {{node}}{% endblock %}
 
 {% block body %}
 

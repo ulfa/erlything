@@ -37,7 +37,7 @@
                             <a href="/logger/none">Logging</a>
                         </li>                                                 
                         <li>
-                            <a href="/actors/tables">Tables</a>
+                            <a href="/actors/tables">Storage</a>
                         </li>                                                 
 
                     </ul>
