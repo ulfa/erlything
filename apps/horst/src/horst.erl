@@ -21,32 +21,26 @@
 -export([get_things/0, get_things/1]).
 -export([get_pic/1, get_log/1]).
 -export([set_active/2, get_state/1, set_state/2]).
-ensure_started(App) ->
-    case application:start(App) of
-        ok ->
-            ok;
-        {error, {already_started, App}} ->
-            ok
-    end.
-	
+
 start() ->
 	ensure_started(crypto),
     ensure_started(asn1),
 	ensure_started(public_key),
 	ensure_started(ssl),
 	ensure_started(sue),
+    %% i don't check the return value, because i also run it on a pc 
  	application:start(gpio),
     ensure_started(?MODULE),    
     ?SEND(?SYSTEM, {info, {"System is started!",[]}}). 
 
 stop() ->
     ?SEND(?SYSTEM, {info, {"System is going down!",[]}}),
-	application:start(public_key),
-	application:stop(crypto),
-	application:stop(ssl),
-	application:start(sue),
-    application:stop(gpio), 
-    application:stop(horst).
+	ensure_stopped(public_key),
+	ensure_stopped(crypto),
+	ensure_stopped(ssl),
+	ensure_stopped(sue),
+    ensure_stopped(gpio), 
+    ensure_stopped(horst).
 
 get_things() ->
     {node(), get_things(things_sup:get_things(), [])}.
@@ -79,6 +73,23 @@ get_state(Thing) ->
 
 set_state(Thing, State) ->
     thing:set_state(Thing, State). 
+
+ensure_started(App) ->
+    case application:start(App) of
+        ok ->
+            ok;
+        {error, {already_started, App}} ->
+            ok
+    end.
+
+ensure_stopped(App) ->
+    case application:stop(App) of
+        ok ->
+            ok;
+        {error, Reason} ->
+            ok
+    end.
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
