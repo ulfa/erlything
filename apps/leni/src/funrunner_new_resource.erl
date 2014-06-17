@@ -133,7 +133,7 @@ create_path(ReqData, Context) ->
 %
 process_post(ReqData, Context) ->
     Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
-    lager:info("body : ~p", [Body]),
+    %lager:info("body : ~p", [Body]),
     Button = get_value("button", Body),
     handle_post(Button, Body),
     {true, ReqData, Context}.
