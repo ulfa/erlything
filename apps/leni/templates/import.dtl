@@ -1,0 +1,46 @@
+{% extends "base_without.dtl" %}
+
+{% block title %}import{% endblock %}
+
+{% block body %}
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h2 class="panel-title">Send a message</h2>  
+    </div>
+    <div class="panel-body">
+    <form role="form" method="post">
+        <input type="hidden" name="node" value="{{node}}">
+        <div class="form-group">
+            <label>Node</label>
+            <div class="controls">
+                <input type="text" class="form-control" name="fnode" placeholder="Node">
+                
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Driver</label>
+                <div class="controls">
+                    <input type="text" class="form-control" name="fdriver" placeholder="Driver">
+                </div>
+        </div>
+
+        <div class="form-group">
+            <label>Id</label>
+                <div class="controls">
+                    <input type="text" class="form-control" name="fid" placeholder="Id">
+                </div>
+        </div>
+
+        <div class="form-group">
+            <label>Payload</label>
+            <div class="controls">
+                <textarea class="form-control" name="fpayload" rows="3" placeholder="Place your erlang payload"></textarea>
+            </div>
+        </div>
+
+        <button type="submit" name="button" value="send" class="btn btn-primary">Send</button>
+        <button type="submit" name="button" value="cancel" class="btn btn-default">Cancel</button>          
+    </form>
+    </div>
+</div>
+{% endblock %}
