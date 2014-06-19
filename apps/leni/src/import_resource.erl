@@ -138,7 +138,8 @@ process_post(ReqData, Context) ->
     send_result(handle(Button, Body), Body, ReqData, Context).
 
 send_result(true, Body, ReqData, Context) ->
-    {true, ReqData, Context};
+    {ok, Content} = import_dtl:render([{success, true}|Body]),    
+    {true, wrq:append_to_response_body(Content, ReqData), Context};
 send_result({false, Error}, Body, ReqData, Context) ->
     {ok, Content} = import_dtl:render([{error, Error}|Body]),    
     {true, wrq:append_to_response_body(Content, ReqData), Context}.
@@ -269,7 +270,7 @@ finish_request(ReqData, Context) ->
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->
     %%Node = wrq:get_qs_value("node",ReqData),
-    {ok, Content} = import_dtl:render([{"fnode", "test"}]),
+    {ok, Content} = import_dtl:render([]),
     {Content, ReqData, Context}.  
 
 get_value(Key, List) ->
