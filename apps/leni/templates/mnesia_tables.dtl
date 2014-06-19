@@ -19,7 +19,7 @@
     <tbody>
     {% for table, link in data %}
         <tr>
-            <td><a href="data{{link}}">{{table}}</a></td>
+            <td><a href="data{{link}}?from_date={{from_date}}&to_date={{to_date}}">{{table}}</a></td>
         </tr>
     {% endfor %}
     </tbody>

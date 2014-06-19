@@ -231,7 +231,7 @@ to_html(ReqData, Context) ->
 
 get_tables(Node) ->
     {Node_1, Tables} = mnesia_driver:get_tables(),
-    [{node, Node_1}, {data, convert(Tables)}].
+    [{node, Node_1}, {data, convert(Tables)}, {from_date, date:get_start_datetime()}, {to_date, date:get_end_datetime()}].
 
 convert(Tables) ->
     [[Table, create_link(string:tokens(atom_to_list(Table), ":"))] || Table <- Tables, Table /= 'schema'].
