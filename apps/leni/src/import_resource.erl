@@ -135,11 +135,16 @@ process_post(ReqData, Context) ->
     Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
     lager:info("body : ~p", [Body]),
     Button = get_value("button", Body),
-    handle(Button, Body),
-    {true, ReqData, Context}.
+    send_result(handle(Button, Body), Body, ReqData, Context).
+
+send_result(true, Body, ReqData, Context) ->
+    {true, ReqData, Context};
+send_result({false, Error}, Body, ReqData, Context) ->
+    {ok, Content} = import_dtl:render([{error, Error}|Body]),    
+    {true, wrq:append_to_response_body(Content, ReqData), Context}.
 
 handle("Cancel", Body) ->
-    ok;
+    true;
 handle("send", Body) ->
     {"fnode", Node} = lists:keyfind("fnode",1, Body),
     {"fdriver", Driver} = lists:keyfind("fdriver",1, Body),
@@ -149,17 +154,16 @@ handle("send", Body) ->
 
 send([], [], [], []) ->
     lager:warning("all fields are empty"),
-    ok;    
+    {false, "all fields must be filled"};    
 send(Node, Driver, Id, Payload) ->
     case string_to_args(Payload) of 
-        {error, Error} -> lager:error(".....:error", [Error]), ok;
+        {error, Error} -> lager:error("error : ", [Error]), {false, Error};
         {ok, Term} -> Message = sender_util:create_message(list_to_atom(Node), list_to_atom(Driver), Id, Term),
-                      sender_util:send_message(Message)
-    end,
-    ok.
+                      sender_util:send_message(Message),
+                      true
+    end.
 
 string_to_args(Args) when is_list(Args) ->
-lager:info("ddddddd : ~p", [Args]),
     try 
         {ok, Tokens,_} = erl_scan:string(Args),
         erl_parse:parse_term(Tokens)
@@ -265,7 +269,7 @@ finish_request(ReqData, Context) ->
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->
     %%Node = wrq:get_qs_value("node",ReqData),
-    {ok, Content} = import_dtl:render(),
+    {ok, Content} = import_dtl:render([{"fnode", "test"}]),
     {Content, ReqData, Context}.  
 
 get_value(Key, List) ->

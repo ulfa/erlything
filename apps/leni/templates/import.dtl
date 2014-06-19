@@ -11,36 +11,40 @@
     <form role="form" method="post">
         <input type="hidden" name="node" value="{{node}}">
         <div class="form-group">
-            <label>Node</label>
+            <label class="control-label" >Node</label>
             <div class="controls">
-                <input type="text" class="form-control" name="fnode" placeholder="Node">
-                
+                <input type="text" class="form-control" name="fnode" value="{{fnode}}" placeholder="Node">
+                <span class="help-inline">The node</span>
             </div>
         </div>
         <div class="form-group">
             <label>Driver</label>
                 <div class="controls">
-                    <input type="text" class="form-control" name="fdriver" placeholder="Driver">
+                    <input type="text" class="form-control" name="fdriver" value="{{fdriver}}" placeholder="Driver">
+                    <span class="help-inline">The name of the driver</span>
                 </div>
         </div>
 
         <div class="form-group">
             <label>Id</label>
                 <div class="controls">
-                    <input type="text" class="form-control" name="fid" placeholder="Id">
+                    <input type="text" class="form-control" name="fid" value="{{fid}}" placeholder="Id">
+                    <span class="help-inline">The id or version of the driver</span>
                 </div>
         </div>
 
         <div class="form-group">
             <label>Payload</label>
             <div class="controls">
-                <textarea class="form-control" name="fpayload" rows="3" placeholder="Place your erlang payload"></textarea>
+                <textarea class="form-control" name="fpayload" rows="3" placeholder="Place your erlang payload">{{fpayload}}</textarea>
+                <span class="help-block">It must be a valid erlang term with a dot at the end.</span>
             </div>
         </div>
 
         <button type="submit" name="button" value="send" class="btn btn-primary">Send</button>
         <button type="submit" name="button" value="cancel" class="btn btn-default">Cancel</button>          
-    </form>
+    </form>    
+    {{error}}
     </div>
 </div>
 {% endblock %}
