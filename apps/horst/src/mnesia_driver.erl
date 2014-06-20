@@ -29,13 +29,22 @@ stop(Config) ->
 	{ok, Config}.
 
 handle_msg([Node ,Module, Id, Time, Body], Config, Module_config) ->
+	handle_intern([Node ,Module, Id, Time, Body], Config, Module_config),
+	Config.
+
+handle_intern([Node ,<<"system">>, Id, Time, {info, {"System is started!",[]}} = Body], Config, Module_config) when Node =:= <<"erlything@macbook-pro">> ->	
+	save_or_create(Node ,<<"system">>, Id, Time, Body);
+handle_intern([Node ,Module, Id, Time, Body], Config, Module_config) ->
+	save_or_create(Node ,Module, Id, Time, Body).
+
+save_or_create(Node ,Module, Id, Time, Body) ->
 	Table_name = create_table_name(Node, Module, Id),
 	case table_exists(Table_name) of
 		false -> create_table(Table_name, [{attributes, [time, body]}]);
 		true -> ok 
 	end,
-	save_values(Table_name, Time, Body),
-	Config.
+	save_values(Table_name, Time, Body).
+
 
 select(Node, Module, Id, From_time, To_time) ->
 	{atomic, Result} = mnesia:transaction(
@@ -77,7 +86,7 @@ binary_to_int(Bin) ->
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
 create_table_name_test() ->
-	?assertEqual('test@node_module_id', create_table_name(<<"test@node">>, <<"module">>, <<"id">>)).
+	?assertEqual('test@node:module:id', create_table_name(<<"test@node">>, <<"module">>, <<"id">>)).
 
 binary_to_int_test() ->
 	?assertEqual(10, binary_to_int(<<"10">>)).
