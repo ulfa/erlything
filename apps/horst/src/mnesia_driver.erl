@@ -22,8 +22,6 @@
 
 init(Config) ->
 	lager:info("~p:init('~p')", [?MODULE, Config]),
-	mnesia:create_schema([node()]),
-	mnesia:start(),
 	{ok, Config}.
 
 stop(Config) ->

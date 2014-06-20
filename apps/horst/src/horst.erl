@@ -30,6 +30,7 @@ start() ->
 	ensure_started(sue),
     %% i don't check the return value, because i also run it on a pc 
  	application:start(gpio),
+    start_mnesia(),
     ensure_started(?MODULE),    
     ?SEND(?SYSTEM, {info, {"System is started!",[]}}). 
 
@@ -41,6 +42,10 @@ stop() ->
 	ensure_stopped(sue),
     ensure_stopped(gpio), 
     ensure_stopped(horst).
+
+start_mnesia() ->
+    mnesia:create_schema([node()]),
+    mnesia:start().
 
 get_things() ->
     {node(), get_things(things_sup:get_things(), [])}.
