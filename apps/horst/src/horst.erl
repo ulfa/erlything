@@ -41,11 +41,15 @@ stop() ->
 	ensure_stopped(ssl),
 	ensure_stopped(sue),
     ensure_stopped(gpio), 
+    stop_mnesia(),
     ensure_stopped(horst).
 
 start_mnesia() ->
     mnesia:create_schema([node()]),
     mnesia:start().
+
+stop_mnesia() ->
+    mnesia:stop().
 
 get_things() ->
     {node(), get_things(things_sup:get_things(), [])}.
