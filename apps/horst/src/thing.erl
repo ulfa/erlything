@@ -83,7 +83,7 @@ get_description(Name) ->
 get_state(Name) when is_list(Name) ->
     get_state(list_to_atom(Name));
 get_state(Name) ->
-    gen_server:call(list_to_atom(Name), {get_state}).
+    gen_server:call(Name, {get_state}).
 get_module_config(Name) when is_list(Name) ->
     get_module_config(list_to_atom(Name));
 get_module_config(Name) ->
