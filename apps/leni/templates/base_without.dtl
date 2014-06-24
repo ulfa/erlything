@@ -63,7 +63,9 @@
     <!-- DataTables -->
     <script type="text/javascript" charset="utf8">
         $(document).ready( function () {
-            $('#table_id').DataTable();
+            $('#table_id').DataTable({
+                "order": [[ 0, "desc" ]]
+                });
         } );
     </script>
 	</body>
