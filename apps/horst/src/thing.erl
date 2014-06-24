@@ -34,6 +34,7 @@
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
 -export([get_state/1, set_state/2, get_module_config/1, get_start_time/1, get_name/1, get_icon/1]).
 -export([save_data_to_ets/2, save_data_to_ets/3, get_table_id/1, get_model/1, set_value/2, get_value/1]).
+-export([get_pid/1]).
 -export([stop/1]).
 
 %% ====================================================================
@@ -43,6 +44,11 @@ get_value(Name) when is_list(Name) ->
     get_name(list_to_atom(Name));
 get_value(Name) ->
     gen_server:call(Name, {get_value}).
+
+get_pid(Name) when is_list(Name) ->
+    whereis(list_to_atom(Name)); 
+get_pid(Name) ->
+    whereis(Name). 
 
 set_value(Pid, Value) when is_pid(Pid) ->
     gen_server:cast(Pid, {set_value, Value}). 
@@ -83,7 +89,7 @@ get_description(Name) ->
 get_state(Name) when is_list(Name) ->
     get_state(list_to_atom(Name));
 get_state(Name) ->
-    gen_server:call(list_to_atom(Name), {get_state}).
+    gen_server:call(Name, {get_state}).
 get_module_config(Name) when is_list(Name) ->
     get_module_config(list_to_atom(Name));
 get_module_config(Name) ->

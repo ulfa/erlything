@@ -17,7 +17,7 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([init/1, stop/1, handle_msg/3]).
--export([select/5]).
+-export([select/5, select_entries/1]).
 -export([table_exists/1, create_table_name/3, get_tables/0]).
 
 init(Config) ->
@@ -32,8 +32,11 @@ handle_msg([Node ,Module, Id, Time, Body], Config, Module_config) ->
 	handle_intern([Node ,Module, Id, Time, Body], Config, Module_config),
 	Config.
 
-handle_intern([Node ,<<"system">>, Id, Time, {info, {"System is started!",[]}} = Body], Config, Module_config) when Node =:= <<"erlything@macbook-pro">> ->	
-	save_or_create(Node ,<<"system">>, Id, Time, Body);
+handle_intern([Node ,<<"system">>, Id, Time, {info, {"System is started!",[]}} = Body], Config, Module_config) ->
+	case Node =:= atom_to_binary(node(), utf8) of   	
+		true -> save_or_create(Node ,<<"system">>, Id, Time, Body);
+		false -> lager:info("we do nothing, because it is a message from a different node"), false
+	end;
 handle_intern([Node ,Module, Id, Time, Body], Config, Module_config) ->
 	save_or_create(Node ,Module, Id, Time, Body).
 
@@ -44,13 +47,19 @@ save_or_create(Node ,Module, Id, Time, Body) ->
 		true -> ok 
 	end,
 	save_values(Table_name, Time, Body).
-
-
+	
 select(Node, Module, Id, From_time, To_time) ->
 	{atomic, Result} = mnesia:transaction(
 		fun() ->
     		qlc:e(qlc:q([{Table, Time, Payload} || {Table, Time, Payload} <- mnesia:table(create_table_name(Node, Module, Id)), Time >= From_time, Time =< To_time]))
     		
+		end),
+	Result.
+
+select_entries(Table) ->
+	{atomic, Result} = mnesia:transaction(
+		fun() ->
+    		qlc:e(qlc:sort(qlc:e(mnesia:table(Table)), [{order, ascending}]))
 		end),
 	Result.
 

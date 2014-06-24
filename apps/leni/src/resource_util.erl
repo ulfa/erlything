@@ -30,6 +30,7 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([convert_nodes/1, get_path/1]).
+-export([get_qs_value/3]).
 
 convert_nodes(Nodes) ->
     [{Node, convert_date_in_things(Things)}|| {Node, Things} <- Nodes].
@@ -43,6 +44,12 @@ convert_date_in_things(Things) ->
 get_path(App) when is_atom(App) ->
   [{App, Entries}] = ets:lookup(webmachine_router, App),
   Entries.
+
+get_qs_value(Key, ReqData, Default) ->
+  case wrq:get_qs_value(Key, ReqData) of 
+    undefined -> Default;
+    Any -> Any
+  end.
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
