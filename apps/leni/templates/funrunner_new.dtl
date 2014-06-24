@@ -15,20 +15,23 @@
             <label>Name</label>     
             <div class="controls">       
                 <input class="form-control col-md-8" type="text" name="fname" placeholder="Fun Name">
+                <span class="help-block">The name of the rule</span>
             </div>
         </div>
         <div class="form-group">
-            <label>Message</span>
+            <label>Message</label>
             <div class="controls form-inline">            
                 <input type="text" class="form-control input-medium" name="fnode" placeholder="Node">
                 <input type="text" class="form-control input-medium" name="fdriver" placeholder="Driver">
                 <input type="text" class="form-control input-medium" name="fid" placeholder="Id">
+                <span class="help-block">The meta data of the message</span>
             </div>
         </div>
         <div class="form-group">
             <label>Fun</label>
             <div class="controls">
                 <textarea class="form-control col-md-8" name="ffun" rows="6" placeholder="fun([Name, Pid, X]) -> X + 1 end."></textarea>
+                <span class="help-block">an erlang function</span>
             </div>
         </div>
 
@@ -36,6 +39,7 @@
             <label>Comment</label>
             <div class="controls">
                 <textarea class="form-control col-md-8" name="fcomment" rows="3" >{{comment}}</textarea>
+                <span class="help-block">A meaningfull comment.</span>
             </div>
         </div>        
         <button type="submit" name="button" value="save" class="btn btn-primary">Save</button>

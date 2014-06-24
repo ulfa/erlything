@@ -25,24 +25,24 @@ init(Config) ->
     lager:info("funrunner_driver:init('~p')", [Config]),
     {ok, Config}.
 
-handle_msg([Node ,Sensor, Id, Time, {run_result, Name, {ok, Result}}], Config, Module_config) ->  
+handle_msg([Node,_Sensor, _Id, Time, {run_result, Name, {ok, Result}}], Config, _Module_config) ->  
     lager:info("get result for fun : ~p with result : ~p", [Name, Result]),  
     Table_Id = proplists:get_value(?TABLE, Config),
     [{results, Data}] = ets:lookup(Table_Id, results),
     ets:insert(Table_Id, [{results, add(Data, {Time, Node, Name, Result})}]),
     Config;
 
-handle_msg([Node ,Sensor, Id, Time, {error, Text, Reason}], Config, Module_config) ->
+handle_msg([Node, _Sensor, _Id, Time, {error, Text, Reason}], Config, _Module_config) ->
     Table_Id = proplists:get_value(?TABLE, Config),
     [{errors, Data}] = ets:lookup(Table_Id, errors),
     ets:insert(Table_Id, [{errors, add(Data, {Time, Node, Text, Reason})}]),
     Config;
 
 
-handle_msg([Node ,Sensor, Id, Time, {save, Name, Message, Command, Comment}], Config, Module_config) ->
-    save_fun(Name, Message, Command, Comment, Config, Module_config);
+handle_msg([_Node,_Sensor, _Id, _Time, {save, Name, Message, Command, Comment}], Config, Module_config) ->
+    save_fun({save, Name, Message, Command, Comment}, Config, Module_config);
 
-handle_msg([Node ,Sensor, Id, Time, {run,{Node_1, Driver_1, Id_1, Time_1, Body} = Msg}], Config, Module_config) ->
+handle_msg([_Node, _Sensor, _Id, _Time, {run,{Node_1, Driver_1, Id_1, _Time_1, Body} = Msg}], Config, Module_config) ->
     Msg = {Node_1, Driver_1, Id_1, Body},
     lager:info("run fun for message : ~p ", [Msg]),
     Funs = config:get_value(funs, Module_config, []),
@@ -57,7 +57,7 @@ handle_msg([Node ,Sensor, Id, Time, {run,{Node_1, Driver_1, Id_1, Time_1, Body} 
     end,
     Config;
 
-handle_msg([Node ,Sensor, Id, Time, {run, Name, Args}], Config, Module_config) when is_list(Name) ->
+handle_msg([_Node, _Sensor, _Id, _Time, {run, Name, Args}], Config, Module_config) when is_list(Name) ->
     lager:info("run fun with name : ~p and arguments : ~p", [Name, Args]),
     Funs = config:get_value(funs, Module_config, []),
     case get_fun(Funs, Name) of
@@ -76,35 +76,32 @@ handle_msg([Node ,Sensor, Id, Time, {run, Name, Args}], Config, Module_config) w
             Config
     end;
 
-handle_msg([Node ,Sensor, Id, Time, {list, Name}], Config, Module_config) ->
+handle_msg([_Node, _Sensor, _Id, _Time, {list, Name}], Config, Module_config) ->
     lager:info("list the fun with name : ~p", [Name]),
     Funs = config:get_value(funs, Module_config, []),
     Result = get_command(Funs, Name),
     create_message_and_send(Config, {list_result, Name, {ok, Result}}),
     Config;
 
-handle_msg([Node ,Sensor, Id, Time, {list}], Config, Module_config) ->
+handle_msg([_Node, _Sensor, _Id, _Time, {list}], Config, Module_config) ->
     lager:info("list all funs "),
     Funs = config:get_value(funs, Module_config, []),
     Result = get_commands(Funs),
     create_message_and_send(Config, {list_result, {ok, Result}}),
     Config;
 
-handle_msg([Node ,Sensor, Id, Time, {error, Text, Others}], Config, Module_config) ->
-    lager:error("An error occured: ~p : ~p", [Text, Others]),
-%%    Module_config_1 = lists:keyreplace(errors, 1, Module_config, {errors, [{Text, Others}]}),
-%%    lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1}).
+handle_msg([_Node, _Sensor, _Id, _Time, {save_result, _Msg}], Config, _Module_config) ->
     Config;
 
 handle_msg([Node ,Driver, Id, Time, Body] = Msg, Config, Module_config) ->
     Funs = config:get_value(funs, Module_config, []),
     case get_fun(Funs, {Node, Driver, Id}) of   
-       {Name, Fun} -> handle_msg([Node ,Driver, Id, Time, {run, {Node, Driver, Id, Time, Body}}], Config, Module_config);
+       {_Name, _Fun} -> handle_msg([Node ,Driver, Id, Time, {run, {Node, Driver, Id, Time, Body}}], Config, Module_config);
        [] -> lager:info("no fun found for : ~p", [Msg]),
              Config
     end;
 
-handle_msg(Msg, Config, Module_config) ->
+handle_msg(Msg, Config, _Module_config) ->
     lager:warning("~p got an unkown message : ~p", [?MODULE, Msg]),  
     Config.
 
@@ -116,12 +113,12 @@ stop(Config) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-save_fun(Name, Message, Command, Comment, Config, Module_config) ->
+save_fun({save, Name, Message, Command, Comment} = Msg , Config, Module_config) ->
     lager:info("save fun under name : ~p with message : ~p ,command : ~p and comment : ~p ", [Name, Message, Command, Comment]),
     Funs = config:get_value(funs, Module_config, []),
     try 
         {ok, Fun} = command_to_fun(Command),
-        create_message_and_send(Module_config, {save_result, Name, ok}),
+        create_message_and_send(Module_config, {save_result, Msg}),
         Module_config_1 = lists:keyreplace(funs, 1 , Module_config, {funs, lists:keystore(Name, 1, Funs, {Name, Message, Fun, Command, Comment})}),    
         lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1})        
     catch
@@ -136,7 +133,7 @@ handle_error(Config, Module_config, Name, Error_text, Error) ->
 create_message_and_send(Config, Result) ->
     create_message_and_send(Config, config_handler:get_id(Config), Result).
 
-create_message_and_send(Config, Id, Result) ->    
+create_message_and_send(Config, _Id, Result) ->    
     ?SEND(Result).
 
 
@@ -170,23 +167,23 @@ run_fun(Fun, Name, Args) when is_function(Fun) ->
     lager:info("~p ~p ~w" , [Fun, Name, Args]),
     Fun(self(),Name, [Args]).      
 
-get_fun(Funs, {Node, Driver, Id} = Msg) ->  
+get_fun(Funs, {_Node, _Driver, _Id} = Msg) ->  
     case lists:keysearch(Msg, 2, Funs) of
-        {value, {N, M, F, C, Co}} -> {N,F};
+        {value, {N, _M, F, _C, _Co}} -> {N,F};
         false -> []
     end;
 get_fun(Funs, Name) ->  
     case lists:keysearch(Name, 1, Funs) of
-        {value, {N, M, F, C, Co}} -> F;
+        {value, {_N, _M, F, _C, _Co}} -> F;
         false -> []
     end.
 
 
 get_commands(Funs) ->
-    [{N, C, Co} || {N, F, C, Co} <- Funs].  
+    [{N, C, Co} || {N, _F, C, Co} <- Funs].  
 get_command(Funs, Name) ->
     case lists:keysearch(Name, 1, Funs) of
-        {value, {N, F, C, Co}} -> {N, C, Co};
+        {value, {N, _F, C, Co}} -> {N, C, Co};
         false -> []
     end.    
 
