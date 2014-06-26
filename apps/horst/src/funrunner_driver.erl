@@ -22,7 +22,11 @@
 -export([test_schimmel1/0, test_schimmel_data/0, test_send_after/0, test_start_send_after/0]).
 
 init(Config) ->
-    lager:info("funrunner_driver:init('~p')", [Config]),
+    lager:info("~p:init('~p')", [?MODULE, Config]),
+    {ok, Config}.
+
+stop(Config) ->
+    lager:info("~p:stop('~p')", [?MODULE, Config]),
     {ok, Config}.
 
 handle_msg([Node,_Sensor, _Id, Time, {run_result, Name, {ok, Result}}], Config, _Module_config) ->  
@@ -104,11 +108,6 @@ handle_msg([Node ,Driver, Id, Time, Body] = Msg, Config, Module_config) ->
 handle_msg(Msg, Config, _Module_config) ->
     lager:warning("~p got an unkown message : ~p", [?MODULE, Msg]),  
     Config.
-
-stop(Config) ->
-    lager:info("~p:stop('~p')", [?MODULE, Config]),  
-    {ok, Config}.
-
 
 %% --------------------------------------------------------------------
 %%% Internal functions
@@ -199,11 +198,11 @@ add(List, Value) ->
 %% --------------------------------------------------------------------
 test_me() ->
     Message = sensor:create_message('node@localhost', 'testmodule', config_handler:get_id([]), {save, "arg_test", [], "fun(Pid, Name,[X]) -> X + 1 end.", "Das ist ein Argument Test"}), 
-    sensor:send_message(nodes(), Message),
+    sensor:send_message([node()], Message),
     Message1 = sensor:create_message('node@localhost', 'testmodule', config_handler:get_id([]), {list}), 
-    sensor:send_message(nodes(), Message1),
+    sensor:send_message([node()], Message1),
     Message2 = sensor:create_message('node@localhost', 'testmodule', config_handler:get_id([]), {run, "arg_test", "{1, int}"}), 
-    sensor:send_message(nodes(), Message2).
+    sensor:send_message([node()], Message2).
 
 test_schimmel1() ->
     Config = [],

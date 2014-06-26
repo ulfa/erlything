@@ -32,9 +32,13 @@ handle_msg([Node ,Module, Id, Time, Body], Config, Module_config) ->
 	handle_intern([Node ,Module, Id, Time, Body], Config, Module_config),
 	Config.
 
-handle_intern([Node ,<<"system">>, Id, Time, {info, {"System is started!",[]}} = Body], Config, Module_config) ->
+%% --------------------------------------------------------------------
+%%% Internal functions
+%% --------------------------------------------------------------------
+handle_intern([Node ,<<"system">> = Module, Id, Time, {info, {"System is started!",[]}} = Body], Config, Module_config) ->		
 	case Node =:= atom_to_binary(node(), utf8) of   	
-		true -> save_or_create(Node ,<<"system">>, Id, Time, Body);
+		true -> save_or_create(Node, Module, Id, Time, Body),				
+				handle_saved_funrunner_messages(Config);
 		false -> lager:info("we do nothing, because it is a message from a different node"), false
 	end;
 handle_intern([Node ,Module, Id, Time, Body], Config, Module_config) ->
@@ -63,9 +67,10 @@ select_entries(Table) ->
 		end),
 	Result.
 
-%% --------------------------------------------------------------------
-%%% Internal functions
-%% --------------------------------------------------------------------
+handle_saved_funrunner_messages(Config) ->	
+	Messages = select_entries('erlything@macbook-pro:funrunner_driver:default'),
+	[?SEND(Body) ||  {Node, Time, {save_result, Body}} <- Messages].	
+
 create_table(Table_name, Record) ->
 	{atomic, ok} = mnesia:create_table(Table_name, [{disc_only_copies, [node()]}|Record]). 
 
@@ -80,6 +85,9 @@ get_tables() ->
 
 save_values(Table_name, Time, Body) ->
 	mnesia:dirty_write({Table_name, binary_to_int(Time), Body}).
+
+create_table_name(Node, Module, Id) when is_atom(Node), is_atom(Module), is_atom(Id) ->
+	create_table_name(Node, Module, Id);
 
 create_table_name(Node, Module, Id) when is_list(Node), is_list(Module), is_list(Id) ->
 	create_table_name(list_to_binary(Node), list_to_binary(Module), list_to_binary(Id));
