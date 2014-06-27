@@ -1,4 +1,4 @@
-{% extends "base_without.dtl" %}
+{% extends "base.dtl" %}
 
 {% block title %}Max Cube{% endblock %}
 

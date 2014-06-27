@@ -1,5 +1,7 @@
-{% extends "base_without.dtl" %}
+{% extends "base.dtl" %}
+
 {% block title %}Switches{% endblock %}
+
 {% block body %}
     <div class="panel panel-info">
         <div class="panel-heading">
