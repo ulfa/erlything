@@ -46,7 +46,7 @@ handle_msg([Node, _Sensor, _Id, Time, {error, Text, Reason}], Config, _Module_co
 handle_msg([_Node,_Sensor, _Id, _Time, {save, Name, Message, Command, Comment}], Config, Module_config) ->
     save_fun({save, Name, Message, Command, Comment}, Config, Module_config);
 
-handle_msg([_Node, _Sensor, _Id, _Time, {run,{Node_1, Driver_1, Id_1, _Time_1, Body} = Msg}], Config, Module_config) ->
+handle_msg([_Node, _Sensor, _Id, _Time, {run, {Node_1, Driver_1, Id_1, _Time_1, Body} = Msg}], Config, Module_config) ->
     Msg = {Node_1, Driver_1, Id_1, Body},
     lager:info("run fun for message : ~p ", [Msg]),
     Funs = config:get_value(funs, Module_config, []),
@@ -79,6 +79,22 @@ handle_msg([_Node, _Sensor, _Id, _Time, {run, Name, Args}], Config, Module_confi
             end,
             Config
     end;
+
+handle_msg([Node, Driver, Id, Time, {run, Args}], Config, Module_config) ->
+    lager:info("..... run fun with and arguments : "),
+    Funs = config:get_value(funs, Module_config, []),
+    case get_fun(Funs, {Node, Driver, Id}) of
+        [] -> lager:info("no fun for Message ~p found", [{Node, Driver, Id}]);
+        {Name, Fun} ->  try
+                            Result = run_fun(Fun, Name, Args),
+                            lager:info("Result of fun : ~p is : ~p", [Name, Result]),
+                            create_message_and_send(Config, {run_result, Name, {ok, Result}})
+                        catch   
+                            _:Error -> create_message_and_send(Config, {error, "running fun with name : " ++ Name ++ " ", Error}),
+                            handle_error(Config, Module_config, Name, "running fun with name : " ++ Name ++ " ", Error)
+                        end
+    end,
+    Config;
 
 handle_msg([_Node, _Sensor, _Id, _Time, {list, Name}], Config, Module_config) ->
     lager:info("list the fun with name : ~p", [Name]),
@@ -166,7 +182,7 @@ run_fun(Fun, Name, Args) when is_function(Fun) ->
     lager:info("~p ~p ~w" , [Fun, Name, Args]),
     Fun(self(),Name, [Args]).      
 
-get_fun(Funs, {_Node, _Driver, _Id} = Msg) ->  
+get_fun(Funs, {Node, Driver, Id} = Msg) ->  
     case lists:keysearch(Msg, 2, Funs) of
         {value, {N, _M, F, _C, _Co}} -> {N,F};
         false -> []
@@ -210,7 +226,7 @@ test_schimmel1() ->
 
 test_schimmel_data() ->
     Config = [],
-    ?SEND([{temp, 10.0},{hum, 50}]).
+    ?SEND({run, [{temp, 10.0},{hum, 50}]}).
 
 test_send_after() ->
     Config = [],
@@ -242,6 +258,12 @@ string_to_args_test() ->
 args_to_types_test() ->
     ?assertEqual([1],args_to_types([{1,int}])),
     ?assertEqual(['Bell'], args_to_types([{'Bell',atm}])).
+
+get_fun_test() ->
+    Funs = [{"schimmel",{<<"horst@raspberrypi">>,<<"dht22_driver">>,<<"default">>}, "Fun_1" ,"Body_2", "Comment_1"},
+            {"schimmel_1",{<<"horst@raspberrypi">>,<<"test_driver">>,<<"default">>}, "Fun_2","Body_1", "Comment_1"}
+            ],
+    ?assertEqual({"schimmel_1","Fun_2"}, get_fun(Funs, {<<"horst@raspberrypi">>,<<"test_driver">>,<<"default">>})).
 
 fun_test() ->
     fun(Name, Pid, [Body]) -> 

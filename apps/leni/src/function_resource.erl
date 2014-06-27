@@ -129,7 +129,6 @@ create_path(ReqData, Context) ->
 % If it succeeds, it should return true.
 %
 process_post(ReqData, Context) ->
-    lager:info("1...... this is a test ....~p",[wrq:req_qs(ReqData)]),
     Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
     Button = get_value("button", Body),
     handle_post(Button, Body),
@@ -145,7 +144,8 @@ handle_post("save", Body) ->
     F_message = {list_to_binary(F_node), list_to_binary(F_driver), list_to_binary(F_id)},
     Send_body = {save, F_name, F_message, F_fun, F_comment},
     lager:info("send the body : ~p",[Send_body]),
-    sensor:send(?MODULE, Send_body); 
+    Message = sender_util:create_message(?MODULE, Send_body),
+    sender_util:send_message(Message); 
     
 handle_post("run", Body) ->
     F_name = get_value("fName", Body),
