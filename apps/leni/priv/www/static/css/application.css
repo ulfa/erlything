@@ -13,3 +13,7 @@
 .spacer {
     margin-top: 40px; /* define margin as you see fit */
 }
+
+.nowrap {
+    white-space: nowrap;
+}
