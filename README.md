@@ -187,5 +187,8 @@ These things are used in my internal project and they work for me.
 * fungi_driver is an application which warns you if one of your rooms is fungi  endangered.
 * node_driver gets informed when a node is down or gets started
 * mqttc_driver can send messages to mqtt broker like http://www.mqttdashboard.com/
+* mnesia_driver persists messages and restore them if the node must be restarted (a kind of Event Sourcing)
+* config_driver can send a thing configuration to another node, so that this config will be stored there (sending of the messages.config part is missing, so
+you have to edit the messages.config by hand) 
 
 
