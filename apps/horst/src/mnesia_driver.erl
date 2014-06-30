@@ -68,7 +68,7 @@ select_entries(Table) ->
 	Result.
 
 handle_saved_funrunner_messages(Config) ->	
-	Messages = select_entries('erlything@macbook-pro:funrunner_driver:default'),
+	Messages = select_entries(create_table_name(node(),funrunner_driver,default)),
 	[?SEND(Body) ||  {Node, Time, {save_result, Body}} <- Messages].	
 
 create_table(Table_name, Record) ->
@@ -87,7 +87,7 @@ save_values(Table_name, Time, Body) ->
 	mnesia:dirty_write({Table_name, binary_to_int(Time), Body}).
 
 create_table_name(Node, Module, Id) when is_atom(Node), is_atom(Module), is_atom(Id) ->
-	create_table_name(Node, Module, Id);
+	create_table_name(atom_to_binary(Node, utf8), atom_to_binary(Module, utf8), atom_to_binary(Id, utf8));
 
 create_table_name(Node, Module, Id) when is_list(Node), is_list(Module), is_list(Id) ->
 	create_table_name(list_to_binary(Node), list_to_binary(Module), list_to_binary(Id));
@@ -97,6 +97,7 @@ create_table_name(Node, Module, Id) ->
 
 binary_to_int(Bin) ->
 	list_to_integer(binary_to_list(Bin)).
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
