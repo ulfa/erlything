@@ -46,18 +46,20 @@ handle_msg([Node, _Sensor, _Id, Time, {error, Text, Reason}], Config, _Module_co
 handle_msg([_Node,_Sensor, _Id, _Time, {save, Name, Message, Command, Comment}], Config, Module_config) ->
     save_fun({save, Name, Message, Command, Comment}, Config, Module_config);
 
-handle_msg([_Node, _Sensor, _Id, _Time, {run, {Node_1, Driver_1, Id_1, _Time_1, Body} = Msg}], Config, Module_config) ->
-    Msg = {Node_1, Driver_1, Id_1, Body},
-    lager:info("run fun for message : ~p ", [Msg]),
+handle_msg([_Node, _Sensor, _Id, _Time, {run, {Node_1, Driver_1, Id_1, _Time_1, Args} = Msg}], Config, Module_config) ->
+    Msg1 = {Node_1, Driver_1, Id_1, Args},
+    lager:info("run fun for message : ~p ", [Msg1]),
     Funs = config:get_value(funs, Module_config, []),
-    {Name, Fun} = get_fun(Funs, {Node_1, Driver_1, Id_1}),      
-    try
-        Result = run_fun(Fun, Name, Body),
-        lager:info("Result of fun : ~p is : ~p", [Msg, Result]),
-        create_message_and_send(Config, {run_result, Name, {ok, Result}})
-    catch   
-        _:Error -> create_message_and_send(Config, {error, "running fun with name : " ++ Name ++ " ", Error}),
-                    handle_error(Config, Module_config, Name, "running fun with name : " ++ Name ++ " ", Error)
+    case get_fun(Funs, {Node_1, Driver_1, Id_1}) of
+        [] -> lager:info("no fun for Message ~p found", [{Node_1, Driver_1, Id_1}]);
+        {Name, Fun} ->  try
+                            Result = run_fun(Fun, Name, Args),
+                            lager:info("Result of fun : ~p is : ~p", [Name, Result]),
+                            create_message_and_send(Config, {run_result, Name, {ok, Result}})
+                        catch   
+                            _:Error -> create_message_and_send(Config, {error, "running fun with name : " ++ Name ++ " ", Error}),
+                            handle_error(Config, Module_config, Name, "running fun with name : " ++ Name ++ " ", Error)
+                        end
     end,
     Config;
 

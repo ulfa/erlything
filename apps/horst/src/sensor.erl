@@ -19,7 +19,7 @@
 -export([send/3]).
 -export([send_message/2]).
 -export([send_messages/2]).
--export([send_after/3]).
+-export([send_after/4]).
 -export([generate_messages/1, generate_messages/2]).
 %% --------------------------------------------------------------------
 %% record definitions
@@ -72,9 +72,8 @@ send_message(Node, Nodes, Target, [Node_1, Module, Id, Time, Body] = Message) ->
 	rpc:abcast([Node|Nodes], Target, Message),
 	ok.
 
-
-send_after(Pid, Time, Messages) when is_list(Messages) ->
-	erlang:send_after(Time, Pid, {send_after, Messages}).    
+send_after(Pid, Name, Time, Body) when is_list(Body) ->
+	erlang:send_after(Time, Pid, {send_after, Name, Body}).    
 %%
 %% doc generates messages and send them. !!! only for testing !!!
 %%

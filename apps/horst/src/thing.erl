@@ -271,9 +271,9 @@ handle_info({'ETS-TRANSFER', TableId, Pid, _Data}, State=#state{config = Config}
     end,
     {noreply, State#state{config = Config_1}};
  
-handle_info({send_after, Messages}, State) ->
-    lager:info("now we send the message : ~p ", [Messages]),
-    sensor:send_messages([], Messages),
+handle_info({send_after, Name, Body}, State) ->
+    lager:info("now we send the message from : ~p with body : ~p ", [Name, Body]),
+    sensor:send([], Name, Body),
     {noreply, State};
     
 handle_info({Port, Payload}, State=#state{config = Config}) when is_port(Port) ->
