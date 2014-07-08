@@ -260,7 +260,13 @@ create_links(Node, Name) ->
 	[{new, "funrunners/new?node=" ++ Node ++ "&name=" ++ Name, "New"}].
 
 convert_timestamp_to_date(List) ->
-    lists:foldr(fun({Timestamp, A, B, C}, Acc) -> [{date:timestamp_to_date(Timestamp), A, B, C}|Acc] end, [], List).
+    lists:foldr(fun({Timestamp, A, B, C}, Acc) -> [{date:timestamp_to_date(Timestamp), A, B, reference_to_list(C)}|Acc] end, [], List).
+
+reference_to_list(Ref) when is_reference(Ref) ->
+    erlang:ref_to_list(Ref); 
+reference_to_list(Ref) ->
+    Ref.     
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
