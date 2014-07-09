@@ -234,7 +234,7 @@ get_tables(Node) ->
     [{node, Node_1}, {data, convert(Tables)}, {from_date, date:get_start_datetime()}, {to_date, date:get_end_datetime()}].
 
 convert(Tables) ->
-    [[Table, create_link(string:tokens(atom_to_list(Table), ":"))] || Table <- Tables, Table /= 'schema'].
+    [[Table, create_link(string:tokens(atom_to_list(Table), ":")), Size] || {Table, Size} <- Tables, Table /= 'schema'].
 
 create_link([A, B, C]) ->
     lists:flatten(["/", A, "/", B, "/", C]) .

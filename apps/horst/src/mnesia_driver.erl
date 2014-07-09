@@ -35,13 +35,13 @@ handle_msg([Node ,Module, Id, Time, Body], Config, Module_config) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-handle_intern([Node ,<<"system">> = Module, Id, Time, {info, {"System is started!",[]}} = Body], Config, Module_config) ->		
+handle_intern([Node ,<<"system">> = Module, Id, Time, {info, {"System is started!",[]}} = Body], Config, _Module_config) ->		
 	case Node =:= atom_to_binary(node(), utf8) of   	
 		true -> save_or_create(Node, Module, Id, Time, Body),				
 				handle_saved_funrunner_messages(Config);
 		false -> lager:info("we do nothing, because it is a message from a different node"), false
 	end;
-handle_intern([Node ,Module, Id, Time, Body], Config, Module_config) ->
+handle_intern([Node ,Module, Id, Time, Body], _Config, _Module_config) ->
 	save_or_create(Node ,Module, Id, Time, Body).
 
 save_or_create(Node ,Module, Id, Time, Body) ->
@@ -69,7 +69,7 @@ select_entries(Table) ->
 
 handle_saved_funrunner_messages(Config) ->	
 	Messages = select_entries(create_table_name(node(),funrunner_driver,default)),
-	[?SEND(Body) ||  {Node, Time, {save_result, Body}} <- Messages].	
+	[?SEND(Body) ||  {_Node, _Time, {save_result, Body}} <- Messages].	
 
 create_table(Table_name, Record) ->
 	{atomic, ok} = mnesia:create_table(Table_name, [{disc_only_copies, [node()]}|Record]). 
@@ -80,8 +80,12 @@ table_exists(Table_name) ->
    Tables = mnesia:system_info(tables),
    lists:member(Table_name,Tables).
 
+-spec get_tables() -> {atom(), [{atom(), integer()}]}.
 get_tables() ->
-	{node(), mnesia:system_info(tables)}.
+	{node(), [{Table_name, get_table_size(Table_name)}||Table_name <- mnesia:system_info(tables)]}.
+
+get_table_size(Table_name) ->
+	mnesia:table_info(Table_name,size).
 
 save_values(Table_name, Time, Body) ->
 	mnesia:dirty_write({Table_name, binary_to_int(Time), Body}).
