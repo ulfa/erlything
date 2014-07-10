@@ -97,7 +97,7 @@ valid_content_headers(ReqData, Context) ->
 % will be sent. Note that these are all-caps and are atoms. (single-quoted)
 %
 allowed_methods(ReqData, Context) ->
-    {['GET'], ReqData, Context}.
+    {['GET', 'POST'], ReqData, Context}.
 %
 % This is called when a DELETE request should be enacted 
 % and should return true if the deletion succeeded.
@@ -132,7 +132,22 @@ create_path(ReqData, Context) ->
 % If it succeeds, it should return true.
 %
 process_post(ReqData, Context) ->
-    {true, ReqData, Context}.
+    Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),    
+    Button = get_value("button", Body),  
+    process_button(Button, Body),    
+    {true, wrq:do_redirect(true, wrq:set_resp_header("location", "/actors/tables", ReqData)), Context}.
+    
+process_button("delete", Body) ->
+    delete_entries(Body).
+
+delete_entries([]) ->
+    ok;
+delete_entries([{"table_to_delete", Table}|Body]) ->    
+    mnesia_driver:delete_table(Table),
+    delete_entries(Body);
+delete_entries([{_Any, _Any_value}|Body]) ->
+    delete_entries(Body).
+
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 
 % where Mediatype is a string of content-type format and the Handler is an atom naming 
@@ -222,6 +237,9 @@ generate_etag(ReqData, Context) ->
 %
 finish_request(ReqData, Context) ->
     {true, ReqData, Context}.
+
+get_value(Key, List) ->
+    proplists:get_value(Key, List). 
 %% --------------------------------------------------------------------
 %%% Additional functions
 %% --------------------------------------------------------------------

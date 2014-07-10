@@ -19,6 +19,7 @@
 -export([init/1, stop/1, handle_msg/3]).
 -export([select/5, select_entries/1]).
 -export([table_exists/1, create_table_name/3, get_tables/0]).
+-export([delete_table/1]).
 
 init(Config) ->
 	lager:info("~p:init('~p')", [?MODULE, Config]),
@@ -102,6 +103,14 @@ create_table_name(Node, Module, Id) ->
 binary_to_int(Bin) ->
 	list_to_integer(binary_to_list(Bin)).
 
+delete_table(Table_name) when is_list(Table_name) ->
+	delete_table(list_to_atom(Table_name));
+delete_table(Table_name) ->
+	lager:info("delete table : ~p", [Table_name]),
+			case mnesia:delete_table(Table_name) of 
+				{atomic, ok} -> ok;
+				{aborted, Reason} -> lager:error("error while deleting table : ~p", [Reason])
+			end.
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
