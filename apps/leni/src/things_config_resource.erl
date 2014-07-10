@@ -133,7 +133,6 @@ create_path(ReqData, Context) ->
 %
 process_post(ReqData, Context) ->
 	Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
-	lager:info("body : ~p", [Body]),
 	{"form", Form} = lists:keyfind("form",1, Body),
 	process_request(ReqData, Context, Form, Body).
 
@@ -142,35 +141,30 @@ process_request(ReqData, Context, "activate", Body) ->
 	{"thing", Thing} = lists:keyfind("thing",1, Body),
 	{"active", Active} = lists:keyfind("active",1, Body),
 	rpc:call(erlang:list_to_atom(Node), node_config, set_active, [Thing, list_to_atom(Active)]),	
-	Location = "/things_config", 
-	{true, wrq:do_redirect(true, wrq:set_resp_header("location", Location, ReqData)), Context};
+	{true, wrq:do_redirect(true, wrq:set_resp_header("location", wrq:path(ReqData), ReqData)), Context};
 process_request(ReqData, Context,"copy_delete", Body) ->
 	{"button", Button} = lists:keyfind("button",1, Body),
 	process_request(ReqData, Context, Button, Body);
-
 process_request(ReqData, Context,"copy", Body) ->		
 	{"node", Node} = lists:keyfind("node",1, Body),
 	{"thing", Thing} = lists:keyfind("thing",1, Body),	
 	{"selected_node", Selected_node} = lists:keyfind("selected_node",1, Body),
 	Msg = sender_util:create_message(?MODULE, [{action, "copy"}, {thing, Thing}, {target, Selected_node}]), 
 	sender_util:send_message(list_to_atom(Node), Msg), 
-	Location = "/things_config",
-	{true, wrq:do_redirect(true, wrq:set_resp_header("location", Location, ReqData)), Context};
+	{true, wrq:do_redirect(true, wrq:set_resp_header("location", wrq:path(ReqData), ReqData)), Context};
 process_request(ReqData, Context,"delete", Body) ->	
 	{"node", Node} = lists:keyfind("node",1, Body),
 	{"thing", Thing} = lists:keyfind("thing",1, Body),
 	{"selected_node", Selected_node} = lists:keyfind("selected_node",1, Body),
 	Msg = sender_util:create_message(?MODULE, [{action, "delete"}, {thing, Thing}, {target, Selected_node}]), 
 	sender_util:send_message(list_to_atom(Node), Msg), 
-	Location = "/things_config",
-	{true, wrq:do_redirect(true, wrq:set_resp_header("location", Location, ReqData)), Context};
+	{true, wrq:do_redirect(true, wrq:set_resp_header("location", wrq:path(ReqData), ReqData)), Context};
 process_request(ReqData, Context,"export", Body) ->	
 	{"node", Node} = lists:keyfind("node",1, Body),
 	{"thing", Thing} = lists:keyfind("thing",1, Body),	
 	Msg = sender_util:create_message(?MODULE, [{action, "export"}, {thing, Thing}]), 
 	sender_util:send_message(list_to_atom(Node), Msg), 
-	Location = "/things_config",
-	{true, wrq:do_redirect(true, wrq:set_resp_header("location", Location, ReqData)), Context}.
+	{true, wrq:do_redirect(true, wrq:set_resp_header("location", wrq:path(ReqData), ReqData)), Context}.
 
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 

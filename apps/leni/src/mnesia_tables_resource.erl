@@ -134,9 +134,9 @@ create_path(ReqData, Context) ->
 process_post(ReqData, Context) ->
     Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),    
     Button = get_value("button", Body),  
-    process_button(Button, Body),    
-    {true, wrq:do_redirect(true, wrq:set_resp_header("location", "/actors/tables", ReqData)), Context}.
-    
+    process_button(Button, Body),
+    {true, wrq:do_redirect(true, wrq:set_resp_header("location", wrq:path(ReqData), ReqData)), Context}.
+
 process_button("delete", Body) ->
     delete_entries(Body).
 
