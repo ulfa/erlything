@@ -1,6 +1,6 @@
 # Overview
 
-erlyThing is a decentral, distributed message based thing plattform. 
+erlyThing is a decentral, distributed message based thing plattform written in Erlang. 
 
 ## Features
 
