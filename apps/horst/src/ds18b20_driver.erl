@@ -55,5 +55,5 @@ parse_message(Msg) ->
 -ifdef(TEST).
 parse_message_test() ->
     Msg = "37 01 4b 46 7f ff 09 10 26 : crc=26 YES\n 37 01 4b 46 7f ff 09 10 26 t=19437\n",
-    ?assertEqual({temp, "19437"}, parse_message(Msg)).
+    ?assertEqual({temp, 19.437}, parse_message(Msg)).
 -endif.
