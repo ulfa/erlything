@@ -27,6 +27,7 @@ start() ->
     ensure_started(asn1),
 	ensure_started(public_key),
 	ensure_started(ssl),
+    ensure_started(inets), 
 	ensure_started(sue),
     %% i don't check the return value, because i also run it on a pc 
  	application:start(gpio),

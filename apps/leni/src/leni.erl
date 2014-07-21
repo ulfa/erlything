@@ -36,8 +36,7 @@ ensure_started(App) ->
             ok
     end.
 	
-start() ->
-	ensure_started(inets), 
+start() ->	
 	ensure_started(crypto),
   	ensure_started(lager),
 	ensure_started(mochiweb),
