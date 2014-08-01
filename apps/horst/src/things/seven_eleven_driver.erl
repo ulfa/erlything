@@ -17,7 +17,7 @@
 %% --------------------------------------------------------------------
 -export([handle_msg/3]).
 
-handle_msg([Node ,Sensor, Id, Time, ?ON] = Msg, Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, ?ON] = Msg, Config, Module_config) ->
     play_sound(),
     Config;
 %%

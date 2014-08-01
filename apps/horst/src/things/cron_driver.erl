@@ -33,16 +33,16 @@ stop(Config) ->
 	application:stop(erlcron),
     {ok, Config}.
 
-handle_msg([Node ,Sensor, Id, Time, {once, {Hour, Minutes, pm}}], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, {once, {Hour, Minutes, pm}}], Config, Module_config) ->
     Config;	 
 
-handle_msg([Node ,Sensor, Id, Time, {once, Seconds}], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional,{once, Seconds}], Config, Module_config) ->
     Config;  
 
-handle_msg([Node ,Sensor, Id, Time, {{daily, {every, {Seconds, sec}, {between, {From_hour, pm}, {To_hour, To_minutes, pm}}}}}], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, {{daily, {every, {Seconds, sec}, {between, {From_hour, pm}, {To_hour, To_minutes, pm}}}}}], Config, Module_config) ->
     Config;  
 
-handle_msg([Node ,Sensor, Id, Time, {daily, {Hour, Minutes, pm}}], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, {daily, {Hour, Minutes, pm}}], Config, Module_config) ->
     Config;  
 
 handle_msg(Message, Config, Module_config) ->

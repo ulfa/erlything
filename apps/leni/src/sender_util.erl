@@ -29,7 +29,7 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([create_message/5, create_message/4, create_message/3, create_message/2]).
+-export([create_message/5, create_message/4, create_message/6, create_message/3, create_message/2]).
 -export([send_message/1, send_message/2]).
 -export([encode/1]).
 %% --------------------------------------------------------------------
@@ -39,16 +39,19 @@
 %%% Internal functions
 %% --------------------------------------------------------------------
 create_message(Module, Body) ->
-  create_message(node(), Module, get_id([]), date:get_date_seconds(), Body).
+  create_message(node(), Module, get_id([]), get_name(), Body).
 
 create_message(Node, Module, Body) ->
-  create_message(Node, Module, get_id([]), date:get_date_seconds(), Body).
+  create_message(Node, Module, get_id([]), get_name(), Body).
 
 create_message(Node, Module, Id, Body) ->
-  create_message(Node, Module, Id, date:get_date_seconds(), Body).
+  create_message(Node, Module, Id, get_name(), Body).
 
-create_message(Node, Sensor, Id, Time, Body) ->
-    [atom_to_binary(Node, utf8), atom_to_binary(Sensor, utf8), list_to_binary(Id), list_to_binary(integer_to_list(Time)), Body].
+create_message(Node, Module, Id, Optional, Body) ->
+  create_message(Node, Module, Id, date:get_date_seconds(), Optional, Body).
+
+create_message(Node, Sensor, Id, Time, Optional, Body) ->
+    [atom_to_binary(Node, utf8), atom_to_binary(Sensor, utf8), list_to_binary(Id), list_to_binary(integer_to_list(Time)), Optional, Body].
 
 send_message(Message) ->
   send_message(nodes(), Message).
@@ -59,7 +62,7 @@ send_message(Node, [Node_1, Module, Id, Time, Body] = Message) when is_atom(Node
 send_message(Nodes, Message) ->
   send_message(Nodes, 'actor_group', Message).    
 
-send_message(Nodes, Target, [Node_1, Module, Id, Time, Body] = Message) when is_list(Nodes)->
+send_message(Nodes, Target, [Node_1, Module, Id, Time, Optional, Body] = Message) when is_list(Nodes)->
   rpc:abcast([node()|Nodes], Target, Message).    
 
 encode([]) ->
@@ -75,6 +78,8 @@ get_id([]) ->
 get_id(Config) when is_list(Config) ->
   proplists:get_value(id, Config, "default"). 
 
+get_name() ->
+  erlang:process_info(self(), registered_name).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

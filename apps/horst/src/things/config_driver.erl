@@ -33,7 +33,7 @@ init(Config) ->
 stop(Config) ->
     Config.
 
-handle_msg([Node ,Sensor, Id, Time, [{action, "copy"}, {thing, Thing}, {target, Target}]] = Msg, Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, [{action, "copy"}, {thing, Thing}, {target, Target}]] = Msg, Config, Module_config) ->
     lager:info("~p got message : ~p", [?MODULE, Msg]),
     Thing_config = node_config:get_thing_config(Thing),    
     case rpc:call(list_to_atom(Target), node_config, add_thing_to_config, [Thing_config, ?THINGS_CONFIG]) of 
@@ -44,7 +44,7 @@ handle_msg([Node ,Sensor, Id, Time, [{action, "copy"}, {thing, Thing}, {target, 
     end,
     Config;
 
-handle_msg([Node ,Sensor, Id, Time, [{action, "delete"}, {thing, Thing}, {target, Target}]] = Msg, Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional,[{action, "delete"}, {thing, Thing}, {target, Target}]] = Msg, Config, Module_config) ->
     lager:info("~p got message : ~p", [?MODULE, Msg]),
     Thing_config = node_config:get_thing_config(Thing),
     case rpc:call(list_to_atom(Target), node_config, delete_thing_config, [Thing_config, ?THINGS_CONFIG]) of 
@@ -55,7 +55,7 @@ handle_msg([Node ,Sensor, Id, Time, [{action, "delete"}, {thing, Thing}, {target
     end,
     Config;
 
-handle_msg([Node ,Sensor, Id, Time, [{action, "export"}, {thing, Thing}]] = Msg, Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, [{action, "export"}, {thing, Thing}]] = Msg, Config, Module_config) ->
     lager:info("~p got message : ~p", [?MODULE, Msg]),
     Thing_config = node_config:get_thing_config(Thing),
     ?SEND(lists:flatten(io_lib:format("export ~p - config from node.", [Thing]))),

@@ -135,13 +135,12 @@ create_path(ReqData, Context) ->
 %
 process_post(ReqData, Context) ->
 	Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
-	lager:info(".... ~p", [Body]),
 	{"node", Node} = lists:keyfind("node",1, Body),
 	{"name", Name} = lists:keyfind("name",1, Body),
 	{"switch", Switch} = lists:keyfind("switch",1, Body),
 	{"number", Number} = lists:keyfind("number",1, Body),
 	{"status", Status} = lists:keyfind("status",1, Body),
-	Msg = sender_util:create_message(node(), ?MODULE, "0", {Switch, Number, Status}),	
+	Msg = sender_util:create_message(node(), ?MODULE, "0",{Switch, Number, Status}),	
 	sender_util:send_message(Msg),
 	Location = "/actors/transmitter_433_driver?name=" ++ Name ++ "&node=" ++ Node, 
 	{true, wrq:do_redirect(true, wrq:set_resp_header("location", Location, ReqData)), Context}.

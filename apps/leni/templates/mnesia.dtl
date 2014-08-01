@@ -14,13 +14,15 @@
     <thead>
         <tr>
             <th>Time</th>
+            <th>Optional</th>
             <th>Payload</th>
         </tr>   
     </thead>
     <tbody>
-    {% for table, date, payload in data %}
+    {% for table, date, optional, payload in data %}
         <tr>
             <td>{{date}}</td>
+            <td>{{optional}}</td>
             <td>{{payload}}</td>
         </tr>
     {% endfor %}

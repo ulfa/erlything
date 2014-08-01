@@ -18,6 +18,7 @@
 			<th>Node</th>
 			<th>Thing</th>
 			<th>Id</th>
+			<th>Optional</th>
 			<th>Payload</th>
 		</tr>	
 	</thead>

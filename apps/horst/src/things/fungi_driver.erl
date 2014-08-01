@@ -25,9 +25,9 @@
 %% 
 %% Here we handle the messages from the dht22 sensor
 %%
-handle_msg([Node ,Sensor, Id, Time, [{temp, 0.0}, {hum, 0.0}]] = Msg, Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, [{temp, 0.0}, {hum, 0.0}]] = Msg, Config, Module_config) ->
     Config;
-handle_msg([Node ,Sensor, Id, Time, [{temp, Temp}, {hum, Hum}]] = Msg, Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, [{temp, Temp}, {hum, Hum}]] = Msg, Config, Module_config) ->
     lager:info("~p got a message with values: ~p", [?MODULE, Msg]),
     {Room_name, Room_id} = get_room(binary_to_list(Node), Module_config),
     %%[Hum_max, Temp_max, Temp_min] = config:get_values([hum_max, temp_max, temp_min], Module_config), 
@@ -41,7 +41,7 @@ handle_msg([Node ,Sensor, Id, Time, [{temp, Temp}, {hum, Hum}]] = Msg, Config, M
 %%
 %% Here we handle the window state from the cuberl. 
 %%
-handle_msg([Node ,<<"cube_driver">>, Id, Time, {window_state, Body}] = Msg, Config, Module_config) ->
+handle_msg([Node ,<<"cube_driver">>, Id, Time, Optional, {window_state, Body}] = Msg, Config, Module_config) ->
     lager:info("~p got a message with values: ~p", [?MODULE, Msg]),
     [Room_name, Window_state_new, Room_id, Room_name] = config:get_values([room_name, window_state, room_id, room_name], Body), 
     Room_name = get_value(room_name, Body),

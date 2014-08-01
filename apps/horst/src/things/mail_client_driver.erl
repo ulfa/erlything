@@ -20,14 +20,14 @@ init(Config) ->
 	{ok, Config}.
 
 
-handle_msg([Node ,Sensor, Id, Time, [{to, To}, {subject, Subject}, {content, Content}]], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, [{to, To}, {subject, Subject}, {content, Content}]], Config, Module_config) ->
 	Options = proplists:get_value(options, Module_config),
 	Sender = proplists:get_value(sender, Module_config),
 	Password = proplists:get_value(password, Module_config),
 	send_email(Sender, Password, To, Subject, "Motion detected", Options),
 	Config;
 
-handle_msg([Node ,Sensor, Id, Time, "RISING"], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, "RISING"], Config, Module_config) ->
 	Options = proplists:get_value(options, Module_config),
 	Sender  = proplists:get_value(sender, Module_config),
 	Password  = proplists:get_value(password, Module_config),
@@ -36,7 +36,7 @@ handle_msg([Node ,Sensor, Id, Time, "RISING"], Config, Module_config) ->
 	send_email(Sender, Password, To, Subject, "Motion detected", Options),
 	Config;
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, Body], Config, Module_config) ->
 	lager:warning("mail_client_driver got the wrong message : ~p", [[Node ,Sensor, Id, Time, Body]]),
 	Config.
 

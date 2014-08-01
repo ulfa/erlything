@@ -17,7 +17,7 @@
 %% --------------------------------------------------------------------
 -export([handle_msg/3]).
 
-handle_msg([Node ,Sensor, Id, Time, {temp, Temp}], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, {temp, Temp}], Config, Module_config) ->
 	Table_Id = proplists:get_value(?TABLE, Config),
 	[{data, Data}] = ets:lookup(Table_Id, data),
 	ets:insert(Table_Id, [{data, add(Data, {Time, Temp})}]),

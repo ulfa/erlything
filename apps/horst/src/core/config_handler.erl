@@ -18,7 +18,7 @@
 -export([get_config/2, create_thing_spec/1]).
 -export([get_messages_for_module/3, is_active/1]).
 -export([set_active/3]).
--export([get_id/1]).
+-export([get_id/1, get_name/2, get_thing_name/1]).
 -export([add_message_to_config/2]).
 -export([add_thing_to_config/2, get_thing_config/2]).
 -export([delete_thing_config/2, write_config/3]).
@@ -36,7 +36,7 @@ get_config(Application, Config_file) ->
 	end. 
 
 is_active_set({thing, _Name, Config}) ->
-	proplists:get_value(activ, Config, false).
+	confi:get_value(activ, Config, false).
 
 set_active(Config, Name, Status) when is_list(Config) ->
 	Thing_Config = get_thing_config(Config, Name),
@@ -89,8 +89,23 @@ create_thing_spec(Config) when is_list(Config)->
 get_id([]) ->
 	"default";
 get_id(Config) when is_list(Config) ->
-	proplists:get_value(id, Config, "default"). 
+	config:get_value(id, Config, "default"). 
 
+get_name([], Optional) ->
+	Optional;
+get_name([], []) ->
+	[];		
+get_name(Config, Optional) ->
+	case config:get_value(name, Config) of 
+		undefined -> [];
+		Name -> [{name, Name}|Optional]
+	end.
+
+get_thing_name(Optional) ->
+	case config:get_value(name, Optional) of 
+		undefined -> [];
+		Name -> Name 
+	end.	
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
@@ -99,7 +114,7 @@ is_active(true) ->
 is_active(false) ->
 	false;
 is_active(List) when is_list(List) ->
-	proplists:get_value(activ, List, false). 
+	config:get_value(activ, List, false). 
 
 is_type(Type, Type) ->
 	true;

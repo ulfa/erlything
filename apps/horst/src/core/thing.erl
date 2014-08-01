@@ -49,7 +49,7 @@ get_value(Node, Name) when is_atom(Node) and is_atom(Name) ->
     rpc:call(Node,thing, get_value, [Name]).
 
 get_pid(Name) when is_list(Name) ->
-    whereis(list_to_atom(Name)); 
+    whereis(list_to_existing_atom(Name)); 
 get_pid(Name) ->
     whereis(Name). 
 

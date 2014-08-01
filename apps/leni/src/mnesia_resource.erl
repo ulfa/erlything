@@ -241,7 +241,7 @@ search_database(Node, Module, Id, From_time, To_time) ->
 
 
 convert_date(Data) ->
-    [{Table, date:seconds_to_date(Time), Payload}|| {Table, Time, Payload} <- Data].
+    [{Table, date:seconds_to_date(Time), Optional, Payload}|| {Table, Time, Optional, Payload} <- Data].
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

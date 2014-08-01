@@ -80,7 +80,7 @@ handle_cast(Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_info([Node ,Sensor, Id, Time, Payload] = Message, State) ->
+handle_info([Node ,Sensor, Id, Time, Optional, Payload] = Message, State) ->
 	lager:debug("got message: ~p", [Message]),
 	send_msg(Message),
     {noreply, State};
@@ -107,7 +107,7 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-send_msg([Node ,Sensor, Id, Time, Payload] = Message) ->
+send_msg([Node ,Sensor, Id, Time, Optional, Payload] = Message) ->
     lists:foreach(fun(Pid) -> Pid ! Message end, things_sup:get_actors_pids()).    
 %% --------------------------------------------------------------------
 %%% Test functions

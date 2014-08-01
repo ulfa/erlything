@@ -37,7 +37,7 @@ stop(Config) ->
     application:unload(emqttc),
     {ok, Config}.
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, Body], Config, Module_config) ->
     lager:debug("~p got a message with body : ~p : ", [?MODULE, Body]),
     Prefix = proplists:get_value(prefix, Module_config, ?MQTT_PREFIX),
     increase_counter(Config, publish_counter),

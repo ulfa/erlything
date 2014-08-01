@@ -19,7 +19,7 @@
 
 %%{"Licht","11111 2","1"}
 
-handle_msg([Node ,Sensor, Id, Time, {Name, Device, Status}], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, {Name, Device, Status}], Config, Module_config) ->
 	lager:info("Device : ~p ,Name : ~p, Status : ~p, Time : ~p ", [Device, Name, Status, Time]),
 	Table_Id = proplists:get_value(?TABLE, Config),
 	[{data, Data}] = ets:lookup(Table_Id, data),	

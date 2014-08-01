@@ -29,34 +29,34 @@ stop(Config) ->
 	lager:info("~p:stop('~p')", [?MODULE, Config]),
 	{ok, Config}.
 
-handle_msg([Node ,Module, Id, Time, Body], Config, Module_config) ->
-	handle_intern([Node ,Module, Id, Time, Body], Config, Module_config),
+handle_msg([Node ,Module, Id, Time, Optional, Body], Config, Module_config) ->
+	handle_intern([Node ,Module, Id, Time, Optional, Body], Config, Module_config),
 	Config.
 
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-handle_intern([Node ,<<"system">> = Module, Id, Time, {info, {"System is started!",[]}} = Body], Config, _Module_config) ->		
+handle_intern([Node ,<<"system">> = Module, Id, Time, Optional, {info, {"System is started!",[]}} = Body], Config, _Module_config) ->		
 	case Node =:= atom_to_binary(node(), utf8) of   	
-		true -> save_or_create(Node, Module, Id, Time, Body),				
+		true -> save_or_create(Node, Module, Id, Time, Optional, Body),				
 				handle_saved_funrunner_messages(Config);
 		false -> lager:info("we do nothing, because it is a message from a different node"), false
 	end;
-handle_intern([Node ,Module, Id, Time, Body], _Config, _Module_config) ->
-	save_or_create(Node ,Module, Id, Time, Body).
+handle_intern([Node ,Module, Id, Time, Optional, Body], _Config, _Module_config) ->
+	save_or_create(Node ,Module, Id, Time, Optional, Body).
 
-save_or_create(Node ,Module, Id, Time, Body) ->
+save_or_create(Node ,Module, Id, Time, Optional, Body) ->
 	Table_name = create_table_name(Node, Module, Id),
 	case table_exists(Table_name) of
-		false -> create_table(Table_name, [{attributes, [time, body]}]);
+		false -> create_table(Table_name, [{attributes, [time, optional, body]}]);
 		true -> ok 
 	end,
-	save_values(Table_name, Time, Body).
+	save_values(Table_name, Time, Optional, Body).
 	
 select(Node, Module, Id, From_time, To_time) ->
 	{atomic, Result} = mnesia:transaction(
 		fun() ->
-    		qlc:e(qlc:q([{Table, Time, Payload} || {Table, Time, Payload} <- mnesia:table(create_table_name(Node, Module, Id)), Time >= From_time, Time =< To_time]))
+    		qlc:e(qlc:q([{Table, Time, Optional, Payload} || {Table, Time, Optional,Payload} <- mnesia:table(create_table_name(Node, Module, Id)), Time >= From_time, Time =< To_time]))
     		
 		end),
 	Result.
@@ -70,7 +70,7 @@ select_entries(Table) ->
 
 handle_saved_funrunner_messages(Config) ->	
 	Messages = select_entries(create_table_name(node(),funrunner_driver,default)),
-	[?SEND(Body) ||  {_Node, _Time, {save_result, Body}} <- Messages].	
+	[?SEND(Body) ||  {_Node, _Time, _Optional, {save_result, Body}} <- Messages].	
 
 create_table(Table_name, Record) ->
 	{atomic, ok} = mnesia:create_table(Table_name, [{disc_only_copies, [node()]}|Record]). 
@@ -88,8 +88,8 @@ get_tables() ->
 get_table_size(Table_name) ->
 	mnesia:table_info(Table_name,size).
 
-save_values(Table_name, Time, Body) ->
-	mnesia:dirty_write({Table_name, binary_to_int(Time), Body}).
+save_values(Table_name, Time, Optional, Body) ->
+	mnesia:dirty_write({Table_name, binary_to_int(Time), Optional, Body}).
 
 create_table_name(Node, Module, Id) when is_atom(Node), is_atom(Module), is_atom(Id) ->
 	create_table_name(atom_to_binary(Node, utf8), atom_to_binary(Module, utf8), atom_to_binary(Id, utf8));

@@ -38,7 +38,7 @@ get_code(Node, Thing, Name) ->
     end.
 
 
-handle_msg([Node ,Sensor, _Id, Time, {Switch, Number, Status}] = Msg, Config, Module_config) ->
+handle_msg([Node ,Sensor, _Id, Time, Optional, {Switch, Number, Status}] = Msg, Config, Module_config) ->
 	lager:info("~p got a message with values: ~p. ", [?MODULE, Msg]),
 	case is_valid_device(Number, Module_config) of 
 		false -> lager:info("Device : ~p is not a valid device for this node", [Number]),

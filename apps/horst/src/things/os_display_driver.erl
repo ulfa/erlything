@@ -27,7 +27,7 @@ init(Config) ->
 
 %% OS_data = [{temp,38.47}{avg1,0.0390625}{avg5,0.109375}{avg15,0.12890625}]
 %% {node,[{temp,38.47}{avg1,0.0390625}{avg5,0.109375}{avg15,0.12890625}]}
-handle_msg([Node ,Sensor, Id, Time, OS_data], Config, Module_config) ->	
+handle_msg([Node ,Sensor, Id, Time, Optional, OS_data], Config, Module_config) ->	
 	Table_Id = thing:get_table_id(Config) ,
 	[{data, Data}] = ets:lookup(Table_Id, data),
 	[{funs, Funs}] = ets:lookup(Table_Id, funs),
@@ -36,7 +36,7 @@ handle_msg([Node ,Sensor, Id, Time, OS_data], Config, Module_config) ->
 	apply_functions(Config, Funs, Node, proplists:lookup(temp, OS_data)),
 	Config;
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, Body], Config, Module_config) ->
 	lager:warning("os_display_driver got the wrong message : ~p", [[Node ,Sensor, Id, Time, Body]]),
 	Config.
 %% --------------------------------------------------------------------

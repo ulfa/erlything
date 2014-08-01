@@ -21,7 +21,7 @@ init(Config) ->
 	os:cmd("mount -a -o nolock"), 
 	{ok, Config}.
 
-handle_msg([Node ,Sensor, Id, Time, ?ON], Config, Module_config) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, ?ON], Config, Module_config) ->
 	Path = config:get_value(path, Module_config, []),
 	Last_shot = config:get_value(last_shot, Module_config, 0),
 	Actual_time = date:get_date_seconds(),
