@@ -33,17 +33,20 @@
 -export([start_link/1]).
 -export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
 -export([get_state/1, set_state/2, get_module_config/1, get_start_time/1, get_name/1, get_icon/1]).
--export([save_data_to_ets/2, save_data_to_ets/3, get_table_id/1, get_model/1, set_value/2, get_value/1]).
--export([get_pid/1]).
+-export([save_data_to_ets/2, save_data_to_ets/3, get_table_id/1, get_model/1, set_value/2, get_value/1, get_value/2]).
+-export([get_pid/1, where_is_message_from/1]).
 -export([stop/1]).
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
 get_value(Name) when is_list(Name) ->
-    get_name(list_to_atom(Name));
+    get_name(list_to_existing_atom(Name));
 get_value(Name) ->
     gen_server:call(Name, {get_value}).
+
+get_value(Node, Name) when is_atom(Node) and is_atom(Name) ->
+    rpc:call(Node,thing, get_value, [Name]).
 
 get_pid(Name) when is_list(Name) ->
     whereis(list_to_atom(Name)); 
@@ -234,9 +237,9 @@ handle_info(timeout, State=#state{config = Config}) ->
 	start_timer(config:get_value(timer, Config_2, 0)),
     {noreply, State#state{allowed_msgs = Allowed_msgs, start_time=now(), config = Config_2}};
 
-handle_info([Node ,Sensor, Id, Time, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
-    lager:debug("Message=~p ", [[Node ,Sensor, Id, Time, Body]]),
-    Config_1 = handle_msg([Node ,Sensor, Id, Time, Body], Config, is_message_well_known({Node, Sensor, Id}, Allowed_msgs)),
+handle_info([Node ,Sensor, Id, Time, Optional, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
+    lager:debug("Message=~p ", [[Node ,Sensor, Id, Time, Optional, Body]]),
+    Config_1 = handle_msg([Node ,Sensor, Id, Time, Optional, Body], Config, is_message_well_known({Node, Sensor, Id}, Allowed_msgs)),
     {noreply, State#state{config = Config_1}};
 
 handle_info({call_sensor}, State=#state{config = Config}) ->
@@ -271,9 +274,9 @@ handle_info({'ETS-TRANSFER', TableId, Pid, _Data}, State=#state{config = Config}
     end,
     {noreply, State#state{config = Config_1}};
  
-handle_info({send_after, Name, Body}, State) ->
+handle_info({send_after, Name, Optional, Body}, State) ->
     lager:info("now we send the message from : ~p with body : ~p ", [Name, Body]),
-    sensor:send([], Name, Body),
+    sensor:send([], Name, Optional, Body),
     {noreply, State};
     
 handle_info({Port, Payload}, State=#state{config = Config}) when is_port(Port) ->
@@ -364,12 +367,12 @@ is_msgs_allowed({Node, Sensor, Id}, {all, Sensor1, Id1}) ->
 is_msgs_allowed({Node, Sensor, Id}, Allowed_msgs) ->
     false.
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, true) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, Body], Config, true) ->
     lager:debug("got message : ~p : ~p", [Time, Body]),
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
-    Module:Func([Node ,Sensor, Id, Time, Body], Config, Module_config);
+    Module:Func([Node ,Sensor, Id, Time, Optional, Body], Config, Module_config);
 
-handle_msg([Node ,Sensor, Id, Time, Body], Config, false) ->
+handle_msg([Node ,Sensor, Id, Time, Optional, Body], Config, false) ->
     lager:debug("got message which i don't understand : ~p", [{Node, Sensor, Id}]),
     Config.
 
@@ -413,7 +416,11 @@ check_init(Module) ->
         Any -> lager:warning("the init function has too many arguments"),
                 false
     end.
-
+where_is_message_from([Node, Driver, Id, Optional, Payload]) ->    
+    case config_handler:get_thing_name(Optional) of 
+        [] -> [];
+        Name -> rpc:call(binary_to_existing_atom(Node, utf8), erlang, whereis, [Name])
+    end.
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
