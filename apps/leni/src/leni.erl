@@ -39,6 +39,7 @@ ensure_started(App) ->
 start() ->	
 	ensure_started(crypto),
   	ensure_started(lager),
+    ensure_started(xmerl),
 	ensure_started(mochiweb),
 	%%application:set_env(webmachine, webmachine_logger_module, webmachine_logger),
 	ensure_started(webmachine),
