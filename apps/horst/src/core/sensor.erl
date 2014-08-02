@@ -73,7 +73,7 @@ send_message(Node, Nodes, Target, [Node_1, Module, Id, Time, Optional, Body] = M
 	ok.
 
 send_after(Pid, Name, Time, Optional, Body) ->
-	erlang:send_after(Time, Pid, {send_after, Name, Optional, Body}).    
+	thing:send_time_based(Time, Pid, Name, Optional, Body).    
 %%
 %% doc generates messages and send them. !!! only for testing !!!
 %%

@@ -36,10 +36,14 @@
 -export([save_data_to_ets/2, save_data_to_ets/3, get_table_id/1, get_model/1, set_value/2, get_value/1, get_value/2]).
 -export([get_pid/1, where_is_message_from/1]).
 -export([stop/1]).
+-export([send_time_based/5]).
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
+send_time_based(Time, Pid, Name, Optional, Payload) when is_pid(Pid) ->
+    gen_server:cast(Pid, {send_time_based, Pid, Name, Time, Optional, Payload}).
+
 get_value(Name) when is_list(Name) ->
     get_name(list_to_existing_atom(Name));
 get_value(Name) ->
@@ -111,9 +115,9 @@ stop(Name) ->
     gen_server:cast(Name, {stop}).
 
 %% --------------------------------------------------------------------
-%% record definitions
+%% record definitions   
 %% --------------------------------------------------------------------
--record(state, {config, allowed_msgs, start_time, value}).
+-record(state, {config, allowed_msgs, start_time, value, timed_msgs}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -133,7 +137,7 @@ start_link(Config) ->
 %% --------------------------------------------------------------------
 init(Config) ->
     process_flag(trap_exit, true),
-    {ok, #state{config=Config, allowed_msgs = [], start_time=0, value=undefined}, 0}.
+    {ok, #state{config=Config, allowed_msgs = [], start_time=0, value=undefined, timed_msgs=dict:new()}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -214,6 +218,13 @@ get_table_id(Config) ->
 handle_cast(die, State) ->
     exit(self(),killed),
     {noreply, State};
+handle_cast({send_time_based, Pid, Name, Time, Optional, Payload}, State=#state{timed_msgs = Time_msgs}) ->
+    case dict:find({Pid, Name}, Time_msgs) of 
+        {ok, Timer_ref} -> erlang:cancel_timer(Timer_ref);                                                   
+        error -> ok
+    end,
+    New_Timer_ref = erlang:send_after(Time, Pid, {send_after, Name, Optional, Payload}),
+    {noreply, State#state{timed_msgs = dict:store({Pid, Name}, New_Timer_ref, Time_msgs)}};
 handle_cast({set_value, Value}, State) ->
     {noreply, State#state{value=Value}};
 handle_cast({stop}, State=#state{config = Config}) ->
@@ -274,10 +285,11 @@ handle_info({'ETS-TRANSFER', TableId, Pid, _Data}, State=#state{config = Config}
     end,
     {noreply, State#state{config = Config_1}};
  
-handle_info({send_after, Name, Optional, Body}, State) ->
+handle_info({send_after, Name, Optional, Body}, State=#state{timed_msgs = Timed_msgs}) ->
     lager:info("now we send the message from : ~p with body : ~p ", [Name, Body]),
+
     sensor:send([], Name, Optional, Body),
-    {noreply, State};
+    {noreply, State#state{timed_msgs = dict:erase({self(), Name}, Timed_msgs)}};
     
 handle_info({Port, Payload}, State=#state{config = Config}) when is_port(Port) ->
     lager:info("got a message from a port with payload: ~p ", [Payload]),
