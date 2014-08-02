@@ -153,7 +153,7 @@ handle_post("save", Body) ->
 save(Name, [], [], [], Fun, Comment) ->
     sender_util:create_message(node(), funrunner_new_resource, {save, Name, [], Fun, Comment});
 save(Name, Node, Driver, Id, Fun, Comment) ->
-    Message = {list_to_atom(Node), list_to_atom(Driver), list_to_atom(Id)},
+    Message = {list_to_binary(Node), list_to_binary(Driver), list_to_binary(Id)},
     sender_util:create_message(node(), funrunner_new_resource, {save, Name, Message, Fun, Comment}).
     
 %
