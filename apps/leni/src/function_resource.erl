@@ -130,11 +130,18 @@ create_path(ReqData, Context) ->
 %
 process_post(ReqData, Context) ->
     Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
-    Button = get_value("button", Body),
-    handle_post(Button, Body),
-    {true, ReqData, Context}.
+    Button = get_value("button", Body),    
+    {true, wrq:do_redirect(true, handle_post(Button, ReqData, Body)), Context}.
 
-handle_post("save", Body) ->
+handle_post("cancel", ReqData, Body) ->
+    Node_1 = wrq:get_qs_value("node", ReqData),
+    Name_1 = wrq:get_qs_value("name", ReqData),
+    lager:info("1...: ~p ... ~p", [Node_1, Name_1]),
+    wrq:set_resp_header("location", "/actors/funrunner_driver?name=" ++ Name_1 ++ "&node=" ++ Node_1, ReqData);
+    
+handle_post("save", ReqData, Body) ->
+    Node_1 = wrq:get_qs_value("node",ReqData),
+    Name_1 = wrq:get_qs_value("name",ReqData),
     F_name = get_value("fName", Body),
     F_fun = get_value("fFun",Body),
     F_node =  get_value("fNode",Body),
@@ -145,13 +152,18 @@ handle_post("save", Body) ->
     Send_body = {save, F_name, F_message, F_fun, F_comment},
     lager:info("send the body : ~p",[Send_body]),
     Message = sender_util:create_message(?MODULE, Send_body),
-    sender_util:send_message(Message); 
+    sender_util:send_message(Message),
+    wrq:set_resp_header("location", "/actors/funrunner_driver?name=" ++ Name_1 ++ "&node=" ++ Node_1, ReqData);
     
-handle_post("run", Body) ->
+handle_post("run", ReqData, Body) ->
+    Node_1 = wrq:get_qs_value("node", ReqData),
+    Name_1 = wrq:get_qs_value("name",ReqData),
+    lager:info("1...: ~p ... ~p", [Node_1, Name_1]),
     F_name = get_value("fName", Body),
     F_args = get_value("fArgs", Body),
     Msg = sender_util:create_message(node(), ?MODULE, "default", date:get_date_seconds(), {run, F_name, F_args }),    
-    sender_util:send_message(Msg).
+    sender_util:send_message(Msg),
+    wrq:set_resp_header("location", "/actors/funrunner_driver?name=" ++ Name_1 ++ "&node=" ++ Node_1, ReqData).
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 
 % where Mediatype is a string of content-type format and the Handler is an atom naming 

@@ -133,14 +133,17 @@ create_path(ReqData, Context) ->
 %
 process_post(ReqData, Context) ->
     Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
-    %lager:info("body : ~p", [Body]),
-    Button = get_value("button", Body),
-    handle_post(Button, Body),
-    {true, ReqData, Context}.
+    Button = get_value("button", Body), 
+    {true, wrq:do_redirect(true, handle_post(Button, ReqData, Body)), Context}.
 
-handle_post("cancel", Body) ->
-    ok;
-handle_post("save", Body) ->    
+handle_post("cancel", ReqData, Body) ->
+    Node_1 = wrq:get_qs_value("node",ReqData),
+    Name_1 = wrq:get_qs_value("name",ReqData),
+    wrq:set_resp_header("location", "/actors/funrunner_driver?name=" ++ Name_1 ++ "&node=" ++ Node_1, ReqData);
+    
+handle_post("save", ReqData, Body) ->    
+    Node_1 = wrq:get_qs_value("node",ReqData),
+    Name_1 = wrq:get_qs_value("name",ReqData),
     {"fname", Name} = lists:keyfind("fname",1, Body),
     {"fnode", Node} = lists:keyfind("fnode",1, Body),
     {"fdriver", Driver} = lists:keyfind("fdriver",1, Body),
@@ -148,7 +151,8 @@ handle_post("save", Body) ->
     {"ffun", Fun} = lists:keyfind("ffun",1, Body),
     {"fcomment", Comment} = lists:keyfind("fcomment",1, Body),    
     Msg = save(Name, Node, Driver, Id, Fun, Comment),
-    sender_util:send_message(Msg).
+    sender_util:send_message(Msg),
+    wrq:set_resp_header("location", "/actors/funrunner_driver?name=" ++ Name_1 ++ "&node=" ++ Node_1, ReqData).
 
 save(Name, [], [], [], Fun, Comment) ->
     sender_util:create_message(node(), funrunner_new_resource, {save, Name, [], Fun, Comment});
