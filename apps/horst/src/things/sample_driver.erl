@@ -24,8 +24,9 @@ stop(Config) ->
     {ok, Config}.
 
 call_sensor(Config, Module_config) ->
-    ?SEND([{sample, "test"}]),
-    thing:set_value(self(), [{sample, "test"}]),
+    Msg = [{sample, now()}],
+    ?SEND(Msg),
+    thing:set_value(self(), Msg),
     Config.
 %% --------------------------------------------------------------------
 %%% Internal functions
