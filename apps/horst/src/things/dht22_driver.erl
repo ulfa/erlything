@@ -32,7 +32,7 @@ call_driver() ->
     os:cmd(Driver ++ " 22 4").
 
 parse_message_from_dht22(Msg) ->
-    lager:info("Msg from DHT : ~p", [Msg]),
+    %%lager:info("Msg from DHT : ~p", [Msg]),
     Temp = case re:run(Msg ,"Temp =\s+([0-9.]+)") of 
        nomatch -> {temp, 0.0};
        {match,[{C1,C2},{C3,C4}]} -> {temp, string:substr(Msg, C3 + 1, C4)}
