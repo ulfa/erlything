@@ -3,7 +3,7 @@
 {% block title %}new{% endblock %}
 
 {% block body %}
-<div class="panel panel-info">
+<div class="panel panel-primary">
     <div class="panel-heading">
         <h2 class="panel-title">Create a new function</h2>  
     </div>

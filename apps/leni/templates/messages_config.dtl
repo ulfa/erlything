@@ -24,7 +24,7 @@
     {% endif %}    
 
 	{%for driver, id, messages in messages_config%}
-		<div class="panel panel-info">
+		<div class="panel panel-primary">
     	<div class="panel-heading">
         	<h2 class="panel-title">{{driver}}_{{id}}</h2>  
     	</div>
