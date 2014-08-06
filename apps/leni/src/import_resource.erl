@@ -159,7 +159,7 @@ send([], [], [], []) ->
 send(Node, Driver, Id, Payload) ->
     case string_to_args(Payload) of 
         {error, Error} -> lager:error("error : ", [Error]), {false, Error};
-        {ok, Term} -> Message = sender_util:create_message(list_to_existing_atom(Node), list_to_existing_atom(Driver), Id, Term),
+        {ok, Term} -> Message = sender_util:create_message(list_to_atom(Node), list_to_atom(Driver), Id, Term),
                       sender_util:send_message(Message),
                       true
     end.
