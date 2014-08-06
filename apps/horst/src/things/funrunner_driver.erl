@@ -178,7 +178,7 @@ convert(Value, str) when is_list(Value) ->
     Value.
 
 run_fun(Fun, Name, Args) when is_function(Fun) and is_list(Args) ->
-    lager:info("~p ~p ~p" , [Fun, Name, Args]),
+    lager:info("run_fun Fun: ~p Name: ~p Args: ~p" , [Fun, Name, Args]),
     Fun(self(), Name, Args);  
 run_fun(Fun, Name, Args) when is_function(Fun) ->
     lager:info("~p ~p ~p" , [Fun, Name, Args]),
