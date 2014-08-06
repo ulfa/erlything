@@ -2,7 +2,7 @@
 
 <title>{% block title %}{{node}}/{{pid}}{% endblock %}</title>
 {% block body %}
-<div class="panel panel-default">
+<div class="panel panel-primary">
     <div class="panel-heading">
         <h2 class="panel-title">process: {{pid}}</h2>  
     </div>

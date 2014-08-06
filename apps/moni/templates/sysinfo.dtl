@@ -3,7 +3,7 @@
 <title>{% block title %}System info : {{node}}{% endblock %}</title>
 
 {% block body %}
-<div class="panel panel-default">
+<div class="panel panel-primary">
     <div class="panel-heading">
         <h2 class="panel-title">Sysinfo : {{node}}</h2>  
     </div>
