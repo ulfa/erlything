@@ -16,7 +16,7 @@
 -export([send_message/1]).
 init(Config) ->
     MD = config:get_module_config(Config), 
-	lager:info("cron_driver:init('~p')", [MD]),
+    lager:info("~p:init('~p')", [?MODULE, Config]),	
 	Crontab = proplists:get_value(crontab, MD, []), 
     case application:start(erlcron) of
         ok -> start_jobs(Crontab),
