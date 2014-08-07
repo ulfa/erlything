@@ -15,25 +15,21 @@
 -export([handle_msg/3]).
 
 init(Config) ->
-	lager:info("mail_client_driver:init('~p')", [Config]),	
+	lager:info("~p:init('~p')", [?MODULE, Config]),
 	application:start(gen_smtpc),
 	{ok, Config}.
 
+stop(Config) ->
+	lager:info("~p:stop('~p')", [?MODULE, Config]),
+    application:stop(gen_smtpc),
+    application:unload(gen_smtpc),
+    {ok, Config}.
 
 handle_msg([Node ,Sensor, Id, Time, Optional, [{to, To}, {subject, Subject}, {content, Content}]], Config, Module_config) ->
-	Options = proplists:get_value(options, Module_config),
-	Sender = proplists:get_value(sender, Module_config),
-	Password = proplists:get_value(password, Module_config),
-	send_email(Sender, Password, To, Subject, "Motion detected", Options),
-	Config;
-
-handle_msg([Node ,Sensor, Id, Time, Optional, "RISING"], Config, Module_config) ->
-	Options = proplists:get_value(options, Module_config),
-	Sender  = proplists:get_value(sender, Module_config),
-	Password  = proplists:get_value(password, Module_config),
-	To = proplists:get_value(to, Module_config),
-	Subject = proplists:get_value(subject, Module_config),
-	send_email(Sender, Password, To, Subject, "Motion detected", Options),
+	Options = config:get_value(options, Module_config),
+	Sender = config:get_value(sender, Module_config),
+	Password = config:get_value(password, Module_config),
+	send_email(Sender, Password, To, Subject, Content, Options),
 	Config;
 
 handle_msg([Node ,Sensor, Id, Time, Optional, Body], Config, Module_config) ->
@@ -46,10 +42,6 @@ send_email(Sender, Password, To, Subject, Content, Options) ->
 	lager:info("sending email").
 
 
-stop(Config) ->
-    application:stop(gen_smtpc),
-    application:unload(gen_smtpc),
-    {ok, Config}.
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
