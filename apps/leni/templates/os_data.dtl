@@ -10,7 +10,7 @@
         
 {% for node, time, temp, avg1, avg5, avg15 in os_data %}
 <div class="col-xs-6">
-<div class="panel panel-info">
+<div class="panel panel-primary">
     <div class="panel-heading">
         <h2 class="panel-title">{{node}}</h2>  
     </div>

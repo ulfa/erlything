@@ -3,7 +3,7 @@
 {% block title %}seven eleven{% endblock %}
 
 {% block body %}
-<div class="panel panel-info">
+<div class="panel panel-primary">
 	 <div class="panel-heading">
         <h2 class="panel-title">Ring my bell</h2> 
     </div>
