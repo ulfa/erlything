@@ -36,16 +36,19 @@
 -export([save_data_to_ets/2, save_data_to_ets/3, get_table_id/1, get_model/1, set_value/2, get_value/1, get_value/2]).
 -export([get_pid/1, where_is_message_from/1]).
 -export([stop/1]).
--export([send_time_based/5]).
+-export([send_time_based/5, send_message/2]).
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
+send_message(Name, Message) ->
+    gen_server:cast(list_to_atom(Name), {send_message, Message}).
+
 send_time_based(Time, Pid, Name, Optional, Payload) when is_pid(Pid) ->
     gen_server:cast(Pid, {send_time_based, Pid, Name, Time, Optional, Payload}).
 
 get_value(Name) when is_list(Name) ->
-    get_name(list_to_existing_atom(Name));
+    get_name(list_to_atom(Name));
 get_value(Name) ->
     gen_server:call(Name, {get_value}).
 
@@ -53,7 +56,7 @@ get_value(Node, Name) when is_atom(Node) and is_atom(Name) ->
     rpc:call(Node,thing, get_value, [Name]).
 
 get_pid(Name) when is_list(Name) ->
-    whereis(list_to_existing_atom(Name)); 
+    whereis(list_to_atom(Name)); 
 get_pid(Name) ->
     whereis(Name). 
 
@@ -231,6 +234,10 @@ handle_cast({stop}, State=#state{config = Config}) ->
     Name = proplists:get_value(name, Config), 
     lager:info("stopping thing : ~p ", [Name]),
      {stop, normal, State}; 
+handle_cast({send_message, Message}, State=#state{config = Config}) ->
+    {driver, {Module, Fun}, Module_config} = lists:keyfind(driver, 1, Config),
+    ?SEND_1(Module, Message),
+    {noreply, State};
 handle_cast(Msg, State) ->
     {noreply, State}.
 %% --------------------------------------------------------------------

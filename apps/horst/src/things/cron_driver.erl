@@ -13,7 +13,8 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([init/1, stop/1, handle_msg/3]).
--export([send_message/1]).
+-export([send_message/2]).
+
 init(Config) ->
     MD = config:get_module_config(Config), 
     lager:info("~p:init('~p')", [?MODULE, Config]),	
@@ -56,10 +57,9 @@ handle_msg(Message, Config, Module_config) ->
 %% This function will be used, when a cron job fires.
 %% {daily,{every,{10,sec},{between,{6,am},{6,0,pm}}}},{cron_driver,send_message,["Test Message"]}}]}
 %% TODO: How can i get the config from the cron_driver?
-send_message(Message) ->
+send_message(Name, Message) ->
     lager:info("cron_driver will send the following message : ~p", [Message]),
-    Config = [],
-    ?SEND(Message).
+    thing:send_message(Name, Message).
 
 start_jobs(Crontab) ->
 	[erlcron:cron(Job) || Job <- Crontab].
