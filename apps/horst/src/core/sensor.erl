@@ -67,9 +67,8 @@ send_message(Nodes, Message) ->
 send_message(Nodes, Target, Message) ->
 	send_message(node(), Nodes, Target, Message).
 
-send_message(Node, Nodes, Target, [Node_1, Module, Id, Time, Optional, Body] = Message) ->
-	%%lager:info("send message : ~p ", [Message]),
-	rpc:abcast([Node|Nodes], Target, Message),
+send_message(Node, Nodes, Target, [Node_1, Module, Id, Time, Optional, _Body] = Message) ->
+	[rpc:cast(Node_1, Target, 'broadcast', [Message]) || Node_1 <- [Node|Nodes]],
 	ok.
 
 send_after(Pid, Name, Time, Optional, Body) ->

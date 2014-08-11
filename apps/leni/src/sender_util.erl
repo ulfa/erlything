@@ -54,16 +54,13 @@ create_message(Node, Sensor, Id, Time, Optional, Body) ->
     [atom_to_binary(Node, utf8), atom_to_binary(Sensor, utf8), list_to_binary(Id), list_to_binary(integer_to_list(Time)), Optional, Body].
 
 send_message(Message) ->
-  send_message(nodes(), Message).
-
-send_message(Node, [Node_1, Module, Id, Time, Body] = Message) when is_atom(Node)->
-  rpc:abcast([Node], 'actor_group', Message);
+  send_message([node()|nodes()], Message).
 
 send_message(Nodes, Message) ->
   send_message(Nodes, 'actor_group', Message).    
 
-send_message(Nodes, Target, [Node_1, Module, Id, Time, Optional, Body] = Message) when is_list(Nodes)->
-  rpc:abcast([node()|Nodes], Target, Message).    
+send_message(Nodes, Target, [Node, Module, Id, Time, Optional, Body] = Message) when is_list(Nodes)->
+  [rpc:cast(Node_target, Target, 'broadcast', [Message]) || Node_target <- Nodes].
 
 encode([]) ->
 	[];
