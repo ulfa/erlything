@@ -37,7 +37,7 @@
     </div>
     
     <div class="panel-body">
-        <table class="table">
+        <table class="table" id="table_id">
             <thead>
                 <tr>
                     <th>Time</th>
@@ -67,7 +67,7 @@
         <h2 class="panel-title">Error</h2>  
     </div>
     <div class="panel-body">
-        <table class="table">
+        <table class="table" id="">
             <thead>
                 <tr>
                     <th>Time</th>
