@@ -58,7 +58,7 @@ handle_msg(Message, Config, Module_config) ->
 %% {daily,{every,{10,sec},{between,{6,am},{6,0,pm}}}},{cron_driver,send_message,["Test Message"]}}]}
 %% TODO: How can i get the config from the cron_driver?
 send_message(Name, Message) ->
-    lager:info("cron_driver will send the following message : ~p", [Message]),
+    lager:debug("cron_driver will send the following message : ~p", [Message]),
     thing:send_message(Name, Message).
 
 start_jobs(Crontab) ->
