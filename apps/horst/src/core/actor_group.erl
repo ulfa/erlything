@@ -19,10 +19,13 @@
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0]).
+-export([broadcast/1]).
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
+broadcast([Node, Module, Id, Time, Optional, Payload]) ->
+    gen_server:cast(?MODULE, {broadcast, [Node, Module, Id, Time, Optional, Payload]}).
 
 %% --------------------------------------------------------------------
 %% record definitions
@@ -70,6 +73,11 @@ handle_call(Request, From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_cast({broadcast, [Node ,Sensor, Id, Time, Optional, Payload] = Message}, State) ->
+    lager:debug("got message: ~p", [Message]),
+    send_msg(Message),
+    {noreply, State};
+
 handle_cast(Msg, State) ->
     {noreply, State}.
 
@@ -80,11 +88,6 @@ handle_cast(Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_info([Node ,Sensor, Id, Time, Optional, Payload] = Message, State) ->
-	lager:debug("got message: ~p", [Message]),
-	send_msg(Message),
-    {noreply, State};
-
 handle_info(Info, State) ->
     {noreply, State}.
 
@@ -108,7 +111,7 @@ code_change(OldVsn, State, Extra) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 send_msg([Node ,Sensor, Id, Time, Optional, Payload] = Message) ->
-    lists:foreach(fun(Pid) -> Pid ! Message end, things_sup:get_actors_pids()).    
+    [gen_server:cast(Pid, {message, Message}) || Pid <- things_sup:get_actors_pids()].
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

@@ -221,6 +221,11 @@ get_table_id(Config) ->
 handle_cast(die, State) ->
     exit(self(),killed),
     {noreply, State};
+handle_cast({message, [Node ,Sensor, Id, Time, Optional, Payload]}, State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
+    lager:debug("Message=~p ", [[Node ,Sensor, Id, Time, Optional, Payload]]),
+    Config_1 = handle_msg([Node ,Sensor, Id, Time, Optional, Payload], Config, is_message_well_known({Node, Sensor, Id}, Allowed_msgs)),
+    {noreply, State#state{config = Config_1}};
+
 handle_cast({send_time_based, Pid, Name, Time, Optional, Payload}, State=#state{timed_msgs = Time_msgs}) ->
     case dict:find({Pid, Name}, Time_msgs) of 
         {ok, Timer_ref} -> erlang:cancel_timer(Timer_ref);                                                   
@@ -255,10 +260,10 @@ handle_info(timeout, State=#state{config = Config}) ->
 	start_timer(config:get_value(timer, Config_2, 0)),
     {noreply, State#state{allowed_msgs = Allowed_msgs, start_time=now(), config = Config_2}};
 
-handle_info([Node ,Sensor, Id, Time, Optional, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
-    lager:debug("Message=~p ", [[Node ,Sensor, Id, Time, Optional, Body]]),
-    Config_1 = handle_msg([Node ,Sensor, Id, Time, Optional, Body], Config, is_message_well_known({Node, Sensor, Id}, Allowed_msgs)),
-    {noreply, State#state{config = Config_1}};
+%%handle_info([Node ,Sensor, Id, Time, Optional, Body], State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
+%%    lager:debug("Message=~p ", [[Node ,Sensor, Id, Time, Optional, Body]]),
+%%   Config_1 = handle_msg([Node ,Sensor, Id, Time, Optional, Body], Config, is_message_well_known({Node, Sensor, Id}, Allowed_msgs)),
+%%    {noreply, State#state{config = Config_1}};
 
 handle_info({call_sensor}, State=#state{config = Config}) ->
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
@@ -294,7 +299,6 @@ handle_info({'ETS-TRANSFER', TableId, Pid, _Data}, State=#state{config = Config}
  
 handle_info({send_after, Name, Optional, Body}, State=#state{timed_msgs = Timed_msgs}) ->
     lager:info("now we send the message from : ~p with body : ~p ", [Name, Body]),
-
     sensor:send([], Name, Optional, Body),
     {noreply, State#state{timed_msgs = dict:erase({self(), Name}, Timed_msgs)}};
     
@@ -303,7 +307,6 @@ handle_info({Port, Payload}, State=#state{config = Config}) when is_port(Port) -
     {driver, {Module, Func}, Module_config} = lists:keyfind(driver, 1, Config),
     Config_1 = Module:Func(Payload, Config, Module_config),        
     {noreply, State#state{config = Config_1}};
-
 
 handle_info({'EXIT', Port, normal}, State) ->
     {noreply, State};  
