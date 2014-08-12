@@ -30,7 +30,7 @@ stop(Config) ->
     {ok, Config}.
 
 handle_msg([Node,_Sensor, _Id, Time, Optional, {run_result, Name, {ok, Result}}], Config, _Module_config) ->  
-    lager:info("get result for fun : ~p with result : ~p", [Name, Result]),  
+    lager:debug("get result for fun : ~p with result : ~p", [Name, Result]),  
     Table_Id = proplists:get_value(?TABLE, Config),
     [{results, Data}] = ets:lookup(Table_Id, results),
     ets:insert(Table_Id, [{results, add(Data, {Time, Node, Name, Result})}]),
