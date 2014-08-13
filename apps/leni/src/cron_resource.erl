@@ -240,7 +240,7 @@ get_config(Node, Name) ->
 	case rpc:call(list_to_atom(Node), thing, get_module_config, [Name]) of 
 		{badrpc, Reason} -> lager:error("thing:get_driver(~p) got error : ~p", [Name, Reason]),
 							[];
-		[{init, true, [{crontab, Config}]}] -> Config
+		Config -> proplists:get_value(crontab,Config)
 	end.
 
 

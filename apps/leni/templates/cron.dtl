@@ -4,15 +4,15 @@
 
 {% block body %}
 
-
-
-<div class="well">
-	<h1>Crontab on node : {{node}}</h1>
-
-	{%for job in config%}
-	<p><strong>{{job}}<p>
-	{%endfor%}
-
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">Crontab on node : {{node}}</h2>  
+    </div>
+    <div class="panel-body">
+	   {%for job in config%}
+	   <p><strong>{{job}}<p>
+	   {%endfor%}
+    </div>
 </div>
 
 {% endblock %}
