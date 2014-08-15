@@ -135,10 +135,18 @@ handle_info(Info, State) ->
 %% Returns: any (ignored by gen_server)
 %% --------------------------------------------------------------------
 terminate(_Reason, State=#state{sender = Sender, receiver = Receiver}) ->
-	gen_udp:close(Sender),
-	gen_udp:close(Receiver),
-    ok.
+	close_sender(Sender),
+	close_receiver(Receiver).
 
+close_sender(undefined) ->
+	ok;
+close_sender(Sender) ->
+	gen_udp:close(Sender).
+
+close_receiver(undefined) ->
+	ok;
+close_receiver(Receiver) ->
+	gen_udp:close(Receiver).
 %% --------------------------------------------------------------------
 %% Func: code_change/3
 %% Purpose: Convert process state when code is changed

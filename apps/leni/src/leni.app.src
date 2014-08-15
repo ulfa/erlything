@@ -5,7 +5,9 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  webmachine,
+                  erlydtl
                  ]},
   {mod, { leni_app, []}},
   {env, [

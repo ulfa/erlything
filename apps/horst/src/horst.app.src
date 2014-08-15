@@ -5,7 +5,15 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  gpio,
+                  gen_smtpc,
+                  erlcron,
+                  emqttc,
+                  erlib,
+                  reloader,
+                  mnesia,
+                  sue                  
                  ]},
   {mod, { horst_app, []}},
   {env, [
