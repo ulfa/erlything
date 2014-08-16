@@ -61,7 +61,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    {ok, #state{listener = undefined}, 0}.
+    {ok, #state{listener = []}, 0}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -77,7 +77,7 @@ handle_call({register_listener, Listener}, _From, State) ->
     {reply, ok, State#state{listener = Listener}};
 
 handle_call({unregister_listener}, _From, State) ->
-    {reply, ok, State#state{listener = undefined}};
+    {reply, ok, State#state{listener = []}};
 
 
 handle_call(_Request, _From, State) ->

@@ -5,19 +5,13 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib,
-                  lager,
-                  appmon,
-                  inets,
-                  ssl,
-                  crypto,
-                  public_key,
-                  asn1
+                  stdlib
                  ]},
   {mod, { sue_app, []}},
   {env, [{multi_ip, {239,255,255,250}},
   		 {multi_port, 1900},
 		 {timer, 5000},
+     {ip, {0,0,0,0}},
 		 {node_repo, node_repo},
 		 {node_repo_msg, save}		 
   		]},

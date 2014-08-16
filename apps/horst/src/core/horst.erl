@@ -33,10 +33,10 @@ start() ->
  	application:start(gpio),
     start_mnesia(),
     ensure_started(?MODULE),    
-    ?SEND(?SYSTEM, {info, {"System is started!",[]}}). 
+    ?SEND(?SYSTEM, {info, {"horst is started!",[]}}). 
 
 stop() ->
-    ?SEND(?SYSTEM, {info, {"System is going down!",[]}}),
+    ?SEND(?SYSTEM, {info, {"horst is going down!",[]}}),
 	ensure_stopped(public_key),
 	ensure_stopped(crypto),
 	ensure_stopped(ssl),

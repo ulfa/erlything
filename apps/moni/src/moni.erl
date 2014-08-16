@@ -26,7 +26,7 @@ start() ->
     ensure_started(lager),
 	ensure_started(mochiweb),	
 	ensure_started(webmachine),
-	application:start(?MODULE).
+	ensure_started(?MODULE).
 
 stop() ->
     application:stop(?MODULE).

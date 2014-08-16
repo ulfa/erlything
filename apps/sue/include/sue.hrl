@@ -6,13 +6,13 @@
 				{multicast_loop,true}, 				
 				{broadcast, true}, 
 				{active,true},
-				{add_membership, {get_env(multi_ip), ip_device:get_ip()}}]).
+				{add_membership, {get_env(multi_ip), get_env(ip)}}]).
 	
 -define(SENDER_OPTIONS,[ 
 				binary,
 				{multicast_ttl, 32},	
 				{multicast_loop,true},		
-				{ip, ip_device:get_ip()}]).
+				{ip, get_env(ip)}]).
 
 -define(ALIVE, <<"Alive">>).
 -define(DEAD, <<"Dead">>).
