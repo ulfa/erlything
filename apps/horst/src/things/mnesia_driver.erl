@@ -36,7 +36,7 @@ handle_msg([Node ,Module, Id, Time, Optional, Body], Config, Module_config) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-handle_intern([Node ,<<"system">> = Module, Id, Time, Optional, {info, {"System is started!",[]}} = Body], Config, _Module_config) ->		
+handle_intern([Node ,<<"system">> = Module, Id, Time, Optional, {info, {"horst is started!",[]}} = Body], Config, _Module_config) ->		
 	case Node =:= atom_to_binary(node(), utf8) of   	
 		true -> save_or_create(Node, Module, Id, Time, Optional, Body),				
 				handle_saved_funrunner_messages(Config);
