@@ -60,7 +60,7 @@
         </div>
 
         <button type="submit" name="button" value="send" class="btn btn-primary">Send</button>
-        <button type="submit" name="button" value="cancel" class="btn btn-default">Cancel</button>          
+        <!--button type="submit" name="button" value="cancel" class="btn btn-default">Cancel</button-->          
     </form>    
     </div>
 </div>
