@@ -150,7 +150,7 @@ process_request(ReqData, Context,"copy", Body) ->
 	{"thing", Thing} = lists:keyfind("thing",1, Body),	
 	{"selected_node", Selected_node} = lists:keyfind("selected_node",1, Body),
 	Msg = sender_util:create_message(?MODULE, [{action, "copy"}, {thing, Thing}, {target, Selected_node}]), 
-	sender_util:send_message(list_to_atom(Node), Msg), 
+	sender_util:send_message([list_to_atom(Node)], Msg), 
 	{true, wrq:do_redirect(true, wrq:set_resp_header("location", wrq:path(ReqData), ReqData)), Context};
 process_request(ReqData, Context,"delete", Body) ->	
 	{"node", Node} = lists:keyfind("node",1, Body),

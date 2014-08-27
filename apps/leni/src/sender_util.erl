@@ -60,7 +60,10 @@ send_message(Nodes, Message) ->
   send_message(Nodes, 'actor_group', Message).    
 
 send_message(Nodes, Target, [Node, Module, Id, Time, Optional, Body] = Message) when is_list(Nodes)->
-  [rpc:cast(Node_target, Target, 'broadcast', [Message]) || Node_target <- Nodes].
+  [rpc:cast(Node_target, Target, 'broadcast', [Message]) || Node_target <- Nodes];
+
+send_message(Node, Target, [Node, Module, Id, Time, Optional, Body] = Message) ->
+  send_message([Node], Target, [Node, Module, Id, Time, Optional, Body] = Message).
 
 encode([]) ->
 	[];
