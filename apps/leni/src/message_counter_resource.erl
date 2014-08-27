@@ -236,13 +236,17 @@ get_module_config(Node, Name) ->
 	case rpc:call(Node, thing, get_module_config, [Name]) of 
 		{badrpc, Reason} -> lager:error("thing:get_module_config(~p) got error : ~p", [Name, Reason]),
 							[];
-		Config -> Config
+		Config -> filter(Config)
 	end.
 
 is_not_badrpc({badrpc, Reason}) ->
 	false;
 is_not_badrpc(Any) ->
 	true.
+
+filter(Config) ->
+	Messages = [{Time, [Node, Driver, Id, Payload]}|| {Time, [Node, Driver, Id, Optional, Payload] } <- proplists:get_value(data, Config)],
+	lists:keyreplace(data, 1, Config, {data, Messages}).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
