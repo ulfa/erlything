@@ -25,6 +25,7 @@
     <div class="panel-body">
 	
 	{% if list_of_things %}
+	<div class="table-responsive">
 		<table class="table">  
         	<thead>  
           	  <tr>
@@ -45,6 +46,7 @@
 			</tbody>
 			{% endfor %}
 		</table>
+	</div>
 	{% endif %}
 	</div>
     </div>
