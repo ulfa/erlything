@@ -123,10 +123,10 @@ process_post(ReqData, Context) ->
     Button = get_value("button", Body),  
     case Button of
     	"delete" -> Nodes_to_delete = lists:delete({"button", "delete"}, Body),    
-    				rpc:call(erlang:list_to_atom(Node), sue, delete, [Nodes_to_delete]);
-    	_ -> ok
-    end,
-	{true, ReqData, Context}.
+    				rpc:call(erlang:list_to_atom(Node), sue, delete, [Nodes_to_delete]),
+    				{true, wrq:do_redirect(true, wrq:set_resp_header("location", wrq:path(ReqData), ReqData)), Context};		
+    	_ -> {true, ReqData, Context}
+    end.
 
 %
 % This should return a list of pairs where each pair is of the form {Mediatype, Handler} 
