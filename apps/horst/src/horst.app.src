@@ -5,7 +5,13 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  crypto,
+                  asn1,
+                  public_key,
+                  ssl,
+                  inets,
+                  sue
                  ]},
   {mod, { horst_app, []}},
   {env, [
