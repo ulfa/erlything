@@ -11,7 +11,7 @@ erlyThing is a decentral, distributed message based thing plattform written in E
 * dynamic handling of config files (things.config and messages.config)
 * Integration of 3rd party applications is simple.(see cuberl) 
 * Generic way of handling rules (see funrunner)
-* very simple DSL (Prototype)
+* very easy DSL (Prototype)
 * Logging. Every node writes their own logs. You can have a look throw the logging ui,
 * internal monitoring system:
 	* webbased application explorer
@@ -22,7 +22,8 @@ erlyThing is a decentral, distributed message based thing plattform written in E
 ## Applications
 
 erlyThing consists of the following core applications:
-* roni is a central service app. 
+
+* roni app for services which are used by several other services
 * sue app for finding nodes and a interface for etop, sys_info, memory and others
 * moni ui for sue based on web machine and erlydtl
 * horst the runtime for the things
@@ -36,15 +37,15 @@ extra application
 
 To install erlyThing on your machine, do the following steps :
 
-Before you install erlyTHing on your machine, you have to install an [erlang R15](https://www.erlang-solutions.com/downloads/download-erlang-otp) runtime. 
+Before you install erlyTHing on your machine, you have to install an [erlang R16](https://www.erlang-solutions.com/downloads/download-erlang-otp) runtime. 
 After installing the runtime, you have to install [rebar](https://github.com/basho/rebar) on your machine. rebar is the build tool for erlang.
 
-* [erlang R1503](https://www.erlang-solutions.com/downloads/download-erlang-otp) It also works with R16
+* [erlang R1603](https://www.erlang-solutions.com/downloads/download-erlang-otp) 
 * [rebar](https://github.com/basho/rebar) the build tool for erlang
 
 
 ```bash
-$ git clone https://github.com/ulfa/erlything 
+$ git clone https://github.com/ulfa/erlything
 $ cd erlything
 $ make
 $ ./dev.sh
