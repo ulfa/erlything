@@ -1,0 +1,12 @@
+{application, roni,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { roni_app, []}},
+  {env, []}
+ ]}.

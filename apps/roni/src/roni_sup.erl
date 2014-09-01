@@ -1,13 +1,4 @@
-%% Copyright (c) 2013 Ulf Angermann
-%% See MIT-LICENSE for licensing information.
-
-%%% -------------------------------------------------------------------
-%%% Author  : Ulf Angermann uaforum1@googlemail.com
-%%% Description :
-%%%
-%%% Created : 
-
--module(horst_sup).
+-module(roni_sup).
 
 -behaviour(supervisor).
 
@@ -32,9 +23,8 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-    {ok, { {one_for_one, 5, 10}, [                                  
-    							  ?CHILD(actor_group, worker),
-    							  ?CHILD(node_config, worker),    							
-    							  ?CHILD(things_sup,supervisor),
-                                  ?CHILD(file_provider_sup,supervisor)    							  
-    							  ]}}.
+    {ok, { {one_for_one, 5, 10}, [
+    	?CHILD_ARG(account_sup, supervisor, [roni]),
+    	?CHILD(ets_mgr, worker)
+    ]} }.
+

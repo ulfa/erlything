@@ -16,6 +16,8 @@
 %% --------------------------------------------------------------------
 -include("../include/sue.hrl").
 %% --------------------------------------------------------------------
+
+-define(LISTENER, listener).
 %% External exports
 
 %% gen_server callbacks
@@ -23,14 +25,14 @@
 -export([start_link/0]).
 -export([start/0]).
 -export([register_listener/1, unregister_listener/0, send_msg_listener/1]).
+-export([die/0]).
 %% ====================================================================
 %% External functions
 %% ====================================================================
-
 %% --------------------------------------------------------------------
 %% record definitions
 %% --------------------------------------------------------------------
--record(state, {sender, receiver, listener}).
+-record(state, {sender, receiver, listener, table_id}).
 %% ====================================================================
 %% Server functions
 %% ====================================================================
@@ -42,6 +44,9 @@ unregister_listener() ->
 
 send_msg_listener(Message) ->
 	gen_server:cast(?MODULE, {send_msg_listener, Message}).	
+
+die() ->
+	gen_server:cast(?MODULE, die).	
 
 %%--------------------------------------------------------------------
 %% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
@@ -61,6 +66,7 @@ start() ->
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
+ 	process_flag(trap_exit, true),
     {ok, #state{listener = []}, 0}.
 
 %% --------------------------------------------------------------------
@@ -73,11 +79,15 @@ init([]) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_call({register_listener, Listener}, _From, State) ->
-    {reply, ok, State#state{listener = Listener}};
+handle_call({register_listener, Listener}, _From, #state{table_id = Table}=State) ->
+	[{?LISTENER, Data}] = ets:lookup(Table, ?LISTENER),
+	ets:insert(Table, [{?LISTENER, Listener}]),
+    {reply, ok, State};
 
-handle_call({unregister_listener}, _From, State) ->
-    {reply, ok, State#state{listener = []}};
+handle_call({unregister_listener}, _From, #state{table_id = Table}=State) ->
+	[{?LISTENER, Data}] = ets:lookup(Table, ?LISTENER),
+	ets:insert(Table, [{?LISTENER, []}]),
+    {reply, ok, State};
 
 
 handle_call(_Request, _From, State) ->
@@ -91,8 +101,14 @@ handle_call(_Request, _From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------	
-handle_cast({send_msg_listener, Message}, #state{listener = Listener} = State) ->
+handle_cast({send_msg_listener, Message}, #state{table_id = Table} = State) ->
+	[{?LISTENER, Listener}] = ets:lookup(Table, ?LISTENER),
 	send_message(Listener, Message),
+    {noreply, State};
+
+handle_cast(die, State) ->
+	lager:info("die!"),
+    exit(self(),killed),
     {noreply, State};
 
 handle_cast(_Msg, State) ->
@@ -115,7 +131,7 @@ handle_info(timeout, State) ->
 	{ok, Sender} = gen_udp:open(0, ?SENDER_OPTIONS),		
 	{ok, Receiver} = gen_udp:open(get_env(multi_port), ?RECEIVER_OPTIONS),	
 	start_timer(),
-	{noreply, #state{sender = Sender, receiver = Receiver}};
+	{noreply, #state{sender = Sender, receiver = Receiver, table_id = create_ets()}};
 	
 handle_info(send_alive, State=#state{sender = Socket}) ->
 	{ok, {Address, Port}} = inet:sockname(Socket),
@@ -124,6 +140,12 @@ handle_info(send_alive, State=#state{sender = Socket}) ->
 	start_timer(),		
 	{noreply, State};
 		  
+handle_info({'ETS-TRANSFER', Table_id, Pid, _Data}, State) ->
+    lager:info("ETS Manager (~p) -> Thing (~p) getting TableId: ~p~n", [Pid, self(), Table_id]),
+    {noreply, State#state{table_id = Table_id}};
+
+handle_info({'EXIT', Port, normal}, State) ->
+    {noreply, State};  
 
 handle_info(Info, State) ->
 	%%lager:warning("don't understand this message : ~p", [Info]),	
@@ -134,7 +156,8 @@ handle_info(Info, State) ->
 %% Description: Shutdown the server
 %% Returns: any (ignored by gen_server)
 %% --------------------------------------------------------------------
-terminate(_Reason, State=#state{sender = Sender, receiver = Receiver}) ->
+terminate(Reason, State=#state{sender = Sender, receiver = Receiver}) ->
+	lager:info("~p is going down by reason : ~p", [?MODULE, Reason]),
 	close_sender(Sender),
 	close_receiver(Receiver).
 
@@ -154,11 +177,14 @@ close_receiver(Receiver) ->
 %% --------------------------------------------------------------------
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
-
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
-send_message(undefined, Message) ->
+create_ets() ->
+	lager:info("ask ets_mgr for table"),
+    ets_mgr:init_table(self(), ?MODULE, [{?LISTENER, []}]). 
+
+send_message([], Message) ->
 	lager:error("there is no listener registered!");
 send_message(Listener, Message) when is_pid(Listener) ->
 	Listener ! Message.

@@ -5,7 +5,8 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  roni
                  ]},
   {mod, { leni_app, []}},
   {env, [
