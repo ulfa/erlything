@@ -11,7 +11,7 @@ erlyThing is a decentral, distributed message based thing plattform written in E
 * dynamic handling of config files (things.config and messages.config)
 * Integration of 3rd party applications is simple.(see cuberl) 
 * Generic way of handling rules (see funrunner)
-* very easy DSL (Prototype)
+* very simple DSL (Prototype)
 * Logging. Every node writes their own logs. You can have a look throw the logging ui,
 * internal monitoring system:
 	* webbased application explorer
@@ -22,7 +22,7 @@ erlyThing is a decentral, distributed message based thing plattform written in E
 ## Applications
 
 erlyThing consists of the following core applications:
-
+* roni is a central service app. 
 * sue app for finding nodes and a interface for etop, sys_info, memory and others
 * moni ui for sue based on web machine and erlydtl
 * horst the runtime for the things
