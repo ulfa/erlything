@@ -28,10 +28,10 @@
 -export([init/1, stop/1, handle_msg/3]).
 
 init(Config) ->
-    Config.
+    {ok, Config}.
 
 stop(Config) ->
-    Config.
+    {ok, Config}.
 
 handle_msg([Node ,Sensor, Id, Time, Optional, [{action, "copy"}, {thing, Thing}, {target, Target}]] = Msg, Config, Module_config) ->
     lager:info("~p got message : ~p", [?MODULE, Msg]),
