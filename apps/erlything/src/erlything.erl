@@ -31,18 +31,20 @@
 %% --------------------------------------------------------------------
 -export([start/0, stop/0]).
 
-start() ->
+start() ->    
     ensure_started(crypto),
     ensure_started(asn1),
     ensure_started(public_key),
     ensure_started(ssl),
     ensure_started(inets), 
+    ensure_started(xmerl),
+    start_mnesia(),
     ensure_started(roni),
     ensure_started(sue),
+
     ensure_started(horst),
-    ensure_started(xmerl),
     ensure_started(leni),
-    ensure_started(moni),
+    ensure_started(moni),    
     application:start(?MODULE).
 
 stop() ->
@@ -70,6 +72,16 @@ ensure_stopped(App) ->
         {error, Reason} ->
             ok
     end.
+
+start_mnesia() ->
+    lager:info("create the schema for the database"),
+    mnesia:create_schema([node()]),
+    lager:info("start the database"),
+    ensure_started(mnesia).
+
+stop_mnesia() ->
+    mnesia:stop().
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------

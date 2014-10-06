@@ -12,7 +12,8 @@
                   ssl,
                   inets,
                   roni,
-                  sue
+                  sue,
+                  mnesia
                  ]},
   {mod, { horst_app, []}},
   {env, [

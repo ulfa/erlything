@@ -23,34 +23,15 @@
 -export([set_active/2, get_state/1, set_state/2]).
 
 start() ->
-	ensure_started(crypto),
-    ensure_started(asn1),
-	ensure_started(public_key),
-	ensure_started(ssl),
-    ensure_started(inets), 
-	ensure_started(sue),
     %% i don't check the return value, because i also run it on a pc 
  	application:start(gpio),
-    start_mnesia(),
     ensure_started(?MODULE),    
     ?SEND(?SYSTEM, {info, {"horst is started!",[]}}). 
 
 stop() ->
     ?SEND(?SYSTEM, {info, {"horst is going down!",[]}}),
-	ensure_stopped(public_key),
-	ensure_stopped(crypto),
-	ensure_stopped(ssl),
-	ensure_stopped(sue),
     ensure_stopped(gpio), 
-    stop_mnesia(),
     ensure_stopped(horst).
-
-start_mnesia() ->
-    mnesia:create_schema([node()]),
-    mnesia:start().
-
-stop_mnesia() ->
-    mnesia:stop().
 
 get_things() ->
     {node(), get_things(things_sup:get_things(), [])}.
@@ -99,7 +80,6 @@ ensure_stopped(App) ->
         {error, Reason} ->
             ok
     end.
-
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
