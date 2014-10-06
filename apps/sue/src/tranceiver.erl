@@ -108,7 +108,7 @@ handle_cast({send_msg_listener, Message}, #state{table_id = Table} = State) ->
 
 handle_cast(die, State) ->
 	lager:info("die!"),
-    exit(self(),killed),
+    exit(self(),kill),
     {noreply, State};
 
 handle_cast(_Msg, State) ->
