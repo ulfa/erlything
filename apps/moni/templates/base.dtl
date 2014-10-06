@@ -36,7 +36,7 @@
 				</div>
 			</div>
 		</nav>	
-         
+        {% if links%}
             <div class="row">               
                 <div class="col-sm-2">                 
                     <nav class="navbar-default navbar-inside" role="navigation">
@@ -52,6 +52,7 @@
                     </nav>
                 </div>
                 <div class="col-md-10">
+        {% endif %}                    
                 {% block body %}{% endblock %}
                 </div>
             </div>
