@@ -232,11 +232,15 @@ to_html(ReqData, Context) ->
     {Content, ReqData, Context}.  
 
 get_data(Node, Name) when is_list(Node)->
-    case rpc:call(list_to_atom(Node), thing, get_module_config, [Name]) of 
-        {badrpc, Reason} -> lager:error("got error during call ~p thing:get_driver(~p) with reason ~p", [Node, Name, Reason]),
-                            [];
-        [{data, Data}]     ->  convert_timestamp_to_date(Data)
-    end.
+    D = mnesia_driver:select_entries('erlything@ronja:ds18b20_driver:default'),
+    D1 = [{date:seconds_to_date(Date), Value}|| {_N, Date, _O, {temp, Value}} <- D].
+
+%%get_data(Node, Name) when is_list(Node)->
+%%    case rpc:call(list_to_atom(Node), thing, get_module_config, [Name]) of 
+%%        {badrpc, Reason} -> lager:error("got error during call ~p thing:get_driver(~p) with reason ~p", [Node, Name, Reason]),
+%%                            [];
+%%        [{data, Data}]     ->  convert_timestamp_to_date(Data)
+%%    end.
 
 convert_timestamp_to_date(List_of_temps) ->
     lists:foldr(fun({Timestamp, Temp_hum}, Acc) -> [{date:timestamp_to_date(Timestamp), Temp_hum}|Acc] end, [], List_of_temps).

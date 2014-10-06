@@ -1,0 +1,61 @@
+Fail Over: 
+
+When the node 'erlything1@macbook-pro' dies, than the thing 'Database' will be started on the local node.
+
+fun(Name, Pid, [Payload]) -> 
+    case Payload of 
+       {error,{dead,'erlything1@macbook-pro'}} -> node_config:set_active("Database", true), ok; 
+       {info,{alive,'erlything1@macbook-pro'}} -> node_config:set_active("Database", false), ok; 
+      _Any -> nothing_to_do 
+     end
+end.
+
+fun(Name, Pid, [Payload]) -> 
+    case Payload of 
+       {error,{dead,'erlything1@macbook-pro'}} -> node_config:set_active("Bell", true), ok; 
+       {info,{alive,'erlything1@macbook-pro'}} -> node_config:set_active("Bell", false), ok; 
+      _Any -> nothing_to_do 
+     end
+end.
+
+Messages.config
+
+{<<"erlything@macbook-pro">>, <<"node_driver">> ,all}
+
+
+Switch on the light when the actual time is between 8:00 and 19:00 o'clock.
+
+fun(Pid, Name, Body) -> 
+  case Body of 
+    "off" -> ok; 
+    "on" -> case date:is_time_in_range({08,00,00}, {19,00,00}, time()) of
+                    true -> ok;
+                    false -> sensor:send([], Name, {"Licht","11111 2","1"}),
+                                sensor:send_after(Pid, Name, 20000, [], {"Licht","11111 2","0"})
+                end;
+        _ -> ok 
+  end 
+end.
+
+The following rule will switch on a light and after 20 seconds, the light will switched off.
+
+fun(Pid, Name, Body) -> 
+  case Body of 
+    "off" -> ok; 
+    "on" -> sensor:send([], Name, {"Licht","11111 2","1"}),
+            sensor:send_after(Pid, Name, 20000, [], {"Licht","11111 2","0"});
+        _ -> ok 
+  end 
+end.
+
+Sends only an on singnal. If a driver registrier to this event, you can play, for example, a sound.
+
+alarm_fun
+
+erlything@horst hc_sr501_driver default
+
+fun(Pid, Name, Body) -> 
+  sensor:send([], Name, "on") 
+end.
+
+If a motion is detect from the hc_sr501_driver on horst, an alarm message will be send.
