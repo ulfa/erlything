@@ -219,7 +219,7 @@ get_table_id(Config) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_cast(die, State) ->
-    exit(self(),killed),
+    exit(self(),kill),
     {noreply, State};
 handle_cast({message, [Node ,Sensor, Id, Time, Optional, Payload]}, State=#state{allowed_msgs = Allowed_msgs, config = Config}) ->
     lager:debug("Message=~p ", [[Node ,Sensor, Id, Time, Optional, Payload]]),
