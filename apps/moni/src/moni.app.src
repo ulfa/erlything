@@ -6,7 +6,8 @@
   {applications, [
                   kernel,
                   stdlib,
-                  roni
+                  roni,
+                  lager
                  ]},
   {mod, { moni_app, []}},
   {env, []},
