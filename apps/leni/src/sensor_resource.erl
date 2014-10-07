@@ -45,8 +45,8 @@ init(_Config) ->
 % Returning non-true values will result in 404 Not Found.
 % 
 resource_exists(ReqData, Context) ->
-    {true, ReqData, Context}.
-
+    [Node,Sensor] = wrq:path_tokens(ReqData),
+    {get_sensor(Node, Sensor), ReqData, Context}.
 %
 % true, if the service is available
 %
@@ -237,10 +237,20 @@ to_json(ReqData, Context) ->
     {Content, ReqData, Context}.  
 
 get_data(Node, Sensor) ->
-    case rpc:call(list_to_atom(Node) , thing, get_value, [Sensor]) of 
+    case rpc:call(list_to_atom(Node), thing, get_value, [Sensor]) of 
         {badrpc, Reason} -> lager:error("got error during call thing:get_driver(~p) with reason ~p", [Sensor, Reason]),
                             [];
         Data -> Data
+    end.
+
+get_sensor(Node, Sensor) ->
+    case rpc:call(list_to_atom(Node), things_sup, get_sensors, []) of 
+        {badrpc, Reason} -> lager:error("got error during call ~p things_sup:get_sensors(~p) with reason ~p", [Node, Sensor, Reason]),
+                            [];
+        Data -> case lists:keysearch(list_to_atom(Sensor), 1 ,Data) of 
+                    false -> false;
+                    Any -> true
+                end
     end.
 
 result_to_json(Result) ->
