@@ -225,19 +225,19 @@ finish_request(ReqData, Context) ->
 %% --------------------------------------------------------------------
 %%% Additional functions
 %% --------------------------------------------------------------------
-to_html(ReqData, Context) ->    
-    Sensor = wrq:path_info(sensor, ReqData),    
-    {ok, Content} =  sensor_dtl:render([{sensor, Sensor}, {data, get_data(Sensor)}]),
+to_html(ReqData, Context) ->   
+    [Node,Sensor] = wrq:path_tokens(ReqData), 
+    {ok, Content} =  sensor_dtl:render([{sensor, Sensor}, {data, get_data(Node, Sensor)}]),
     {Content, ReqData, Context}.  
 
 to_json(ReqData, Context) ->
-    Sensor = wrq:path_info(sensor, ReqData),
-    Result = get_data(Sensor),
+    [Node,Sensor] = wrq:path_tokens(ReqData),
+    Result = get_data(Node, Sensor),
     Content = result_to_json(Result),
     {Content, ReqData, Context}.  
 
-get_data(Sensor) ->
-    case rpc:call(node(), thing, get_value, [Sensor]) of 
+get_data(Node, Sensor) ->
+    case rpc:call(list_to_atom(Node) , thing, get_value, [Sensor]) of 
         {badrpc, Reason} -> lager:error("got error during call thing:get_driver(~p) with reason ~p", [Sensor, Reason]),
                             [];
         Data -> Data
