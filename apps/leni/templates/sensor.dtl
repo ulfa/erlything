@@ -1,0 +1,16 @@
+{% extends "base.dtl" %}
+
+{% block title %}Sensor: {{sensor}} {% endblock %}
+
+{% block body %}
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">Sensor: {{sensor}}</h2>  
+    </div>
+    <div class="panel-body">
+        <p><strong>actual data : </strong> {{data}} <p>
+    </div>
+</div>
+
+{% endblock %}
