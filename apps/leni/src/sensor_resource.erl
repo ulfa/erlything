@@ -142,7 +142,6 @@ process_post(ReqData, Context) ->
 % return tuples, then a 406 Not Acceptable will be sent.
 % 
 content_types_provided(ReqData, Context) ->
-    lager:info("~p", [ReqData]),
     {[{"text/html", to_html},{"application/json", to_json}],ReqData, Context}.
 %
 % This is used similarly to content_types_provided, except that it is for incoming 
@@ -227,7 +226,7 @@ finish_request(ReqData, Context) ->
 %%% Additional functions
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->    
-    Sensor = wrq:path_info(sensor, ReqData),
+    Sensor = wrq:path_info(sensor, ReqData),    
     {ok, Content} =  sensor_dtl:render([{sensor, Sensor}, {data, get_data(Sensor)}]),
     {Content, ReqData, Context}.  
 
@@ -246,7 +245,6 @@ get_data(Sensor) ->
 
 result_to_json(Result) ->
     Jsx_input = converter:proplists_to_jsx_input(Result),   
-    lager:info("1... ~p~n", [Jsx_input]), 
     jsx:encode(Jsx_input).
 %% --------------------------------------------------------------------
 %%% Test functions
