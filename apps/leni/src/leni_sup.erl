@@ -46,14 +46,11 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-    Ip = case os:getenv("WEBMACHINE_IP") of 
-        false -> "0.0.0.0"; 
-        Any -> Any 
-    end,
+    Ip = get_ip(),
     {ok, Dispatch} = file:consult(filename:join([filename:dirname(code:which(?MODULE)), "..", "priv", "dispatch.conf"])),
     WebConfig = [
                  {ip, Ip},
-                 {port, 8080},                 
+                 {port, get_port()},                 
                  {dispatch, Dispatch},
                  {dispatch_group, leni},
                  {name, leni},
@@ -62,3 +59,14 @@ init([]) ->
     Web = {wm_instance_2, {webmachine_mochiweb, start, [WebConfig]}, permanent, 5000, worker, dynamic},
     Processes = [Web],
     {ok, { {one_for_one, 10, 10}, Processes} }.
+
+
+get_port() ->
+    {ok, Port} = application:get_env(leni, port),
+    Port.
+
+get_ip() ->
+    case application:get_env(moni, ip) of 
+        undefined ->  "0.0.0.0";
+        {ok, Ip} -> Ip
+    end.
