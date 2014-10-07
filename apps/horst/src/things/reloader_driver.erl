@@ -31,6 +31,7 @@ stop(Config) ->
 
 call_sensor(Config, Module_config) ->   
     Changed_Modules = re_reloader:reload(),
+    thing:set_value(self(), Changed_Modules),
     send_message(Config, Changed_Modules),
     Config.
 %% --------------------------------------------------------------------

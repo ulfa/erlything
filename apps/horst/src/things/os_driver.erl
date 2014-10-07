@@ -18,7 +18,6 @@
 -export([init/1, stop/1]).
 -export([call_sensor/2]).
 
-
 init(Config) ->
     lager:info("~p:init('~p')", [?MODULE, Config]),
     application:start(os_mon),
