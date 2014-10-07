@@ -48,7 +48,7 @@ send_time_based(Time, Pid, Name, Optional, Payload) when is_pid(Pid) ->
     gen_server:cast(Pid, {send_time_based, Pid, Name, Time, Optional, Payload}).
 
 get_value(Name) when is_list(Name) ->
-    get_name(list_to_atom(Name));
+    get_value(list_to_atom(Name));
 get_value(Name) ->
     gen_server:call(Name, {get_value}).
 
