@@ -13,7 +13,8 @@
                   inets,
                   roni,
                   sue,
-                  mnesia
+                  mnesia,
+                  reloader
                  ]},
   {mod, { horst_app, []}},
   {env, []}

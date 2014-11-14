@@ -44,7 +44,7 @@ start() ->
 
     ensure_started(horst),
     ensure_started(leni),
-    ensure_started(moni),    
+    %%ensure_started(moni),    
     application:start(?MODULE).
 
 stop() ->

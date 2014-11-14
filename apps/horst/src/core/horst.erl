@@ -25,6 +25,7 @@
 start() ->
     %% i don't check the return value, because i also run it on a pc 
  	application:start(gpio),
+    application:ensure_all_started(?MODULE), 
     ensure_started(?MODULE),    
     ?SEND(?SYSTEM, {info, {"horst is started!",[]}}). 
 
@@ -77,7 +78,7 @@ ensure_stopped(App) ->
     case application:stop(App) of
         ok ->
             ok;
-        {error, Reason} ->
+        {error, _Reason} ->
             ok
     end.
 %% --------------------------------------------------------------------

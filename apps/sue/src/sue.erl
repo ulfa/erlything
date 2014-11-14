@@ -17,15 +17,13 @@
 -export([get_applications/1, process_info/2, app_info/2, delete/1]).
 -export([set_debug/0, set_info/0]).
 
-%% doc starrt the application
+%% doc start the application
 %%
 	start() ->
-		%%application:start(lager),		
 	  	application:start(?MODULE).
 
 %% doc stop the application
 	stop() ->
-		%%application:stop(lager),		
 		application:stop(?MODULE).
 
 %% doc Return all registered children. 

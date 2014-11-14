@@ -7,7 +7,9 @@
                   kernel,
                   stdlib,
                   roni,
-                  lager
+                  lager,
+                  mochiweb,
+                  webmachine
                  ]},
   {mod, { leni_app, []}},
   {env, [
