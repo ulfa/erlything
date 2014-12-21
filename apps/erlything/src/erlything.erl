@@ -31,7 +31,11 @@
 %% --------------------------------------------------------------------
 -export([start/0, stop/0]).
 
-start() ->    
+start() ->
+    ensure_started(compiler),
+    ensure_started(syntax_tools),
+    ensure_started(goldrush),
+    ensure_started(lager),
     ensure_started(crypto),
     ensure_started(asn1),
     ensure_started(public_key),
@@ -41,10 +45,12 @@ start() ->
     start_mnesia(),
     ensure_started(roni),
     ensure_started(sue),
+    ensure_started(mochiweb),
+    ensure_started(webmachine),
 
     ensure_started(horst),
     ensure_started(leni),
-    %%ensure_started(moni),    
+    ensure_started(moni),    
     application:start(?MODULE).
 
 stop() ->
