@@ -47,7 +47,7 @@ start() ->
     ensure_started(sue),
     ensure_started(mochiweb),
     ensure_started(webmachine),
-
+    ensure_started(gpio),
     ensure_started(horst),
     ensure_started(leni),
     ensure_started(moni),    
