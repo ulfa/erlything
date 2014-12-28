@@ -6,10 +6,7 @@
   {applications, [
                   kernel,
                   stdlib,
-                  roni,
-                  lager,
-                  mochiweb,
-                  webmachine
+                  roni
                  ]},
   {mod, { leni_app, []}},
   {env, [

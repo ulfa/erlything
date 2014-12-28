@@ -6,15 +6,9 @@
   {applications, [
                   kernel,
                   stdlib,
-                  crypto,
-                  asn1,
-                  public_key,
-                  ssl,
-                  inets,
                   roni,
                   sue,
-                  mnesia,
-                  reloader
+                  mnesia                  
                  ]},
   {mod, { horst_app, []}},
   {env, []}

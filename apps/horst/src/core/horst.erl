@@ -24,8 +24,7 @@
 
 start() ->
     %% i don't check the return value, because i also run it on a pc 
- 	application:start(gpio),
-    application:ensure_all_started(?MODULE), 
+ 	application:start(gpio),    
     ensure_started(?MODULE),    
     ?SEND(?SYSTEM, {info, {"horst is started!",[]}}). 
 

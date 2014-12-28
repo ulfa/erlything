@@ -1,4 +1,4 @@
-{% extends "base.dtl" %}
+{% extends "moni_base.dtl" %}
 {% block title %}etop: {{node}}{% endblock %}
 
 {% block body %}	

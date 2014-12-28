@@ -31,20 +31,14 @@
 %% --------------------------------------------------------------------
 -export([start/0, stop/0]).
 
-start() ->    
-    ensure_started(crypto),
-    ensure_started(asn1),
-    ensure_started(public_key),
-    ensure_started(ssl),
-    ensure_started(inets), 
-    ensure_started(xmerl),
+start() -> 
+    application:ensure_all_started(?MODULE),    
     start_mnesia(),
     ensure_started(roni),
     ensure_started(sue),
-
-    ensure_started(horst),
+    ensure_started(horst),    
     ensure_started(leni),
-    %%ensure_started(moni),    
+    ensure_started(moni),    
     application:start(?MODULE).
 
 stop() ->

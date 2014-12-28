@@ -27,7 +27,7 @@
                 </div>               
                 <div class="in collapse navbar-collapse" id="leni-without-navbar-collapse"> 
                     <ul class ="nav navbar-nav">                                                     
-                        <li class="active">
+                        <li>
                             <a href="/messages_config">Messages</a>
                         </li>                                    
                         <li>

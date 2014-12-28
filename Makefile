@@ -22,8 +22,11 @@ cpall: tarall
 cp: tar
 	 cd ..;scp $(REPOSRC)/$(PROJECT).$(VERSION).tar $(USR)@$(HOST):$(TARGET)
 
-release: app
-	@$(REBAR) generate
+release: clean-release all
+	relx -o $(REPO)/$(PROJECT)
+ 
+clean-release: clean-projects
+	rm -rf $(REPO)/$(PROJECT)
 
 app: deps
 	@$(REBAR) compile

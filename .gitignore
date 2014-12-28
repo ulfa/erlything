@@ -9,7 +9,7 @@ apps/*/test/*.beam
 ct_test/*
 .eunit/
 rel/horst/*
-deps
+deps/*/ebin
 src/*~
 include/*~
 log/*

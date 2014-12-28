@@ -21,8 +21,6 @@ ensure_started(App) ->
     end.
 	
 start() ->
-	ensure_started(mochiweb),	
-	ensure_started(webmachine),
 	ensure_started(?MODULE).
 
 stop() ->

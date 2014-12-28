@@ -6,7 +6,15 @@
   {applications, [
                   kernel,
                   stdlib,
-                  erlib
+                  crypto,
+                  asn1,
+                  public_key,
+                  ssl,
+                  inets,
+                  xmerl,
+                  erlib,
+                  mochiweb,
+                  webmachine
                  ]},
   {env, []}
  ]}.
