@@ -7,9 +7,8 @@
                   kernel,
                   stdlib,
                   roni,
-                  sue,
-                  mnesia                  
-                 ]},
+                  sue
+                  ]},
   {mod, { horst_app, []}},
   {env, []}
  ]}.
