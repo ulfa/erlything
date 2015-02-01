@@ -32,7 +32,7 @@
 -export([start_link/1]).
 
 -export([is_valid_account/2]).
-
+-export([get_accounts/1]).
 %% ====================================================================
 %% External functions
 %% ====================================================================
@@ -138,8 +138,8 @@ get_accounts(Application) ->
 -include_lib("eunit/include/eunit.hrl").
 -ifdef(TEST).
 get_accounts_test() ->
-	application:start(erlib),
-	?assertEqual([{"account", "password"}],get_accounts(erlib)).
+	application:start(roni),
+	?assertEqual([{"a", "a"}], get_accounts(roni)).
 
 check_account_test()->
 	Accounts = [{"user", "password"}],
