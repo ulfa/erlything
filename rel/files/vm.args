@@ -1,8 +1,8 @@
 ## Name of the node
--sname erlything
+-name erlything@127.0.0.1
 
 ## Cookie for distributed erlang
--setcookie nocookie
+-setcookie {{cookie}}
 
 ## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
 ## (Disabled by default..use with caution!)
@@ -17,7 +17,3 @@
 
 ## Tweak GC to run more often
 ##-env ERL_FULLSWEEP_AFTER 10
-
--config etc/erlything.config
-##start erylthing
--s lager -s erlything

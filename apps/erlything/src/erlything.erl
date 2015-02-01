@@ -51,16 +51,17 @@ start() ->
     ensure_started(gpio),
     ensure_started(horst),
     ensure_started(leni),
-    ensure_started(moni),    
+    ensure_started(moni),
     application:start(?MODULE).
 
 stop() ->
-    ensure_stopped(sue),
-    ensure_stopped(leni),
-    ensure_stopped(moni),
-    ensure_stopped(roni),
-    ensure_stopped(gpio), 
-    ensure_stopped(horst).
+    ok.
+%%    ensure_stopped(sue),
+%%    ensure_stopped(leni),
+%%    ensure_stopped(moni),
+%%    ensure_stopped(roni),
+%%    ensure_stopped(gpio), 
+%%    ensure_stopped(horst).
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
