@@ -5,9 +5,7 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib,
-                  roni,
-                  sue
+                  stdlib
                   ]},
   {mod, { horst_app, []}},
   {env, []}

@@ -1,0 +1,18 @@
+[
+{sasl,[{sasl_error_logger,false}]},
+{erlything, [{peers, ["127.0.0.1"]}]},
+{horst, [        
+        {backup_path, "backup"},
+        {boxcar,""}
+        ]},
+{leni, [{port, 8081}]},
+{moni, [{port, 8000}]},
+{lager, [
+	{handlers, [
+		{lager_console_backend, info},
+		{lager_file_backend, [{file, "{{log_path}}/error.log"}, {level, error}]},
+		{lager_file_backend, [{file, "{{log_path}}/console.log"}, {level, info}]},
+		{lager_file_backend, [{file, "{{log_path}}/console.log"}, {level, warning}]}		
+		] }
+	]}
+].

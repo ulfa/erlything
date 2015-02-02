@@ -17,4 +17,4 @@ deps/*
 backup/*
 variables-*
 Mnesia.e*
-_rel
+rel/simserl/*
