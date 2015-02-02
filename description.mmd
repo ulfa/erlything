@@ -1,0 +1,135 @@
+#Introduction
+The IoT Platform is devided in different applications with different responsibilities.
+
+##Features
+
+* decentral system. 
+* distributed system
+* async message based communication 
+* fault tolerant
+
+
+#Services
+This application is a cross concerned application which can be used by all other applications and contains services like account management, ets management, node discovery and monitoring features which are used by the monitoring application.
+
+#3rd party 
+You can integrate 3rd party application into the plattform. There also some of them already integrated like gpio or erlcron.
+
+#Core
+This application contains the base infrastructure for the things and all concret implementations. It also contains the configuration service which
+is responsible for the things and messages which are send between the things.
+
+You will learn more about this later.
+
+#Monitoring
+This application contains a webserver and a web application for monitoring the state of the whole system. Note: Whole system means the sum of all nodes.  
+Features:
+* list of all nodes in a cluster and if they are alive or dead
+* list of applications running in a node
+* live view of memory consumption
+* webbased etop, to have a look of running processes
+* system info like uptime, version of ets a.s.o
+
+#UI
+This application contains a webserver and web application for displaying the state of the things you have implemented, configured and started.
+
+#External Interfaces
+If you want to connect a external system, you can implement an external application which runs into the some runtime as the other applications. As an
+example of using this kind of interface, i implemented cuberl which is an 
+interface to the german eq3 MAX! heating system.
+
+#Network topology
+The system is based on a fully connected network topology http://en.wikipedia.org/wiki/Network_topology
+That means, that every node is connected to every other node. That means, that a message which is sended by a thing on one node will be retrieved at every other node.
+
+#What is a thing?
+
+Every thing consists of the following parts:
+
+* a module with the implementation
+* the configuration of the thing which is part of the configuration file things.condig
+* the messages which the thing will interpret are configured in the messages.config file
+
+##Module with the implementation
+
+The individual behaviour of the thing is implemented in this module. It also contains a init functions where the developer can implement the rule what happens when we start the thing. There is also a stop function where she can implement rules for cleaning up.
+
+##things.config
+
+Configuration is code, so we have to create a list of tuples to configure thing. The following snippet shows the configuration of a temperature sensor .
+
+```erlang
+{thing, "temperature_sensor",
+    [
+    {type, sensor},  
+    {ets,false},
+    {icon,"temp.png"},
+    {driver, {dht22_driver, call_sensor}, []}, 
+    {activ, false},
+    {timer, 0},
+    {description, "Temp sensor in my office"}
+    ]}.
+```
+|Type        | Value                       |Description
+|------------|-----------------------------|--------------------------------------------------------------
+|thing       | Name of the thing           | must be unique in a node
+|id         | The id of a thing           | If the id is missing, the system will take "default". 
+|ets          | true/false | should we use an ets or the thing state (for more see the documentation)
+|icon        | "/images/" and the name of the image.| The image must be placed in the apps/horst/priv/images/.  
+|type        | sensor / actor              | type of thing (actor or sensor)
+|driver      | {Module, Function}, []      | the list contains driver specific paramter
+|activ       | true / false                | the thing will only be started if activ = true
+|timer       | int                         | if the driver needs timmer triggering, you must spec it here
+|descripition| String                      | a description
+
+As you can see, there is this active property. You are able to start and stop a thing during runtime. The only thing you have to do is, change the activ flag from true to false and the thing will be stopped.
+To do so, the configuration file is handled automaticly by the core application. Later, i will write down, which kind of properties you can change during runtime.
+
+#messages.config
+
+
+```erlang
+{{dht22_display_driver, "default"}, [{<<"horst@raspberrypi">>,<<"dht22_driver">>, <<"default">>}]}.
+```
+The first tuple contains the module to which this configuration belongs to. Here it is the module dht22_display_driver with the id "default".
+
+In the things.config you can configure the same module with different ids. 
+Example : 
+
+```erlang
+{thing, "temperature_sensor",
+    [
+    {type, sensor},
+    {id , "1"},  
+    {ets,false},
+    {icon,"temp.png"},
+    {driver, {dht22_driver, call_sensor}, []}, 
+    {activ, false},
+    {timer, 0},
+    {description, "First temp sensor in my office"}
+    ]}.
+
+{thing, "temperature_sensor_1",
+    [
+    {type, sensor},
+    {id , "2"},  
+    {ets,false},
+    {icon,"temp.png"},
+    {driver, {dht22_driver, call_sensor}, []}, 
+    {activ, false},
+    {timer, 0},
+    {description, "Second temp sensor in my office"}
+    ]}.
+```
+
+The system looks into the things for the module dht22_driver and for the id 1 / 2. If the system finds such an entry, the message will delivered the thing.
+
+If you make changes to the messages.config, all running thing will be informed to update there messages part. 
+
+###Sensor
+
+A sensor is a thing which gets its input from some hardware like a temperature sensor. The sensor thing converts the data into the internal message format and sends the message into the cluster.
+
+###Actor
+
+An actor is a thing which gets messages and does something with them, for instance storing the message in a database. 
