@@ -227,12 +227,15 @@ finish_request(ReqData, Context) ->
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->
     Node = wrq:get_qs_value("node",ReqData),
-    Name = wrq:get_qs_value("name",ReqData),
-    {ok, Content} = photocell_dtl:render([{node, Node},{value, get_data(Node, Name)}]),
+    Id = wrq:get_qs_value("id",ReqData),
+    {ok, Content} = photocell_dtl:render([{node, Node},{value, get_data(Node, Id)}]),
     {Content, ReqData, Context}.  
 
-get_data(Node, Name) when is_list(Node)->
-    D = mnesia_driver:select_entries('erlything@horst:photocell_driver:default'),
+%% URL = http://localhost:8081/actors/photocell_display_driver?id=default&node=erlything@horst
+
+get_data(Node, Id) when is_list(Node)->
+    Table = lists:concat([Node,":", "photocell_driver", ":", Id]),
+    D = mnesia_driver:select_entries(list_to_atom(Table)),
     D1 = [{date:seconds_to_date(Date), Value}|| {_N, Date, _O, Value} <- D].
 
 %%get_data(Node, Name) when is_list(Node)->
