@@ -228,14 +228,15 @@ finish_request(ReqData, Context) ->
 to_html(ReqData, Context) ->
     Node = wrq:get_qs_value("node",ReqData),
     Id = wrq:get_qs_value("id",ReqData),
-    {ok, Content} = photocell_dtl:render([{node, Node},{value, get_data(Node, Id)}]),
+    From_time = resource_util:get_qs_value("from_date", ReqData, date:get_start_datetime()),
+    To_time = resource_util:get_qs_value("to_date", ReqData, date:get_end_datetime()),
+    {ok, Content} = photocell_dtl:render([{node, Node},{value, get_data(Node, Id, date:create_seconds_from_string(From_time), date:create_seconds_from_string(To_time))}]),
     {Content, ReqData, Context}.  
 
-%% URL = http://localhost:8081/actors/photocell_display_driver?id=default&node=erlything@horst
+%% URL = http://localhost:8081/actors/photocell_display_driver?id=default&node=erlything@horst&from_date=2015-02-21%2000:00:00&to_date=2015-02-21%2023:59:59
 
-get_data(Node, Id) when is_list(Node)->
-    Table = lists:concat([Node,":", "photocell_driver", ":", Id]),
-    D = mnesia_driver:select_entries(list_to_atom(Table)),
+get_data(Node, Id, From_time, To_time) when is_list(Node)->
+    D = mnesia_driver:select(Node, "photocell_driver", Id, From_time, To_time),
     D1 = [{date:seconds_to_date(Date), Value}|| {_N, Date, _O, Value} <- D].
 
 %%get_data(Node, Name) when is_list(Node)->
