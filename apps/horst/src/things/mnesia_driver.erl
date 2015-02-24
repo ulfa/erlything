@@ -17,7 +17,7 @@
 %% External exports
 %% --------------------------------------------------------------------
 -export([init/1, stop/1, handle_msg/3]).
--export([select/5, select_entries/1]).
+-export([select/5, select_entries/1, select_entries/2]).
 -export([table_exists/1, create_table_name/3, get_tables/0]).
 -export([delete_table/1]).
 
@@ -64,7 +64,14 @@ select(Node, Module, Id, From_time, To_time) ->
 select_entries(Table) ->
 	{atomic, Result} = mnesia:transaction(
 		fun() ->
-    		qlc:e(qlc:sort(qlc:e(mnesia:table(Table)), [{order, ascending}]))
+    		qlc:e(qlc:sort(qlc:e(mnesia:table(Table)), [{order, ascending}, {size, 200}]))
+		end),
+	Result.
+
+select_entries(Table, Options) ->
+	{atomic, Result} = mnesia:transaction(
+		fun() ->
+    		qlc:e(qlc:sort(qlc:e(mnesia:table(Table)), Options))
 		end),
 	Result.
 

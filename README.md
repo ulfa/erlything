@@ -191,5 +191,6 @@ These things are used in my internal project and they work for me.
 * mnesia_driver persists messages and restore them if the node must be restarted (a kind of Event Sourcing)
 * config_driver can send a thing configuration to another node, so that this config will be stored there (sending of the messages.config part is missing, so
 you have to edit the messages.config by hand) 
+* photocell_driver measures the lightness and send a message with the measured value. The actor which receives the message can decide what action will be triggered. (Setup will be described in the wiki)
 
 

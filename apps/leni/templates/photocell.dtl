@@ -1,0 +1,84 @@
+{% extends "base.dtl" %}
+
+{% block title %}Photocell{% endblock %}
+
+{% block body %}
+
+<div class="tabbable">
+        <ul class="nav nav-tabs">
+                <li class="active"><a href="#table" data-toggle="tab">Table view</a></li>
+                <li><a href="#graphic" data-toggle="tab">Graphic view</a></li>
+        </ul>
+        <div class="tab-content">
+          <div id="table" class="tab-pane active">
+          <div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">{{node}} photocell</h2>  
+    </div>
+    <div class="panel-body">
+        <table class="table">
+                <thead>
+                        <tr>
+							<th>Time</th>
+              <th>Value</th>                                
+              </tr>
+                </thead>
+                <tbody>                       
+                        {% for time, value in value%}
+                         <tr>
+                                <td>{{time}}</td>          
+                                <td>{{value}}</td>
+                         </tr>
+                        {% endfor %}
+                        
+                </tbody>
+        </table>
+    </div>
+</div>
+</div>
+
+        <div id="graphic" class="tab-pane">
+        <div class="row-fluid">
+          
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h2 class="panel-title">{{node}} photocell</h2>  
+          </div>
+          <div class="panel-body">
+                <div id="chart_temp"></div>
+          </div>
+        </div>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Date', 'Intensity'],
+          {% for date, value in value%}
+            ['{{date}}',  {{value}}],
+          {% endfor %}
+        ]);
+
+        var options = {
+          title: 'intensity',
+          width: 960,
+          height:400,
+          curveType: 'function',
+          colors:['red','#004411'],
+          backgroundColor: {fill:'#F2F2F2'},
+          hAxis: {textPosition:'out',slantedText:true, textStyle: {fontSize:8, bold:true}},
+          vAxis: {title:'intensity'}
+        };
+
+
+        var chart = new google.visualization.LineChart(document.getElementById('chart_temp'));
+        chart.draw(data, options);
+      }
+
+    </script>
+        </div>
+</div>
+</div>
+{% endblock %}

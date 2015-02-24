@@ -185,6 +185,7 @@ send_command(Socket, Command) ->
 
 get_env(Key) ->
 	{ok, Value} = application:get_env(cuberl, Key),
+    lager:info("Key : ~p Value: ~p", [Key, Value]),
 	Value.
 
 start_timer(Time) ->
