@@ -19,3 +19,4 @@ variables-*
 Mnesia.e*
 rel/simserl/*
 _rel
+data
