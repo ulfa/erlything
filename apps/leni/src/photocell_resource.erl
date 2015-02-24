@@ -235,16 +235,9 @@ to_html(ReqData, Context) ->
 
 %% URL = http://localhost:8081/actors/photocell_display_driver?id=default&node=erlything@horst&from_date=2015-02-21%2000:00:00&to_date=2015-02-21%2023:59:59
 
-get_data(Node, Id, From_time, To_time) when is_list(Node)->
+get_data(Node, Id, From_time, To_time) ->
     D = mnesia_driver:select(Node, "photocell_driver", Id, From_time, To_time),
     D1 = [{date:seconds_to_date(Date), Value}|| {_N, Date, _O, Value} <- D].
-
-%%get_data(Node, Name) when is_list(Node)->
-%%    case rpc:call(list_to_atom(Node), thing, get_module_config, [Name]) of 
-%%        {badrpc, Reason} -> lager:error("got error during call ~p thing:get_driver(~p) with reason ~p", [Node, Name, Reason]),
-%%                            [];
-%%        [{data, Data}]     ->  convert_timestamp_to_date(Data)
-%%    end.
 
 convert_timestamp_to_date(List_of_values) ->
     lists:foldr(fun({Timestamp, Value}, Acc) -> [{date:timestamp_to_date(Timestamp), Value}|Acc] end, [], List_of_values).

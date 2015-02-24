@@ -19,7 +19,7 @@
                 {% for table, link, size in data %}
                     <tr>
                         <td><input type="checkbox" name="table_to_delete" value="{{table}}"/></td>
-                        <td><a href="data{{link}}?from_date={{from_date}}&to_date={{to_date}}">{{table}}</a></td>
+                        <td><a href="data{{link}}?from_date={{from_date}}&to_date={{to_date}}&output=table">{{table}}</a></td>
                         <td><span class="badge">{{size}}</span></td>
                     </tr>
                 {% endfor %}

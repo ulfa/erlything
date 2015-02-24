@@ -230,18 +230,34 @@ finish_request(ReqData, Context) ->
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->
     [Node, Module, Id] = wrq:path_tokens(ReqData),
+    Output = resource_util:get_qs_value("output", ReqData, "table"),
     From_time = resource_util:get_qs_value("from_date", ReqData, date:get_start_datetime()),
     To_time = resource_util:get_qs_value("to_date", ReqData, date:get_end_datetime()),
     Data = search_database(Node, Module, Id, date:create_seconds_from_string(From_time), date:create_seconds_from_string(To_time)), 
-    {ok, Content} = mnesia_dtl:render([{table, mnesia_driver:create_table_name(Node, Module, Id)}, {data, convert_date(Data)}]),
+    {ok, Content} = output(Output, Node, Module, Id, Data),
     {Content, ReqData, Context}.  
+
+output("table", Node, Module, Id, Data) ->
+    mnesia_dtl:render([{table, mnesia_driver:create_table_name(Node, Module, Id)}, {data, convert_date(Data)}]);
+output("graph", Node, Module, Id, Data) -> 
+    mnesia_graph_dtl:render([{table, mnesia_driver:create_table_name(Node, Module, Id)}, {data, convert_date(Module, Id, Data)}]).
 
 search_database(Node, Module, Id, From_time, To_time) ->
     mnesia_driver:select(Node, Module, Id, From_time, To_time).
 
-
 convert_date(Data) ->
     [{Table, date:seconds_to_date(Time), Optional, Payload}|| {Table, Time, Optional, Payload} <- Data].
+
+convert_date("ds18b20_driver", "default", Data) ->
+    [{Table, date:seconds_to_date(Time), Optional, Value}|| {Table, Time, Optional, {temp, Value}} <- Data];
+
+convert_date("os_driver", "default", Data) ->
+    [{Table, date:seconds_to_date(Time), Optional, Avg1}|| {Table, Time, Optional, [{temp,_T},{avg1,Avg1},{avg5,_Avg5},{avg15,_Avg15}]} <- Data];
+
+convert_date("photocell_driver", "default", Data) ->
+    [{Table, date:seconds_to_date(Time), Optional, Value}|| {Table, Time, Optional, Value} <- Data].
+
+
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
