@@ -5,7 +5,7 @@
         {backup_path, "backup"},
         {boxcar,""}
         ]},
-{leni, [{port, 8081}]},
+{leni, [{port, 8080}]},
 {moni, [{port, 8000}]},
 {lager, [
 	{handlers, [
