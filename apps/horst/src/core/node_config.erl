@@ -216,25 +216,24 @@ code_change(OldVsn, State, Extra) ->
 %%% Internal functions
 %% --------------------------------------------------------------------
 update_config(true, Config_file, State) ->
-    lager:info("Config file : ~p must be updated!", [Config_file]),
+    lager:info("Config file : ~p has been changed!", [Config_file]),
     %%sensor:send(?SYSTEM, {info, io_lib:format("Config file : ~p was changed, it must be updated",[Config_file])}),
     update_state(Config_file, config_handler:get_config(?APPLICATION, Config_file), State);
 update_config(false, Config_file, State) ->
     State.
 
-update_state(?MESSAGES_CONFIG, {error, Reason} , State=#state{m_valid=true})  ->
+update_state(?MESSAGES_CONFIG, {error, Reason}, State)  ->
     ?SEND(?SYSTEM, {error, {?MESSAGES_CONFIG, "DAMAGED! Please, repair", Reason}}),
-    State=#state{m_valid=false};
-
+    State#state{m_valid=false};
 update_state(?MESSAGES_CONFIG, Config, State) ->
     [Pid ! {update_config, ?MESSAGES_CONFIG} ||Pid <- things_sup:get_things_pids()],
     ?SEND(?SYSTEM, {info, {?MESSAGES_CONFIG, "updated succesfully"}}),
     State#state{messages=Config, m_valid=true};
 
-update_state(?THINGS_CONFIG, {error, Reason}, State=#state{t_valid=true})  ->
+update_state(?THINGS_CONFIG, {error, Reason}, State)  ->
     ?SEND(?SYSTEM, {error, {?THINGS_CONFIG, "DAMAGED! Please, repair", Reason}}),
     State#state{t_valid=false};    
-update_state(?THINGS_CONFIG, Config, State) ->
+update_state(?THINGS_CONFIG, Config, State=#state{m_valid=true}) ->
     things_sup:update_list_of_things(Config),
     ?SEND(?SYSTEM, {info, {?THINGS_CONFIG, "updated succesfully"}}),
     State#state{things=Config, t_valid=true}.

@@ -23,15 +23,14 @@
 %% --------------------------------------------------------------------
 -export([handle_msg/3]).
 
-
 handle_msg([Node ,<<"system">>, Id, Time, Optional, {error,{dead, Node1}}], Config, Module_config) -> 
     {ok, Account} = application:get_env(horst, boxcar),
-    handle_msg([Node, <<"system">>, Id, Time, [{account, Account}, {title, atom_to_list(Node1) ++ " is dead!"}, {message, "Check and fix it."}, {sound, "done"}]], Config, Module_config),
+    handle_msg([Node, <<"system">>, Id, Time, Optional, [{account, Account}, {title, atom_to_list(Node1) ++ " is dead!"}, {message, "Check and fix it."}, {sound, "digital-alarm"}]], Config, Module_config),
     Config;   
 
 handle_msg([Node ,Sensor, Id, Time, Optional, {error,{Config_file, Text, Reason}}], Config, Module_config) -> 
     {ok, Account} = application:get_env(horst, boxcar),
-    handle_msg([Node, Sensor, Id, Time, [{account, Account}, {title, Config_file}, {message, Text}, {sound, "done"}]], Config, Module_config),
+    handle_msg([Node, Sensor, Id, Time, Optional, [{account, Account}, {title, Config_file}, {message, Text}, {sound, "digital-alarm"}]], Config, Module_config),
     Config;   
 
 handle_msg([Node ,Sensor, Id, Time, Optional,[{account, Account}, {title, Title}, {message, Message}, {sound, Sound}]], Config, Module_config) ->
