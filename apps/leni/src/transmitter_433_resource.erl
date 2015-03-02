@@ -255,7 +255,7 @@ to_json(ReqData, Context) ->
 	Node = wrq:get_qs_value("node",ReqData),
 	Name = wrq:get_qs_value("name",ReqData),
 	List_of_devices = get_list_of_devices(list_to_atom(Node), Name),
-	L = [{list_to_binary(Name), [{<<"code">>, list_to_binary(Code)}, {<<"state">>, list_to_binary(State)}]}||{Name, Code, State} <- List_of_devices],
+	L = [ [{<<"name">>, list_to_binary(Name)}, {<<"code">>, list_to_binary(Code)}, {<<"state">>, list_to_binary(State)}]||{Name, Code, State} <- List_of_devices],
 	Content = jsx:encode(L), 
 	{Content, ReqData, Context}.  	
 
