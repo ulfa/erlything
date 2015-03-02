@@ -26,7 +26,7 @@
 %% --------------------------------------------------------------------
 %% External exports
 %% --------------------------------------------------------------------
--export([init/1, to_html/2, content_types_provided/2, allowed_methods/2, resource_exists/2]).
+-export([init/1, to_html/2, to_json/2, content_types_provided/2, allowed_methods/2, resource_exists/2]).
 -export([generate_etag/2]).
 -export([process_post/2, moved_permanently/2]).
 -export([get_list_of_devices/2]).
@@ -153,7 +153,7 @@ process_post(ReqData, Context) ->
 % return tuples, then a 406 Not Acceptable will be sent.
 % 
 content_types_provided(ReqData, Context) ->
-    {[{"text/html", to_html}],ReqData, Context}.
+    {[{"text/html", to_html}, {"application/json", to_json}],ReqData, Context}.
 %
 % This is used similarly to content_types_provided, except that it is for incoming 
 % resource representations -- for example, PUT requests. Handler functions usually 
@@ -249,6 +249,17 @@ get_list_of_devices(Node, Name) ->
 							[];
 		Config -> Config
 	end.
+
+%% [{<<"Licht">>,[{<<"code">>,<<"11111 2">>},{<<"state">>,<<"0">>}]},{<<"Ventilator">>,[{<<"code">>, <<"11111 1">>},{<<"state">>,<<"0">>}]}]
+to_json(ReqData, Context) ->
+	Node = wrq:get_qs_value("node",ReqData),
+	Name = wrq:get_qs_value("name",ReqData),
+	List_of_devices = get_list_of_devices(list_to_atom(Node), Name),
+	L = [{list_to_binary(Name), [{<<"code">>, list_to_binary(Code)}, {<<"state">>, list_to_binary(State)}]}||{Name, Code, State} <- List_of_devices],
+	Content = jsx:encode(L), 
+	{Content, ReqData, Context}.  	
+
+
 
 is_not_badrpc({badrpc, Reason}) ->
 	false;
