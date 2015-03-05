@@ -135,6 +135,7 @@ create_path(ReqData, Context) ->
 %
 process_post(ReqData, Context) ->
 	Body = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
+	lager:info("~p", [Body]),
 	{"node", Node} = lists:keyfind("node",1, Body),
 	{"name", Name} = lists:keyfind("name",1, Body),
 	{"switch", Switch} = lists:keyfind("switch",1, Body),
@@ -258,8 +259,6 @@ to_json(ReqData, Context) ->
 	L = [ [{<<"node">>, list_to_binary(Node)},{<<"group">>, list_to_binary(Name)}, {<<"switch">>, list_to_binary(Switch)}, {<<"code">>, list_to_binary(Code)}, {<<"state">>, list_to_binary(State)}]||{Switch, Code, State} <- List_of_devices],
 	Content = jsx:encode(L), 
 	{Content, ReqData, Context}.  	
-
-
 
 is_not_badrpc({badrpc, Reason}) ->
 	false;

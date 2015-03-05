@@ -31,8 +31,8 @@
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/1]).
--export([get_type/1, get_driver/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
--export([get_state/1, set_state/2, get_module_config/1, get_start_time/1, get_name/1, get_icon/1]).
+-export([get_type/1, get_driver/1, get_driver_1/1, is_activ/1, get_timer/1, get_database/1, get_description/1]).
+-export([get_state/1, set_state/2, get_module_config/1, get_module_config_for_driver/1, get_start_time/1, get_name/1, get_icon/1]).
 -export([save_data_to_ets/2, save_data_to_ets/3, get_table_id/1, get_model/1, set_value/2, get_value/1, get_value/2]).
 -export([get_pid/1, where_is_message_from/1]).
 -export([stop/1]).
@@ -86,6 +86,10 @@ get_driver(Name) when is_list(Name)->
     get_driver(list_to_atom(Name));    
 get_driver(Name) ->
 	gen_server:call(Name, {get_driver}).
+get_driver_1(Name) when is_list(Name)->
+    get_driver_1(list_to_atom(Name));    
+get_driver_1(Name) ->
+    gen_server:call(Name, {get_driver_1}).
 is_activ(Name) ->
 	gen_server:call(list_to_atom(Name), {is_activ}).
 get_timer(Name) ->
@@ -117,6 +121,13 @@ stop(Name) when is_list(Name) ->
 stop(Name) ->
     gen_server:cast(Name, {stop}).
 
+get_module_config_for_driver(Driver) ->
+    {node(),lists:flatten([thing:get_module_config(Name) || {Name, _Pid, _Type, _Modules} <- supervisor:which_children(things_sup), is_driver(Driver, thing:get_driver_1(Name))])}.
+
+is_driver(Driver, Driver) ->
+    true;
+is_driver(Driver, Other) ->
+    false.
 %% --------------------------------------------------------------------
 %% record definitions   
 %% --------------------------------------------------------------------
@@ -163,6 +174,9 @@ handle_call({get_type}, From, State=#state{config = Config}) ->
 handle_call({get_driver}, From, State=#state{config = Config}) ->
 	{driver, Module, Module_config} = lists:keyfind(driver, 1, Config),
     {reply, {Module, Module_config} , State};
+handle_call({get_driver_1}, From, State=#state{config = Config}) ->
+    {driver, {Driver, _Function}, Module_config} = lists:keyfind(driver, 1, Config),
+    {reply, Driver , State};
 handle_call({get_icon}, From, State=#state{config = Config}) ->
     {reply, proplists:get_value(icon, Config, "thing.png") , State};
 handle_call({is_activ}, From, State=#state{config = Config}) ->
