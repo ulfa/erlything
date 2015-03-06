@@ -28,17 +28,20 @@
 -include_lib("webmachine/include/webmachine.hrl").
 
 login(ReqData, Context) ->
+    lager:info("....~p", [wrq:get_req_header("authorization", ReqData) ]),
     case is_peer_allowed(ReqData) of 
         true -> {true, ReqData, Context};
         false -> case wrq:get_req_header("authorization", ReqData) of
-		  "Basic " ++ Base64 -> Str = base64:mime_decode_to_string(Base64),
-			[Account, Password] = string:tokens(Str, ":"),
-            lager:error("Account: ~p, Password: ~p", [Account, Password]),
-			case account:is_valid_account(Account, Password) of
-				true -> {true, ReqData, Context};
-                false-> lager:error("Account : ~p, password: ~p  wrong", [Account, Password]),
-                		{"Basic realm=Webmachine", ReqData, Context}
-             end;
+                  "Basic Og==" -> {"Basic realm=Webmachine", ReqData, Context};
+		          "Basic " ++ Base64 -> Str = base64:mime_decode_to_string(Base64),
+			                         [Account, Password] = string:tokens(Str, ":"),
+                                     lager:error("Account: ~p, Password: ~p", [Account, Password]),                  
+			                         case account:is_valid_account(Account, Password) of
+				                        true -> {true, ReqData, Context};
+                                        false-> lager:error("Account : ~p, password: ~p  wrong", [Account, Password]),
+                		                      {"Basic realm=Webmachine", ReqData, Context};
+                    undefined -> {"Basic realm=Webmachine", ReqData, Context}
+                end;
                 		_ -> {"Basic realm=Webmachine", ReqData, Context}
 	   end
     end.
