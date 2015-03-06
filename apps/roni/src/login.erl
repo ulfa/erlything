@@ -28,7 +28,6 @@
 -include_lib("webmachine/include/webmachine.hrl").
 
 login(ReqData, Context) ->
-    lager:info("....~p", [wrq:get_req_header("authorization", ReqData) ]),
     case is_peer_allowed(ReqData) of 
         true -> {true, ReqData, Context};
         false -> case wrq:get_req_header("authorization", ReqData) of
