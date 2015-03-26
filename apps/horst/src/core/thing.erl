@@ -247,7 +247,9 @@ handle_cast({send_time_based, Pid, Name, Time, Optional, Payload}, State=#state{
     end,
     New_Timer_ref = erlang:send_after(Time, Pid, {send_after, Name, Optional, Payload}),
     {noreply, State#state{timed_msgs = dict:store({Pid, Name}, New_Timer_ref, Time_msgs)}};
-handle_cast({set_value, Value}, State) ->
+handle_cast({set_value, Value}, State=#state{config = Config}) ->
+    Name = proplists:get_value(name, Config),
+    notify(thing_event:exists(thing_event:name(Name)), Name, Value),
     {noreply, State#state{value=Value}};
 handle_cast({stop}, State=#state{config = Config}) ->
     Name = proplists:get_value(name, Config), 
@@ -357,6 +359,11 @@ code_change(OldVsn, State, Extra) ->
 %% --------------------------------------------------------------------
 %%% Internal functions
 %% --------------------------------------------------------------------
+notify(true, Name, Value) ->
+    thing_event:notify({Name, Value});
+notify(false, Name, Value) ->
+    false.
+
 is_message_well_known({Node, Sensor, Id}, Allowed_msgs) ->
     case  sets:is_element({Node, Sensor, Id}, Allowed_msgs) of 
         true -> true;
