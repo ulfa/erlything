@@ -37,19 +37,21 @@ add_handler(Thing) ->
     %% We use add_sup_handler instead of add_handler so that both the
     %% gen_event and the client process will receive notifications if
     %% either goes down.
-    gen_event:add_sup_handler(?NAME(Thing), ?MODULE, [self()]).
+ %%   lager:info(".... add handler : ~p", [?NAME(Thing)]),
+    ok = gen_event:add_sup_handler(thing_event_manager, ?MODULE, [self()]).
 
 %% @doc Sends a notification to all handlers
 -spec notify(term()) -> ok.
-notify({Thing, Value}) ->
-    gen_event:notify(?NAME(Thing), Value).
+notify({Thing, Date, Value}) ->
+   %% lager:info("notify : ~p ~p ~p", [Thing, Date, Value]),
+    gen_event:notify(thing_event_manager, {Thing, Date, Value}).
 
 %% @private
 %% @doc Whenever a new event handler is added to an event manager,
 %% this function is called to initialize the event handler.
 %% @end
 -spec init([pid()]) -> {ok, #state{}}.
-init([Client]) ->
+init([Client]) ->    
     {ok, #state{client = Client}}.
 
 %% @private

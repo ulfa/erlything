@@ -1,0 +1,46 @@
+{% extends "base.dtl" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+
+
+<div class="container-fluid">
+    <div class="row">
+
+{% for name in sensors %}
+    <div class="col-lg-4">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h2 class="panel-title">Sensor: {{name}}</h2>  
+            </div>
+            <div class="panel-body" id="{{name}}_Body">
+                <p id="{{name}}_Time"><p>   
+                <p id="{{name}}"><p>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+</div>
+<script type="text/javascript">
+    var source = new EventSource("/dashboard");
+    source.onmessage = function(event) {   
+    	console.log(event.data);
+    	var data = event.data.split('\n');   
+    	var element = document.getElementById(data[0]); 
+        var time = document.getElementById(data[0] + "_Time"); 
+        var body = document.getElementById(data[0] + "_Body"); 
+    	if (element != null) {
+            time.innerHTML = data[1];
+    		element.innerHTML = data[2];             
+            body.setAttribute("style", "background-color:lightgreen");  
+    		setTimeout(function() {
+                body.setAttribute("style", "background-color:white");                
+                }, 2000);      
+
+            
+
+    	}
+    };
+</script>
+{% endblock %}
