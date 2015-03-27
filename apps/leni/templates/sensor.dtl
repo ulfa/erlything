@@ -9,8 +9,20 @@
         <h2 class="panel-title">Sensor: {{sensor}}</h2>  
     </div>
     <div class="panel-body">
-        <p><strong>actual data : </strong> {{data}} <p>
+        <p id="{{sensor}}">{{data}} <p>
     </div>
 </div>
-
+<script type="text/javascript">
+    var source = new EventSource("/sensors/erlything@Ulfs-MBP/{{sensor}}");
+    source.onmessage = function(event) {   
+    	console.log(event.data);
+    	var data = event.data.split('\n');   
+    	var element = document.getElementById(data[0]); 
+    	if (element != null) {
+    		element.innerHTML = data[1] + ", " + data[2]; 
+    		element.setAttribute("style", "background-color:lightgreen");  
+    		setTimeout(function() {element.setAttribute("style", "background-color:white")}, 2000);      
+    	}
+    };
+</script>
 {% endblock %}

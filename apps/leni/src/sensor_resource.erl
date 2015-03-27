@@ -142,7 +142,7 @@ process_post(ReqData, Context) ->
 % return tuples, then a 406 Not Acceptable will be sent.
 % 
 content_types_provided(ReqData, Context) ->
-    {[{"text/html", to_html},{"application/json", to_json}],ReqData, Context}.
+    {[{"text/html", to_html},{"application/json", to_json}, {"text/event-stream", to_stream}],ReqData, Context}.
 %
 % This is used similarly to content_types_provided, except that it is for incoming 
 % resource representations -- for example, PUT requests. Handler functions usually 
@@ -227,7 +227,7 @@ finish_request(ReqData, Context) ->
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->   
     [Node,Sensor] = wrq:path_tokens(ReqData), 
-    {ok, Content} =  sensor_dtl:render([{sensor, Sensor}, {data, get_data(Node, Sensor)}]),
+    {ok, Content} =  sensor_dtl:render([{sensor, Sensor}, {data, get_data(Node, Sensor)}, {url, wrq:path(ReqData)}]),
     {Content, ReqData, Context}.  
 
 to_json(ReqData, Context) ->
@@ -256,6 +256,18 @@ get_sensor(Node, Sensor) ->
 result_to_json(Result) ->
     Jsx_input = converter:proplists_to_jsx_input(Result),   
     jsx:encode(Jsx_input).
+
+encode(undefined) ->
+    encode(atom_to_list(undefined)); 
+encode(Value) when is_list(Value) -> 
+    case io_lib:printable_unicode_list(Value) of 
+        true -> unicode:characters_to_list(Value);
+        false -> lists:flatten(io_lib:format("~p",[Value]))
+    end;
+encode(Value) when is_integer(Value) ->
+    mochinum:digits(Value);
+encode(Value) when is_float(Value) ->
+    mochinum:digits(Value).
 %% --------------------------------------------------------------------
 %%% Test functions
 %% --------------------------------------------------------------------
