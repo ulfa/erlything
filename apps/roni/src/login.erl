@@ -34,7 +34,7 @@ login(ReqData, Context) ->
                     "Basic Og==" -> {"Basic realm=Webmachine", ReqData, Context};
                     "Basic " ++ Base64 -> Str = base64:mime_decode_to_string(Base64),
 			                              [Account, Password] = string:tokens(Str, ":"),
-                                          lager:info("Account: ~p, Password: ~p", [Account, Password]),                  
+                                          %%lager:info("Account: ~p, Password: ~p", [Account, Password]),                  
 			                              case account:is_valid_account(Account, Password) of
                                                 true -> {true, ReqData, Context};
                                                 false-> {"Basic realm=Webmachine", ReqData, Context};
