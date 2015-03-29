@@ -46,7 +46,7 @@ parse_message(Msg) ->
     lager:debug("Msg from ds18b20 : ~p", [Msg]),
     case re:run(Msg ,"t=([0-9.]+)") of 
        nomatch -> {temp, 0.0};
-       {match,[{C1,C2},{C3,C4}]} -> {temp, erlang:list_to_integer(string:substr(Msg, C3 + 1, C4))/1000}
+       {match,[{C1,C2},{C3,C4}]} -> [{temp, erlang:list_to_integer(string:substr(Msg, C3 + 1, C4))/1000}]
     end.
 %% --------------------------------------------------------------------
 %%% Test functions
