@@ -28,7 +28,8 @@ init(Config) ->
 	{ok, Config}.
 
 handle_msg({gpio_interrupt, 0, Pin, Status}, Config, Modul_config) ->
-	send(Config, Status),	
+	send(Config, Status),
+	thing:set_value(self(), Status),	
 	Module_config_1 = lists:keyreplace(last_changed, 1, Modul_config, {last_changed, date:get_date_seconds()}),
 	lists:keyreplace(driver, 1, Config, {driver, {?MODULE, handle_msg}, Module_config_1});
 

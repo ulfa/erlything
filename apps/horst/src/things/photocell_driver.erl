@@ -31,6 +31,7 @@ call_sensor(Config, Module_config) ->
     gpio:set_direction(Pin, out),
     gpio:set_direction(Pin, in),
     Value = loop(gpio:get(Pin), Pin, 0),
+    thing:set_value(self(), Value),
     ?SEND(Value),
     Config.
 %% --------------------------------------------------------------------
