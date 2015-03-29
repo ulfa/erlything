@@ -29,13 +29,13 @@ stop(Config) ->
 
 handle_msg({external_interrupt, sue, info, {alive, Node}}, Config, Module_config) ->
     lager:info("~p got a message that node : ~p is ALIVE!", [?MODULE, Node]),
-    thing:set_value(self(), Node),
+    thing:set_value(self(), [{info, {alive, Node}}]),
     ?SEND(?MODULE, {info, {alive, Node}}),
     Config;
 
 handle_msg({external_interrupt, sue, error, {dead, Node}}, Config, Module_config) ->
     lager:info("~p got a message that node : ~p is DEAD!", [?MODULE, Node]),
-    thing:set_value(self(), Node),
+    thing:set_value(self(), [{error, {dead, Node}}]),
     ?SEND(?MODULE,{error, {dead, Node}}),
     Config.
 
