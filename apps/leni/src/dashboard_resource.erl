@@ -233,6 +233,7 @@ to_stream(ReqData, Context) ->
         _  -> {{halt, 500}, ReqData, Context}
     end.
 
+
 stream() ->    
     receive
         %% The gen_event crashed or exited, so we should kill the
@@ -244,7 +245,12 @@ stream() ->
     end.
 
 get_sensors() ->
-    [Name||{Name, Pid, Type, Modules} <- things_sup:get_sensors()].
+    [{Name, get_driver(Name)}||{Name, Pid, Type, Module} <- things_sup:get_sensors()].
+
+get_driver(Name) ->
+    {{Driver,_},_} = thing:get_driver(Name),
+    Driver.
+
 encode(undefined) ->
     encode(atom_to_list(undefined)); 
 encode(Value) when is_list(Value) -> 
