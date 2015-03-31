@@ -223,8 +223,9 @@ finish_request(ReqData, Context) ->
 %% --------------------------------------------------------------------
 %%% Additional functions
 %% --------------------------------------------------------------------
-to_html(ReqData, Context) ->   
-    {ok, Content} =  dashboard_dtl:render([{sensors, get_sensors()}, {url, wrq:path(ReqData)}, {node, node()}]),
+to_html(ReqData, Context) ->  
+    Node = wrq:get_qs_value("node",ReqData), 
+    {ok, Content} =  dashboard_dtl:render([{sensors, get_sensors(Node)}, {url, wrq:path(ReqData)}, {node, Node}]),
     {Content, ReqData, Context}.  
 
 to_stream(ReqData, Context) ->
@@ -245,12 +246,8 @@ stream() ->
                                 {Body, fun stream/0}
     end.
 
-get_sensors() ->
-    [{Name, get_driver(Name)}||{Name, Pid, Type, Module} <- things_sup:get_sensors()].
-
-get_driver(Name) ->
-    {{Driver,_},_} = thing:get_driver(Name),
-    Driver.
+get_sensors(Node) ->
+    [{Name, Module}||{Name, Pid, Type, Module} <- rpc:call(list_to_atom(Node), things_sup, get_sensors, [])].
 
 encode(undefined) ->
     encode(atom_to_list(undefined)); 
