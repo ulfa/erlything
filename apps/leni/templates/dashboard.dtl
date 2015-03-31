@@ -24,7 +24,7 @@
 {% endfor %}
 </div>
 <script type="text/javascript">
-    var source = new EventSource("/dashboard");
+    var source = new EventSource("/dashboard?node={{node}}");
     source.onmessage = function(event) {   
     	console.log(event.data);
     	var data = event.data.split('\n');   

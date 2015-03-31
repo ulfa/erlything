@@ -224,11 +224,12 @@ finish_request(ReqData, Context) ->
 %%% Additional functions
 %% --------------------------------------------------------------------
 to_html(ReqData, Context) ->   
-    {ok, Content} =  dashboard_dtl:render([{sensors, get_sensors()}, {url, wrq:path(ReqData)}]),
+    {ok, Content} =  dashboard_dtl:render([{sensors, get_sensors()}, {url, wrq:path(ReqData)}, {node, node()}]),
     {Content, ReqData, Context}.  
 
 to_stream(ReqData, Context) ->
-    case thing_event:add_handler("Dashboad") of
+    Node = wrq:get_qs_value("node",ReqData),
+    case thing_event:add_handler(Node) of
         ok -> {{stream, {<<>>, fun stream/0}}, ReqData, Context};
         _  -> {{halt, 500}, ReqData, Context}
     end.

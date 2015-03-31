@@ -20,7 +20,7 @@
 %% Helper macro for declaring children of supervisor
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
 -define(CHILD_ARG(I, Type, Arg), {I, {I, start_link, [Arg]}, permanent, 5000, Type, [I]}).
--define(CHILD_ARG_1(I, Type, Arg1, Arg2), {Arg1 ++ Arg2, {I, start_link, [Arg1]}, temporary, 5000, Type, [I]}).
+-define(CHILD_ARG_1(I, Type, Arg1), {Arg1, {I, start_link, [Arg1]}, temporary, 5000, Type, [I]}).
 %% ===================================================================
 %% API functions
 %% ===================================================================
@@ -37,6 +37,6 @@ init([]) ->
     							  ?CHILD(actor_group, worker),
     							  ?CHILD(node_config, worker),    							
     							  ?CHILD(things_sup,supervisor),
-    							  ?CHILD_ARG_1(thing_event, worker, "thing", "_event_manager"),
+    							  ?CHILD_ARG_1(thing_event, worker, "thing_event_manager"),
                                   ?CHILD(file_provider_sup,supervisor)    							  
     							  ]}}.

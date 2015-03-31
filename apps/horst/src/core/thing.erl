@@ -249,7 +249,7 @@ handle_cast({send_time_based, Pid, Name, Time, Optional, Payload}, State=#state{
     {noreply, State#state{timed_msgs = dict:store({Pid, Name}, New_Timer_ref, Time_msgs)}};
 handle_cast({set_value, Value}, State=#state{config = Config}) ->
     Name = proplists:get_value(name, Config),
-    notify(thing_event:exists('thing_event_manager'), Name, now(), Value),
+    notify(thing_event:exists(), Name, now(), Value),
     {noreply, State#state{value=Value}};
 handle_cast({stop}, State=#state{config = Config}) ->
     Name = proplists:get_value(name, Config), 

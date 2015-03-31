@@ -2,7 +2,8 @@
 
 -behaviour(gen_event).
 
--define(NAME(Thing), list_to_atom(Thing ++ "_event_manager")).
+-define(NAME(), list_to_atom(atom_to_list(node()) ++ "@" ++ "thing_event_manager")).
+-define(NAME(Node), list_to_atom(Node ++ "@" ++ "thing_event_manager")).
 %% API
 -export([start_link/1, add_handler/1, notify/1]).
 
@@ -10,41 +11,41 @@
 -export([init/1, handle_event/2, handle_call/2,
          handle_info/2, terminate/2, code_change/3]).
 
--export([exists/1, name/1]).
+-export([exists/0, name/1]).
 
 -record(state, {client :: pid()}).
 
 %% @doc checks if the event manager exists
--spec exists(atom()) -> true | false.
-exists(Event_manager) ->
-    case whereis(Event_manager) of
+-spec exists() -> true | false.
+exists() ->
+    case global:whereis_name(?NAME()) of
         undefined -> false;
         _Pid -> true
     end.
 
-name(Thing) ->
-    ?NAME(Thing).
+name(_Thing) ->
+    ?NAME().
 
 %% @doc Creates an event manager
 -spec start_link(string()) -> {ok, pid()} | {error, term()}.
 start_link(Thing) ->
-    gen_event:start_link({local, ?NAME(Thing)}).
+    gen_event:start_link({global, list_to_atom(atom_to_list(node()) ++ "@" ++ Thing)}).
 
 %% @doc Adds an event handler. Client processes that want to receive
 %% the firehose call this.
 -spec add_handler(string()) -> ok | {'EXIT', term()} | term().
-add_handler(Thing) ->
+add_handler(Node) ->
     %% We use add_sup_handler instead of add_handler so that both the
     %% gen_event and the client process will receive notifications if
     %% either goes down.
- %%   lager:info(".... add handler : ~p", [?NAME(Thing)]),
-    ok = gen_event:add_sup_handler(thing_event_manager, ?MODULE, [self()]).
+    lager:info(".... add handler : ~p", [?NAME(Node)]),
+    ok = gen_event:add_sup_handler({global, ?NAME(Node)}, ?MODULE, [self()]).
 
 %% @doc Sends a notification to all handlers
 -spec notify(term()) -> ok.
 notify({Thing, Date, Value}) ->
    %% lager:info("notify : ~p ~p ~p", [Thing, Date, Value]),
-    gen_event:notify(thing_event_manager, {Thing, Date, Value}).
+    gen_event:notify({global,?NAME()}, {Thing, Date, Value}).
 
 %% @private
 %% @doc Whenever a new event handler is added to an event manager,
