@@ -8,15 +8,16 @@
 <div class="container-fluid">
     <div class="row">
 
-{% for name in sensors %}
+{% for name, module in sensors %}
     <div class="col-lg-4">
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <h2 class="panel-title">Sensor: {{name}}</h2>  
-            </div>
-            <div class="panel-body" id="{{name}}_Body">
+            </div>            
+            <div class="panel-body bg-info" id="{{name}}_Body">
                 <p id="{{name}}_Time"><p>   
-                <p id="{{name}}"><p>
+                <p class="lead" id="{{name}}_Value"><p>            
+                
             </div>
         </div>
     </div>
@@ -27,15 +28,15 @@
     source.onmessage = function(event) {   
     	console.log(event.data);
     	var data = event.data.split('\n');   
-    	var element = document.getElementById(data[0]); 
+    	var value = document.getElementById(data[0] + "_Value"); 
         var time = document.getElementById(data[0] + "_Time"); 
         var body = document.getElementById(data[0] + "_Body"); 
-    	if (element != null) {
+    	if (value != null) {
             time.innerHTML = data[1];
-    		element.innerHTML = data[2];             
-            body.setAttribute("style", "background-color:lightgreen");  
+    		value.innerHTML = data[2];             
+            body.setAttribute("class", "panel-body bg-success");  
     		setTimeout(function() {
-                body.setAttribute("style", "background-color:white");                
+                body.setAttribute("class", "panel-body bg-info");                
                 }, 2000);      
 
             
