@@ -1,12 +1,16 @@
 [
-{sasl,[{sasl_error_logger,false}]},
-{erlything, [{peers, ["127.0.0.1"]}]},
+{sasl, [{sasl_error_logger,false}]},
+{roni, [{peers, ["127.0.0.2", "192.168.178.28", "192.168.178.38", "192.168.178.31", "192.168.178.33"]}]},
 {horst, [        
         {backup_path, "backup"},
         {boxcar,""}
         ]},
 {leni, [{port, 8080}]},
 {moni, [{port, 8000}]},
+{cuberl,[
+	{port, 62910},
+  	{ip, {192,168,178,21}}
+]},
 {lager, [
 	{handlers, [
 		{lager_console_backend, info},
