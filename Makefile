@@ -4,6 +4,8 @@ REBAR = rebar
 REPO = ../../../../repository
 REPOSRC = ../../repository
 TARGET = ~/projects/erlang
+DATE = `date +%Y-%m-%d`
+CRASH_DIR = ../../crasher
 
 
 
@@ -51,6 +53,10 @@ docs:
 
 rcswitch:
 	$(MAKE) -C apps/horst/priv/driver/remote send
+
+cp_crash: 
+	mkdir -p $(CRASH_DIR)/$(HOST)/$(DATE)
+	scp $(USR)@$(HOST):$(TARGET)/$(PROJECT)/erl_crash.dump $(CRASH_DIR)/$(HOST)/$(DATE)
 
 ct_setup:
 	rm -rf ct_test/dev1 
